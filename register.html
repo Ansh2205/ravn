@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Join the Family 🫂</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Friendly, Round, Modern Font: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        ravn: {
+                            bg: '#FAFAF9', 
+                            surface: '#FFFFFF',
+                            border: '#F3F4F6', 
+                            primary: '#FF6B6B', 
+                            primaryHover: '#FA5252',
+                            accent: '#FCA311', 
+                            textMain: '#1C1917', 
+                            textMuted: '#57534E', 
+                        }
+                    },
+                    animation: {
+                        'float': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 8s ease-in-out 4s infinite',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                            '50%': { transform: 'translateY(-20px) scale(1.05)' },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 32px; 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .friendly-input {
+            background-color: #F9FAFB;
+            border: 2px solid transparent;
+            color: #1C1917;
+            transition: all 0.3s ease;
+        }
+        .friendly-input:focus {
+            background-color: #FFFFFF;
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+            outline: none;
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 100px;
+            padding: 16px 36px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.02em;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-glow:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1C1917;
+            font-weight: 700;
+            border: 1px solid rgba(200, 200, 200, 0.4);
+            border-radius: 100px;
+            padding: 16px 36px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .btn-glass:hover {
+            background: #ffffff;
+            border-color: rgba(255, 107, 107, 0.4);
+            color: #FF6B6B;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Smooth Sliding Forms */
+        .slide-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            transition: height 0.4s ease;
+        }
+        .slide-step {
+            width: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .step-active {
+            position: relative;
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .step-left {
+            transform: translateX(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .step-right {
+            transform: translateX(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Step Indicators */
+        .step-dot { transition: all 0.3s ease; }
+        .step-line { transition: all 0.3s ease; }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
+
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
+        </div>
+    </div>
+
+    <!-- Ambient Warm Background Glows -->
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full transition-all flex items-center px-6 md:px-8 shadow-sm" id="navbar">
+        <div class="w-full flex justify-between items-center h-full relative">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('nav-fallback').style.display='block';">
+                <span id="nav-fallback" style="display: none;" class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
+                <a href="events.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Adventures ✈️</a>
+                <a href="about.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">About Us ✨</a>
+                <a href="contact.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Say Hello 👋</a>
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                <a href="login.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a>
+                <a href="register.html" class="btn-glow py-2.5 px-6 shadow-md">Join the Club 🫂</a>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary transition-colors">
+                <i class="ph-bold ph-list text-3xl"></i>
+            </button>
+
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+                <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
+                <a href="events.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
+                <a href="about.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">About Us <span>✨</span></a>
+                <a href="contact.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Say Hello <span>👋</span></a>
+                <div class="h-px w-full bg-gray-200 my-2"></div>
+                <a href="login.html" class="text-base font-semibold text-ravn-textMain py-2 flex justify-between">Clubhouse Login <span>🛋️</span></a>
+                <a href="register.html" class="text-base font-extrabold text-ravn-primary py-2 flex justify-between">Join the Club <span>🫂</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 px-6 pt-[120px] pb-24 flex-grow flex items-center justify-center">
+        <div class="container mx-auto max-w-xl w-full">
+            
+            <div id="registrationBlock" class="glass-card p-8 md:p-12 relative overflow-hidden bg-white/60">
+                
+                <!-- Dynamic Capacity Promo Badge -->
+                <div id="capacityBadge" class="hidden absolute top-6 right-6 items-center gap-2 px-4 py-1.5 bg-orange-50 border border-orange-100 rounded-full z-20">
+                    <span class="w-2 h-2 rounded-full bg-ravn-accent animate-pulse"></span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-orange-600">Promo: Free Entry Active</span>
+                </div>
+
+                <!-- Friendly Header -->
+                <div class="text-center mb-8 relative z-10">
+                    <div class="w-20 h-20 rounded-[24px] bg-red-50 flex items-center justify-center mx-auto mb-6 shadow-sm border border-red-100">
+                        <i class="ph-fill ph-hand-waving text-4xl text-ravn-primary"></i>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-2">Pull up a chair! 🪑</h2>
+                    <p class="text-ravn-textMuted font-medium text-sm">Tell us a little bit about yourself so we can get you into the group chat.</p>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="flex items-center justify-center w-full max-w-xs mx-auto mb-10 relative z-10">
+                    <div id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm">1</div>
+                    <div id="line1" class="step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full"></div>
+                    <div id="dot2" class="step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400">2</div>
+                    <div id="line2" class="step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full"></div>
+                    <div id="dot3" class="step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400">3</div>
+                </div>
+
+                <!-- Smooth Form Container -->
+                <form id="multiStepForm" class="relative z-10">
+                    <div class="slide-container" id="slideWrapper">
+                        
+                        <!-- STEP 1: The Basics -->
+                        <div id="step1" class="slide-step step-active">
+                            <div class="space-y-6 text-left">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-ravn-textMain ml-1">What's your name? 🙋‍♂️</label>
+                                    <input type="text" id="regName" placeholder="e.g. Alex" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-ravn-textMain ml-1">Age 🎂</label>
+                                        <input type="number" id="regAge" min="16" max="99" placeholder="20" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-ravn-textMain ml-1">Gender 🌟</label>
+                                        <select id="regGender" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium appearance-none cursor-pointer shadow-sm">
+                                            <option value="" disabled selected hidden>Pick one...</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Non-Binary">Non-Binary</option>
+                                            <option value="Other">Other / Prefer not to say</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="pt-2">
+                                    <button type="button" onclick="goToStep(1, 2)" class="btn-glow w-full py-4 text-sm gap-2">
+                                        <span>Next Step</span> <i class="ph-bold ph-arrow-right text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: Contact & Campus -->
+                        <div id="step2" class="slide-step step-right">
+                            <div class="space-y-6 text-left">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-ravn-textMain ml-1">Email 📧</label>
+                                        <input type="email" id="regEmail" placeholder="alex@email.com" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-ravn-textMain ml-1">Phone Number 📱</label>
+                                        <input type="tel" id="regPhone" placeholder="123-456-7890" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-ravn-textMain ml-1">Which campus do you roam? 🏫</label>
+                                    <input type="text" id="regAddress" placeholder="e.g. Stanford University, CA" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                </div>
+
+                                <div class="pt-2 flex gap-4">
+                                    <button type="button" onclick="goToStep(2, 1)" class="btn-glass w-1/3 py-4 text-sm">Back</button>
+                                    <button type="button" onclick="goToStep(2, 3)" class="btn-glow w-2/3 py-4 text-sm gap-2">
+                                        <span>Almost Done</span> <i class="ph-bold ph-arrow-right text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: The Piggybank (Checkout) -->
+                        <div id="step3" class="slide-step step-right">
+                            <div class="space-y-6 text-left">
+                                
+                                <!-- Dynamic Promo State -->
+                                <div id="promoState" class="hidden flex-col items-center justify-center py-8 bg-orange-50/50 border border-orange-100 rounded-[24px] text-center px-6 shadow-inner">
+                                    <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm mb-4 border border-orange-100">
+                                        <i class="ph-fill ph-ticket text-3xl text-ravn-accent"></i>
+                                    </div>
+                                    <h4 class="text-lg font-extrabold text-ravn-textMain mb-2">First 100 Grant Applied! 🎉</h4>
+                                    <p class="text-sm text-ravn-textMuted font-medium max-w-sm">Your lifetime club access fee has been waived. You're getting in totally free.</p>
+                                </div>
+
+                                <!-- Dynamic Payment State -->
+                                <div id="paymentState" class="hidden flex-col items-center space-y-6">
+                                    <div class="text-center">
+                                        <p class="text-xs font-bold text-ravn-textMuted mb-2">Lifetime Access Fee 🍕</p>
+                                        <h3 class="text-4xl font-extrabold text-ravn-textMain">₹<span id="feeAmount">500</span></h3>
+                                    </div>
+                                    <div class="p-3 bg-white rounded-3xl shadow-sm border border-gray-200 mx-auto w-fit">
+                                        <img id="upiQrCode" src="" class="w-40 h-40 object-cover rounded-[20px]">
+                                    </div>
+                                    <div class="w-full flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-ravn-textMain ml-1 text-center">Enter your UPI Reference (12-Digits) 🧾</label>
+                                        <input type="text" id="utrInput" placeholder="0000 0000 0000" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-mono tracking-widest text-base shadow-sm">
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 flex gap-4">
+                                    <button type="button" onclick="goToStep(3, 2)" class="btn-glass w-1/3 py-4 text-sm">Back</button>
+                                    <button type="submit" id="submitRegBtn" class="btn-glow w-2/3 py-4 text-sm gap-2">
+                                        <span>Join the Club</span> <span class="text-lg">🫂</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="successBlock" class="hidden flex-col items-center justify-center text-center animate-fade-in py-10 glass-card p-12 bg-white/60">
+                <div class="w-24 h-24 rounded-full bg-green-50 flex items-center justify-center text-green-500 mb-6 border border-green-100 shadow-sm">
+                    <span class="text-5xl">🎉</span>
+                </div>
+                <h3 class="font-extrabold text-3xl text-ravn-textMain mb-3 tracking-tight">You're on the list!</h3>
+                <p class="text-ravn-textMuted text-base font-medium mb-10 max-w-sm mx-auto leading-relaxed">
+                    Welcome to the family. We've securely generated your digital ID card. Take a screenshot or just log in!
+                </p>
+
+                <div class="bg-white border border-gray-100 p-8 rounded-[32px] mb-10 max-w-sm mx-auto w-full shadow-sm relative">
+                    <!-- Little tape visual -->
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-gray-200/50 backdrop-blur-sm shadow-sm rotate-[-2deg]"></div>
+                    
+                    <div class="p-2 bg-gray-50 rounded-2xl w-fit mx-auto border border-gray-100 mb-6">
+                        <img id="idQrCode" src="" class="w-40 h-40 rounded-xl object-cover mx-auto mix-blend-multiply">
+                    </div>
+                    <div class="text-center space-y-1">
+                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Clubhouse Pass</p>
+                        <h4 id="displayMemberName" class="font-extrabold text-2xl text-ravn-textMain truncate px-2">---</h4>
+                        <p id="displayMemberId" class="text-base font-mono text-ravn-primary tracking-widest font-bold mt-1 bg-red-50 w-fit mx-auto px-4 py-1 rounded-full border border-red-100">---</p>
+                    </div>
+                </div>
+
+                <a href="login.html" class="btn-glow px-10 py-4 text-sm w-full max-w-sm shadow-md gap-2">
+                    <span>Head to the Clubhouse</span> <i class="ph-bold ph-door-open text-lg"></i>
+                </a>
+            </div>
+
+            <!-- CLOSED STATE -->
+            <div id="closedBlock" class="hidden flex-col items-center justify-center text-center py-20 animate-fade-in glass-card p-12 bg-white/60">
+                <div class="w-24 h-24 rounded-[24px] bg-gray-100 border border-gray-200 flex items-center justify-center mb-6 shadow-sm">
+                    <span class="text-5xl">🛑</span>
+                </div>
+                <h2 class="text-3xl font-extrabold tracking-tight mb-3 text-ravn-textMain">We're fully booked!</h2>
+                <p class="text-ravn-textMuted text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
+                    Our club roster is currently full for the season. Keep an eye on our Instagram for when we open up spots again!
+                </p>
+                <a href="index.html" class="btn-glass px-8 py-4 text-sm gap-2">
+                    <i class="ph-bold ph-arrow-left text-lg"></i> <span>Return Home</span>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto relative z-20">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12 border-b border-gray-200 pb-12">
+                <div class="max-w-sm">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="RAVN.png" alt="RAVN Logo" class="h-6 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('footer-fallback').style.display='block';">
+                        <span id="footer-fallback" style="display: none;" class="font-extrabold text-2xl tracking-widest text-ravn-textMain uppercase block">RAVN</span>
+                    </div>
+                    <p class="text-base text-ravn-textMuted font-medium leading-relaxed">
+                        Your vibe. Your tribe. A community built on shared laughs, spontaneous travel, and cinematic adventures. Come say hi! 👋
+                    </p>
+                </div>
+                
+                <div class="flex gap-16">
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">The Club</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="about.html" class="hover:text-ravn-primary transition-colors">About Us ✨</a></li>
+                            <li><a href="events.html" class="hover:text-ravn-primary transition-colors">Upcoming Plans 🗺️</a></li>
+                            <li><a href="register.html" class="text-ravn-primary font-bold">Join the Family 🫂</a></li>
+                            <li><a href="login.html" class="hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">Connect</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">Instagram 📸</a></li>
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">TikTok 🎵</a></li>
+                            <li><a href="contact.html" class="hover:text-ravn-primary transition-colors">Say Hello 👋</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-bold text-gray-400">
+                <p>Copyright © 2026 RAVN Community. Good Vibes Only. ✌️</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-ravn-primary transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-ravn-primary transition-colors">House Rules</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- PRELOADER ---
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => { preloader.style.display = 'none'; }, 300);
+            }, 300);
+            
+            // Initial height set
+            adjustWrapperHeight('step1');
+            checkCapacity();
+        });
+
+        // --- MOBILE MENU ---
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('ph-list');
+            icon.classList.toggle('ph-x');
+        });
+
+        // --- SLIDING FORM LOGIC ---
+        function adjustWrapperHeight(stepId) {
+            const activeStep = document.getElementById(stepId);
+            const wrapper = document.getElementById('slideWrapper');
+            wrapper.style.height = activeStep.offsetHeight + 'px';
+        }
+
+        function updateProgress(step) {
+            for(let i=1; i<=3; i++) {
+                const dot = document.getElementById(`dot${i}`);
+                if(i === step) {
+                    dot.className = `step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm`;
+                    dot.innerHTML = i;
+                } else if (i < step) {
+                    dot.className = `step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white`;
+                    dot.innerHTML = `<i class="ph-bold ph-check text-lg"></i>`;
+                } else {
+                    dot.className = `step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400`;
+                    dot.innerHTML = i;
+                }
+
+                if(i < 3) {
+                    const line = document.getElementById(`line${i}`);
+                    line.className = i < step ? 'step-line flex-1 h-1 bg-ravn-primary mx-2 rounded-full' : 'step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full';
+                }
+            }
+        }
+
+        function goToStep(current, next) {
+            // Validation
+            if(current === 1 && next === 2) {
+                const name = document.getElementById('regName').value.trim();
+                const age = document.getElementById('regAge').value;
+                const gender = document.getElementById('regGender').value;
+                if(!name || !age || !gender) { alert("Please answer all questions before we move on! 😊"); return; }
+            }
+            if(current === 2 && next === 3) {
+                const email = document.getElementById('regEmail').value.trim();
+                const phone = document.getElementById('regPhone').value.trim();
+                const address = document.getElementById('regAddress').value.trim();
+                if(!email || !phone || !address) { alert("We need your contact info to add you to the group chat! 📱"); return; }
+            }
+
+            const currentEl = document.getElementById(`step${current}`);
+            const nextEl = document.getElementById(`step${next}`);
+
+            // Slide Logic
+            if (next > current) {
+                currentEl.className = 'slide-step step-left';
+                nextEl.className = 'slide-step step-active';
+            } else {
+                currentEl.className = 'slide-step step-right';
+                nextEl.className = 'slide-step step-active';
+            }
+
+            setTimeout(() => adjustWrapperHeight(`step${next}`), 50);
+            updateProgress(next);
+        }
+
+        // --- SETTINGS / PROMO CHECK ---
+        let isFirst100 = false;
+        async function checkCapacity() {
+            try {
+                const res = await fetch('/api/public/settings');
+                if (!res.ok) throw new Error("API not reachable");
+                const data = await res.json();
+                
+                if (data.settings && !data.settings.registrationOpen) {
+                    toggleState('closed'); return;
+                }
+
+                const isPromoActive = data.settings ? data.settings.freePromoActive : false;
+                const feeAmount = data.settings ? data.settings.membershipFee : 500;
+                const upiId = data.settings ? data.settings.upiId : 'ravn@bank';
+
+                if (isPromoActive) {
+                    isFirst100 = true;
+                    document.getElementById('capacityBadge').classList.remove('hidden');
+                    document.getElementById('capacityBadge').classList.add('flex');
+                    document.getElementById('promoState').classList.remove('hidden');
+                    document.getElementById('promoState').classList.add('flex');
+                    document.getElementById('paymentState').classList.add('hidden');
+                    document.getElementById('paymentState').classList.remove('flex');
+                } else {
+                    isFirst100 = false;
+                    document.getElementById('feeAmount').textContent = feeAmount;
+                    const qrUrl = `upi://pay?pa=${upiId}&pn=RAVN%20Club&cu=INR&am=${feeAmount}`;
+                    document.getElementById('upiQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}&color=000000&bgcolor=ffffff`;
+
+                    document.getElementById('paymentState').classList.remove('hidden');
+                    document.getElementById('paymentState').classList.add('flex');
+                    document.getElementById('promoState').classList.add('hidden');
+                    document.getElementById('promoState').classList.remove('flex');
+                }
+            } catch (err) {
+                isFirst100 = false;
+                document.getElementById('paymentState').classList.remove('hidden');
+                document.getElementById('paymentState').classList.add('flex');
+            }
+        }
+
+        function toggleState(state) {
+            document.getElementById('registrationBlock').classList.add('hidden');
+            document.getElementById('successBlock').classList.add('hidden');
+            document.getElementById('closedBlock').classList.add('hidden');
+            
+            if(state === 'closed') {
+                document.getElementById('closedBlock').classList.remove('hidden');
+                document.getElementById('closedBlock').classList.add('flex');
+            } else if(state === 'success') {
+                document.getElementById('successBlock').classList.remove('hidden');
+                document.getElementById('successBlock').classList.add('flex');
+            }
+        }
+
+        // --- SUBMISSION ---
+        document.getElementById('multiStepForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let utr = "";
+            if (!isFirst100) {
+                utr = document.getElementById('utrInput').value.trim();
+                if(utr.length < 8) { alert("Please double-check your UPI Reference Number. 🤔"); return; }
+            }
+
+            const submitBtn = document.getElementById('submitRegBtn');
+            const origHtml = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>';
+            submitBtn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('regName').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                phone: document.getElementById('regPhone').value.trim(),
+                age: document.getElementById('regAge').value,
+                gender: document.getElementById('regGender').value,
+                address: document.getElementById('regAddress').value.trim(),
+                paymentMethod: isFirst100 ? "Free Promo Entry" : `UPI (UTR: ${utr})`
+            };
+
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+
+                renderSuccess(payload.name, data.memberId);
+            } catch (err) {
+                alert("Oops! Something went wrong on our end. " + (err.message || "Please try again!"));
+                submitBtn.innerHTML = origHtml;
+                submitBtn.disabled = false;
+            }
+        });
+
+        function renderSuccess(name, id) {
+            toggleState('success');
+            document.getElementById('displayMemberName').textContent = name;
+            document.getElementById('displayMemberId').textContent = id;
+            document.getElementById('idQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(id)}&color=000000&bgcolor=ffffff`;
+        }
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

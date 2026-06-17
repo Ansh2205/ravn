@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Grab a Seat 🚐</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
+                    colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
+                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'fade-in': 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards', },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' }, }, fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' }, } }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-bottom: 1px solid rgba(229, 231, 235, 0.5); }
+        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
+        .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0.02em; font-size: 14px; cursor: pointer; border: none; }
+        .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
+        .btn-glow:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-glass { background: rgba(255, 255, 255, 0.9); color: #1C1917; font-weight: 700; border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; text-decoration: none; }
+        .btn-glass:hover { background: #ffffff; border-color: rgba(255, 107, 107, 0.4); color: #FF6B6B; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); }
+        .tier-radio:checked + div { border-color: #FF6B6B; background-color: rgba(255, 107, 107, 0.05); box-shadow: 0 4px 15px rgba(255, 107, 107, 0.1); }
+        .slide-container { position: relative; overflow: hidden; width: 100%; transition: height 0.4s ease; }
+        .slide-step { width: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease; position: absolute; top: 0; left: 0; }
+        .step-active { position: relative; transform: translateX(0); opacity: 1; pointer-events: auto; }
+        .step-left { transform: translateX(-120%); opacity: 0; pointer-events: none; }
+        .step-right { transform: translateX(120%); opacity: 0; pointer-events: none; }
+        .step-dot { transition: all 0.3s ease; }
+        .step-line { transition: all 0.3s ease; }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
+
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
+        </div>
+    </div>
+
+    <!-- Ambient Warm Background Glows -->
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full transition-all flex items-center px-6 md:px-8 shadow-sm" id="navbar">
+        <div class="w-full flex justify-between items-center h-full relative">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('nav-fallback').style.display='block';">
+                <span id="nav-fallback" style="display: none;" class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
+                <span class="text-[10px] font-bold text-ravn-textMuted tracking-widest uppercase border-l border-gray-300 pl-3 ml-1 hidden sm:block mt-1">Gateway</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
+                <a href="events.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Adventures ✈️</a>
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                <a href="member.html" class="btn-glass py-2 px-6">Member Portal 🛋️</a>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary transition-colors">
+                <i class="ph-bold ph-list text-3xl"></i>
+            </button>
+
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+                <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
+                <a href="events.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Adventures <span>✈️</span></a>
+                <div class="h-px w-full bg-gray-200 my-2"></div>
+                <a href="member.html" class="text-base font-bold text-ravn-primary py-2 flex justify-between">Member Portal <span>🛋️</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-start justify-center pt-[140px] pb-24 px-6 relative z-10 hidden" id="mainContainer">
+        <div class="container mx-auto max-w-6xl w-full">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- LEFT COLUMN: Event Details Panel -->
+                <div class="lg:col-span-5 glass-card p-8 md:p-10 sticky top-[120px] bg-white/60">
+                    <span id="eventCategoryBadge" class="inline-flex px-4 py-1.5 bg-blue-50 border border-blue-100 text-blue-600 rounded-full text-[10px] font-extrabold uppercase tracking-widest mb-6 shadow-sm"><i class="ph-bold ph-globe mr-1.5"></i> Open Invite</span>
+                    
+                    <h1 id="eventTitle" class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-4 leading-tight">Loading details...</h1>
+                    
+                    <p id="eventDesc" class="text-sm text-ravn-textMuted leading-relaxed font-medium mb-8">Please wait while we grab the details for this adventure from the group chat.</p>
+
+                    <div class="space-y-6 border-t border-gray-200 pt-8">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-[18px] bg-red-50 flex items-center justify-center shrink-0 text-ravn-primary border border-red-100">
+                                <i class="ph-fill ph-calendar-blank text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">When is it? 🗓️</p>
+                                <p id="eventDate" class="text-sm font-extrabold text-ravn-textMain mt-0.5">---</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-[18px] bg-orange-50 flex items-center justify-center shrink-0 text-orange-500 border border-orange-100">
+                                <i class="ph-fill ph-users-three text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Spots Left 🎟️</p>
+                                <p id="eventCap" class="text-sm font-extrabold text-ravn-textMain mt-0.5">---</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-[18px] bg-green-50 flex items-center justify-center shrink-0 text-green-500 border border-green-100">
+                                <i class="ph-fill ph-wallet text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">The Piggybank 🍕</p>
+                                <p id="eventFeeText" class="text-sm font-extrabold text-ravn-textMain mt-0.5">---</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Registration Form (Multi-Step Slider) -->
+                <div class="lg:col-span-7 glass-card p-8 md:p-12 relative overflow-hidden bg-white/60">
+
+                    <!-- Progress Indicator -->
+                    <div class="flex items-center justify-center w-full max-w-sm mx-auto mb-10 relative z-10" id="progressContainer">
+                        <div id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm">1</div>
+                        <div id="line1" class="step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full"></div>
+                        <div id="dot2" class="step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400">2</div>
+                        <div id="line2" class="step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full"></div>
+                        <div id="dot3" class="step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400">3</div>
+                    </div>
+
+                    <div class="mb-8 relative z-10 text-center" id="formHeaderBlock">
+                        <h2 class="text-3xl font-extrabold tracking-tight text-ravn-textMain mb-2" id="formHeader">Grab a seat! 🪑</h2>
+                        <p class="text-xs font-bold text-ravn-textMuted uppercase tracking-widest" id="formSub">Tell us who's coming.</p>
+                    </div>
+
+                    <form id="publicRsvpForm" class="relative z-10">
+                        <input type="hidden" id="rsvpEventId">
+                        <input type="hidden" id="rsvpIsPayable">
+
+                        <div class="slide-container" id="slideWrapper">
+                            
+                            <!-- STEP 1: The Basics -->
+                            <div id="step1" class="slide-step step-active">
+                                <div class="space-y-6 text-left">
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold uppercase tracking-widest text-ravn-textMain ml-1">What's your name? 🙋‍♂️</label>
+                                        <input type="text" id="rsvpName" placeholder="e.g. Alex" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-xs font-bold uppercase tracking-widest text-ravn-textMain ml-1">Email 📧</label>
+                                            <input type="email" id="rsvpEmail" placeholder="alex@email.com" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-xs font-bold uppercase tracking-widest text-ravn-textMain ml-1">Phone Number 📱</label>
+                                            <input type="tel" id="rsvpPhone" placeholder="123-456-7890" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                        </div>
+                                    </div>
+                                    <div class="pt-2">
+                                        <button type="button" onclick="goToStep(1, 2)" class="btn-glow w-full py-4 text-sm gap-2">
+                                            <span>Next Step</span> <i class="ph-bold ph-arrow-right text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 2: Campus Details -->
+                            <div id="step2" class="slide-step step-right">
+                                <div class="space-y-6 text-left">
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold uppercase tracking-widest text-ravn-textMain ml-1">Which campus do you roam? 🏫</label>
+                                        <input type="text" id="rsvpInstitution" placeholder="Name of your university" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold uppercase tracking-widest text-ravn-textMain ml-1">Year of Study 📚</label>
+                                        <select id="rsvpYear" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium appearance-none cursor-pointer shadow-sm">
+                                            <option value="" disabled selected hidden>Select Current Year</option>
+                                            <option value="1st Year">1st Year (Freshman)</option>
+                                            <option value="2nd Year">2nd Year (Sophomore)</option>
+                                            <option value="3rd Year">3rd Year (Junior)</option>
+                                            <option value="4th Year">4th Year (Senior)</option>
+                                            <option value="Postgrad">Postgraduate / Masters</option>
+                                            <option value="Alumni">Alumni / Professional</option>
+                                        </select>
+                                    </div>
+                                    <div class="pt-2 flex gap-4">
+                                        <button type="button" onclick="goToStep(2, 1)" class="btn-glass w-1/3 py-4 text-sm">Back</button>
+                                        <button type="button" onclick="goToStep(2, 3)" class="btn-glow w-2/3 py-4 text-sm gap-2">
+                                            <span>Almost Done</span> <i class="ph-bold ph-arrow-right text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: Checkout / Confirmation -->
+                            <div id="step3" class="slide-step step-right">
+                                <div class="space-y-6 text-left">
+                                    
+                                    <!-- Dynamic Tiers -->
+                                    <div id="tiersContainer" class="hidden flex-col gap-3">
+                                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-ravn-primary">Pick your pass 🎟️</p>
+                                        <div id="tiersList" class="grid grid-cols-2 gap-4">
+                                            <!-- Populated via JS -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Dynamic Payment Block -->
+                                    <div id="paymentBlock" class="hidden flex-col items-center gap-6 pt-4">
+                                        <div class="text-center w-full">
+                                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Your Total</span>
+                                            <h3 class="text-4xl font-extrabold tracking-tight text-ravn-textMain">₹<span id="feeDisplay">0</span></h3>
+                                        </div>
+                                        
+                                        <!-- Frictionless UPI Intent Link Button -->
+                                        <a id="upiIntentBtn" href="#" class="btn-glow w-full py-4 text-sm gap-2 mt-2 hidden sm:flex">
+                                            <i class="ph-bold ph-device-mobile text-lg"></i> <span>Pay with GPay / PhonePe</span>
+                                        </a>
+
+                                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2 hidden sm:block">OR SCAN CODE</p>
+
+                                        <div class="p-3 bg-white border border-gray-200 rounded-3xl mx-auto w-fit shadow-sm my-2 relative">
+                                            <img id="rsvpQrCode" src="" class="w-40 h-40 object-cover rounded-[20px]">
+                                        </div>
+                                        
+                                        <div class="w-full flex flex-col gap-2">
+                                            <label class="text-xs font-bold uppercase tracking-widest text-ravn-textMain ml-1 text-center">Enter your UPI Reference (12-Digits) 🧾</label>
+                                            <input type="text" id="rsvpUtr" placeholder="0000 0000 0000" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-mono tracking-widest text-base shadow-sm">
+                                        </div>
+                                    </div>
+
+                                    <!-- Free / Waitlist Friendly Block -->
+                                    <div id="freeBlock" class="hidden flex-col items-center justify-center text-center py-6">
+                                        <div class="w-20 h-20 bg-green-50 rounded-[24px] flex items-center justify-center text-green-500 mb-4 border border-green-100">
+                                            <i class="ph-fill ph-check-circle text-4xl"></i>
+                                        </div>
+                                        <h3 class="text-xl font-extrabold text-ravn-textMain mb-2" id="freeBlockTitle">Ready to pack your bags? 🎒</h3>
+                                        <p class="text-sm font-medium text-ravn-textMuted">We've got your info. Just click confirm below to secure your spot!</p>
+                                    </div>
+
+                                    <div class="pt-4 flex gap-4">
+                                        <button type="button" onclick="goToStep(3, 2)" class="btn-glass w-1/3 py-4 text-sm">Back</button>
+                                        <button type="submit" id="submitBtn" class="btn-glow w-2/3 py-4 text-sm gap-2">
+                                            <span>Confirm RSVP</span> <i class="ph-bold ph-check-circle text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Error State -->
+            <div id="errorState" class="hidden flex-col items-center justify-center text-center py-20 glass-card max-w-2xl mx-auto mt-10 bg-white/60">
+                <div class="w-24 h-24 rounded-[24px] bg-red-50 flex items-center justify-center text-red-500 mb-6 border border-red-100">
+                    <i class="ph-bold ph-warning-circle text-5xl"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-ravn-textMain">Event Unavailable.</h2>
+                <p class="text-ravn-textMuted text-base font-medium mb-10 max-w-md mx-auto" id="errorMsgText">
+                    This initiative is either members-only, fully booked, or the URL provided is invalid.
+                </p>
+                <div class="flex gap-4">
+                    <a href="index.html" class="btn-glass px-8 py-3.5 text-sm">Return Home</a>
+                    <a href="login.html" class="btn-glow px-8 py-3.5 text-sm hidden" id="errLoginBtn">Head to Clubhouse</a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Success Modal Overlay -->
+    <div id="successModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity duration-300 opacity-0">
+        <div class="glass-card p-10 max-w-md w-full shadow-2xl relative flex flex-col items-center transform scale-95 transition-transform duration-300 bg-white/95" id="successModalContent">
+            
+            <button onclick="closeSuccessModal()" class="absolute top-6 right-6 text-gray-400 hover:text-ravn-textMain transition-colors w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100">
+                <i class="ph-bold ph-x text-xl"></i>
+            </button>
+            
+            <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center text-green-500 mb-6 border border-green-100 shadow-sm">
+                <span class="text-4xl">🎉</span>
+            </div>
+            <h3 class="font-extrabold text-3xl text-ravn-textMain mb-2 tracking-tight" id="successTitle">You're on the list!</h3>
+            <p class="text-ravn-textMuted text-sm font-medium mb-8 text-center leading-relaxed" id="successDesc">
+                We've securely generated your digital event pass. Take a screenshot or just view it in your portal!
+            </p>
+
+            <div class="bg-white border border-gray-100 p-6 rounded-[24px] mb-8 w-full shadow-sm relative" id="passCardUi">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-gray-200/50 backdrop-blur-sm shadow-sm rotate-[-2deg]"></div>
+                
+                <div class="p-2 bg-gray-50 rounded-xl w-fit mx-auto border border-gray-100 mb-5">
+                    <img id="passQrCode" src="" class="w-32 h-32 rounded-lg object-cover mx-auto mix-blend-multiply">
+                </div>
+                <div class="text-center space-y-1">
+                    <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Clubhouse Event Pass</p>
+                    <h4 id="passEventTitle" class="font-extrabold text-xl text-ravn-textMain line-clamp-1 px-2">---</h4>
+                    <p id="passGuestName" class="text-xs font-bold text-ravn-textMuted mt-1">---</p>
+                    <p id="passStatusLabel" class="text-[10px] font-mono text-ravn-primary tracking-widest font-bold mt-3 bg-red-50 w-fit mx-auto px-4 py-1 rounded-full border border-red-100">Verifying...</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col w-full gap-3">
+                <a href="member.html" class="btn-glow px-8 py-3.5 text-sm w-full shadow-md gap-2">
+                    <span>Head to the Clubhouse</span> <i class="ph-bold ph-door-open text-lg"></i>
+                </a>
+                <a href="#" id="addToCalBtn" target="_blank" class="btn-glass px-8 py-3.5 text-sm w-full gap-2">
+                    <i class="ph-bold ph-calendar-plus text-lg"></i> <span>Add to Google Calendar</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-white border-gray-100 text-ravn-textMain shadow-lg';
+            const iconClass = type === 'error' ? 'ph-warning-circle text-red-500' : 'ph-check-circle text-green-500';
+            
+            toast.className = `p-4 rounded-2xl backdrop-blur-md text-sm font-bold flex items-center gap-3 transition-all duration-500 transform translate-y-10 opacity-0 border ${bgClass}`;
+            toast.innerHTML = `<i class="ph-fill ${iconClass} text-2xl"></i> <span>${message}</span>`;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }); });
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 4000); }, 4000);
+        }
+
+        let currentEvent = null;
+        let isUserLoggedIn = false;
+        let loggedInUser = null;
+        let isWaitlist = false; 
+        let upiId = 'ravn@bank';
+
+        window.addEventListener('load', async () => {
+            const sessionData = sessionStorage.getItem('ravn_member_session');
+            if (sessionData) {
+                try { loggedInUser = JSON.parse(sessionData); isUserLoggedIn = true; } catch(e) {}
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            let eventId = urlParams.get('id');
+            if (!eventId && window.location.hash.startsWith('#event-')) eventId = window.location.hash.replace('#event-', '');
+
+            if (!eventId) { showErrorState("No event link provided. Did you get lost? 🤔"); return; }
+            await fetchEventDetails(eventId);
+        });
+
+        async function fetchEventDetails(eventId) {
+            try {
+                const setRes = await fetch('/api/public/settings');
+                if(setRes.ok) {
+                    const setData = await setRes.json();
+                    if(setData.settings) upiId = setData.settings.upiId || 'ravn@bank';
+                }
+                window.globalUpiId = upiId;
+
+                const eventRes = await fetch(`/api/public/events/${eventId}`);
+                if (!eventRes.ok) throw new Error("Oops! Couldn't find that adventure. 😅");
+                
+                currentEvent = await eventRes.json();
+
+                if (currentEvent.isMembersOnly && !isUserLoggedIn) {
+                    document.getElementById('errLoginBtn').classList.remove('hidden');
+                    throw new Error("This adventure is strictly for Clubhouse Members. Please log in first! 🛋️");
+                }
+                if (!currentEvent.rsvpOpen) throw new Error("Sorry, the sign-up sheet for this is currently closed! 🛑");
+
+                document.getElementById('eventTitle').textContent = currentEvent.title;
+                document.getElementById('eventDesc').textContent = currentEvent.description || "Grab your seat before it fills up!";
+                document.getElementById('eventDate').textContent = currentEvent.date || 'TBD';
+                
+                if(currentEvent.visibility === 'Unlisted') {
+                    document.getElementById('eventCategoryBadge').innerHTML = '<i class="ph-bold ph-detective mr-1.5"></i> Secret Invite';
+                    document.getElementById('eventCategoryBadge').className = "inline-flex px-4 py-1.5 bg-gray-800 border border-gray-900 text-white rounded-full text-[10px] font-extrabold uppercase tracking-widest mb-6 shadow-sm";
+                } else if(currentEvent.isMembersOnly) {
+                    document.getElementById('eventCategoryBadge').innerHTML = '<i class="ph-bold ph-lock-key mr-1.5"></i> Members Only';
+                    document.getElementById('eventCategoryBadge').className = "inline-flex px-4 py-1.5 bg-purple-50 border border-purple-100 text-purple-600 rounded-full text-[10px] font-extrabold uppercase tracking-widest mb-6 shadow-sm";
+                }
+
+                const attendeesCount = currentEvent.attendees ? currentEvent.attendees.length : 0;
+                const capacity = currentEvent.capacity || 50;
+
+                if (attendeesCount >= capacity) {
+                    isWaitlist = true;
+                    document.getElementById('eventCap').innerHTML = `<span class="text-orange-500">Capacity Full (${capacity}/${capacity})</span>`;
+                    document.getElementById('formHeader').textContent = "Join Waitlist ⏳";
+                    document.getElementById('formSub').textContent = "Enter your details to join the queue.";
+                    document.getElementById('submitBtn').innerHTML = "<span>Join Waitlist</span> <i class='ph-bold ph-clock text-lg'></i>";
+                } else {
+                    document.getElementById('eventCap').innerHTML = `<span class="text-green-500">${capacity - attendeesCount} Spots Remaining</span>`;
+                }
+
+                document.getElementById('rsvpEventId').value = currentEvent._id;
+                document.getElementById('rsvpIsPayable').value = currentEvent.isPayable;
+
+                if (currentEvent.isPayable && !isWaitlist) {
+                    document.getElementById('eventFeeText').textContent = currentEvent.tiers && currentEvent.tiers.length > 0 ? `Starts at ₹${currentEvent.tiers[0].price}` : `₹${currentEvent.eventFee}`;
+                    if (currentEvent.tiers && currentEvent.tiers.length > 0) {
+                        document.getElementById('tiersContainer').classList.remove('hidden'); 
+                        document.getElementById('tiersContainer').classList.add('flex');
+                        document.getElementById('tiersList').innerHTML = currentEvent.tiers.map((t, i) => `
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="tierSelect" value="${t.name}|${t.price}" class="tier-radio absolute opacity-0" ${i===0?'checked':''} onchange="updateFee(${t.price})">
+                                <div class="p-4 rounded-[20px] border-2 border-gray-200 transition-colors bg-white text-center shadow-sm">
+                                    <span class="block text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1">${t.name}</span>
+                                    <span class="block text-xl font-black text-ravn-textMain">₹${t.price}</span>
+                                </div>
+                            </label>
+                        `).join('');
+                        updateFee(currentEvent.tiers[0].price);
+                    } else { updateFee(currentEvent.eventFee); }
+                } else {
+                    document.getElementById('eventFeeText').textContent = isWaitlist ? 'Waitlist' : 'Free Entry 🎉';
+                    document.getElementById('paymentBlock').classList.add('hidden');
+                    document.getElementById('paymentBlock').classList.remove('flex');
+                    document.getElementById('rsvpUtr').required = false;
+                    document.getElementById('freeBlock').classList.remove('hidden');
+                    document.getElementById('freeBlock').classList.add('flex');
+                    if(isWaitlist) document.getElementById('freeBlockTitle').textContent = "Ready to join the queue? ⏳";
+                }
+
+                if (isUserLoggedIn && loggedInUser) {
+                    if(!isWaitlist) {
+                        document.getElementById('formHeader').textContent = `Hi, ${loggedInUser.name.split(' ')[0]}! 👋`;
+                        document.getElementById('formSub').textContent = "Let's grab your seat.";
+                    }
+                    document.getElementById('rsvpName').value = loggedInUser.name || '';
+                    document.getElementById('rsvpEmail').value = loggedInUser.email || '';
+                    document.getElementById('rsvpPhone').value = loggedInUser.phone || '';
+                    if (loggedInUser.email) {
+                        document.getElementById('rsvpEmail').readOnly = true;
+                        document.getElementById('rsvpEmail').className = "friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm opacity-70 cursor-not-allowed";
+                    }
+                }
+
+                document.getElementById('preloader').style.opacity = '0';
+                setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 500);
+                document.getElementById('mainContainer').classList.remove('hidden');
+                adjustWrapperHeight('step1');
+
+            } catch (err) { showErrorState(err.message); }
+        }
+
+        function adjustWrapperHeight(stepId) {
+            const activeStep = document.getElementById(stepId);
+            document.getElementById('slideWrapper').style.height = activeStep.offsetHeight + 'px';
+        }
+
+        function updateProgress(step) {
+            for(let i=1; i<=3; i++) {
+                const dot = document.getElementById(`dot${i}`);
+                if(i === step) {
+                    dot.className = `step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm`;
+                    dot.innerHTML = i;
+                } else if (i < step) {
+                    dot.className = `step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white`;
+                    dot.innerHTML = `<i class="ph-bold ph-check text-lg"></i>`;
+                } else {
+                    dot.className = `step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400`;
+                    dot.innerHTML = i;
+                }
+                if(i < 3) document.getElementById(`line${i}`).className = i < step ? 'step-line flex-1 h-1 bg-ravn-primary mx-2 rounded-full' : 'step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full';
+            }
+        }
+
+        function goToStep(current, next) {
+            if(current === 1 && next === 2) {
+                if(!document.getElementById('rsvpName').value.trim() || !document.getElementById('rsvpEmail').value.trim() || !document.getElementById('rsvpPhone').value.trim()) { showToast("Please fill out your basics first! 😊", "error"); return; }
+            }
+            if(current === 2 && next === 3) {
+                if(!document.getElementById('rsvpInstitution').value.trim() || !document.getElementById('rsvpYear').value) { showToast("We need your campus details! 🏫", "error"); return; }
+            }
+
+            const currentEl = document.getElementById(`step${current}`);
+            const nextEl = document.getElementById(`step${next}`);
+
+            if (next > current) { currentEl.className = 'slide-step step-left'; nextEl.className = 'slide-step step-active'; } 
+            else { currentEl.className = 'slide-step step-right'; nextEl.className = 'slide-step step-active'; }
+
+            setTimeout(() => adjustWrapperHeight(`step${next}`), 50);
+            updateProgress(next);
+        }
+
+        window.updateFee = function(price) {
+            if(isWaitlist) return;
+            const paymentBlock = document.getElementById('paymentBlock');
+            paymentBlock.classList.remove('hidden'); paymentBlock.classList.add('flex');
+            document.getElementById('feeDisplay').textContent = price; 
+            document.getElementById('rsvpUtr').required = true;
+            
+            const upiUrl = `upi://pay?pa=${window.globalUpiId}&pn=RAVN%20Events&cu=INR&am=${price}`;
+            
+            // Set QR Code
+            document.getElementById('rsvpQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}&color=000000&bgcolor=ffffff`;
+            
+            // Set Intent Link Button for Mobile
+            const intentBtn = document.getElementById('upiIntentBtn');
+            intentBtn.href = upiUrl;
+            
+            // Show intent button only if on mobile device
+            if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+                intentBtn.classList.remove('hidden');
+                intentBtn.classList.add('flex');
+            }
+
+            setTimeout(() => adjustWrapperHeight(`step3`), 50);
+        }
+
+        function showErrorState(msg) {
+            document.getElementById('preloader').style.opacity = '0';
+            setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 500);
+            document.getElementById('mainContainer').classList.remove('hidden');
+            document.querySelector('.grid').classList.add('hidden');
+            document.getElementById('progressContainer').classList.add('hidden');
+            
+            const errBlock = document.getElementById('errorState');
+            document.getElementById('errorMsgText').textContent = msg;
+            errBlock.classList.remove('hidden'); errBlock.classList.add('flex');
+        }
+
+        // Google Calendar Link Generator
+        function generateCalendarLink(event) {
+            if (!event) return '#';
+            
+            // Fallback for simple date formats (YYYY-MM-DD)
+            let dateStr = event.date || '';
+            let calDates = '';
+            
+            if (dateStr.includes('-')) {
+                // If it's YYYY-MM-DD, create an all-day event format (YYYYMMDD/YYYYMMDD+1)
+                const d = dateStr.replace(/-/g, '');
+                const nextDate = new Date(dateStr);
+                nextDate.setDate(nextDate.getDate() + 1);
+                const nd = nextDate.toISOString().split('T')[0].replace(/-/g, '');
+                calDates = `${d}/${nd}`;
+            }
+
+            const title = encodeURIComponent(event.title || 'RAVN Event');
+            const details = encodeURIComponent(event.description || 'Join us for a RAVN Adventure!');
+            const location = encodeURIComponent(event.venue || 'TBD');
+
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${calDates}&details=${details}&location=${location}`;
+        }
+
+        document.getElementById('publicRsvpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Processing...';
+            btn.disabled = true;
+
+            const isPayable = document.getElementById('rsvpIsPayable').value === 'true';
+            let selectedTier = "Standard";
+            if (!isWaitlist && currentEvent.isPayable && currentEvent.tiers && currentEvent.tiers.length > 0) {
+                const checked = document.querySelector('input[name="tierSelect"]:checked');
+                if(checked) selectedTier = checked.value.split('|')[0];
+            }
+
+            const payload = {
+                name: document.getElementById('rsvpName').value.trim(),
+                email: document.getElementById('rsvpEmail').value.trim(),
+                phone: document.getElementById('rsvpPhone').value.trim(),
+                institution: document.getElementById('rsvpInstitution').value.trim(),
+                year: document.getElementById('rsvpYear').value,
+                tier: selectedTier,
+                utr: (!isWaitlist && isPayable) ? document.getElementById('rsvpUtr').value.trim() : null
+            };
+
+            try {
+                const res = await fetch(`/api/public/events/${currentEvent._id}/rsvp`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.error || "Submission rejected.");
+                
+                if (data.waitlist) {
+                    showSuccessState("Waitlist Secured", "You're in the queue! We'll email you if a spot opens up. ⏳", null);
+                    return;
+                }
+
+                showSuccessState("You're on the list! 🎉", "We've securely generated your digital event pass. See you there!", { 
+                    event: currentEvent, guest: payload, refId: data.refId, qrUrl: data.qrUrl 
+                });
+                
+            } catch (err) {
+                showToast(`Oops: ${err.message}`, "error");
+                btn.innerHTML = originalText; btn.disabled = false;
+            }
+        });
+
+        function showSuccessState(title, desc, passData) {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<span>Confirm RSVP</span> <i class="ph-bold ph-check-circle text-lg"></i>'; btn.disabled = false;
+
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successDesc').textContent = desc;
+
+            if (passData) {
+                document.getElementById('passEventTitle').textContent = passData.event.title;
+                document.getElementById('passGuestName').textContent = passData.guest.name;
+                document.getElementById('passQrCode').src = passData.qrUrl;
+                document.getElementById('passStatusLabel').textContent = passData.event.isPayable ? 'VERIFICATION PENDING ⏳' : 'PASS SECURED 🎉';
+                document.getElementById('passStatusLabel').className = passData.event.isPayable ? 'text-[10px] font-mono text-orange-500 tracking-widest font-bold mt-3 bg-orange-50 w-fit mx-auto px-3 py-1 rounded-full border border-orange-100' : 'text-[10px] font-mono text-green-500 tracking-widest font-bold mt-3 bg-green-50 w-fit mx-auto px-3 py-1 rounded-full border border-green-100';
+                document.getElementById('passCardUi').classList.remove('hidden');
+                
+                // Set Calendar Button
+                const calBtn = document.getElementById('addToCalBtn');
+                calBtn.href = generateCalendarLink(passData.event);
+                calBtn.classList.remove('hidden');
+                calBtn.classList.add('flex');
+
+            } else { 
+                document.getElementById('passCardUi').classList.add('hidden'); 
+                document.getElementById('addToCalBtn').classList.add('hidden');
+            }
+
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95'); content.classList.add('scale-100');
+        }
+
+        function closeSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100'); content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden'); modal.classList.remove('flex');
+                document.getElementById('publicRsvpForm').reset();
+                goToStep(3, 1);
+            }, 300);
+        }
+
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden'); mobileMenu.classList.toggle('flex');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('ph-list'); icon.classList.toggle('ph-x');
+        });
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

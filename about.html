@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Our Story ✨</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        ravn: {
+                            bg: '#FAFAF9', 
+                            surface: '#FFFFFF',
+                            border: '#F3F4F6', 
+                            primary: '#FF6B6B', 
+                            primaryHover: '#FA5252',
+                            accent: '#FCA311', 
+                            textMain: '#1C1917', 
+                            textMuted: '#57534E', 
+                        }
+                    },
+                    animation: {
+                        'float': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 8s ease-in-out 4s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                            '50%': { transform: 'translateY(-20px) scale(1.05)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 32px; 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(255, 107, 107, 0.3);
+            box-shadow: 0 15px 40px -10px rgba(255, 107, 107, 0.15);
+            transform: translateY(-6px);
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 100px;
+            padding: 16px 36px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.02em;
+            font-size: 14px;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .image-collage-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-auto-rows: minmax(100px, auto);
+            gap: 16px;
+        }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
+
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full transition-all flex items-center px-6 md:px-8 shadow-sm" id="navbar">
+        <div class="w-full flex justify-between items-center h-full relative">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('nav-fallback').style.display='block';">
+                <span id="nav-fallback" style="display: none;" class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
+                <a href="events.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Adventures ✈️</a>
+                <a href="about.html" class="text-sm font-bold text-ravn-primary transition-colors">About Us ✨</a>
+                <a href="contact.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Say Hello 👋</a>
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                <a href="login.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a>
+                <a href="register.html" class="btn-glow py-2.5 px-6 shadow-md">Join the Club 🫂</a>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary transition-colors">
+                <i class="ph-bold ph-list text-3xl"></i>
+            </button>
+
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+                <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
+                <a href="events.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
+                <a href="about.html" class="text-base font-bold text-ravn-primary py-2 flex justify-between">About Us <span>✨</span></a>
+                <a href="contact.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Say Hello <span>👋</span></a>
+                <div class="h-px w-full bg-gray-200 my-2"></div>
+                <a href="login.html" class="text-base font-semibold text-ravn-textMain py-2 flex justify-between">Clubhouse Login <span>🛋️</span></a>
+                <a href="register.html" class="text-base font-extrabold text-ravn-primary py-2 flex justify-between">Join the Club <span>🫂</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative pt-[200px] pb-[100px] w-full flex items-center justify-center">
+        <div class="container mx-auto px-6 text-center flex flex-col items-center max-w-4xl relative z-10">
+            <div class="px-5 py-2 rounded-full border border-ravn-primary/20 bg-white shadow-sm text-sm font-bold text-ravn-primary mb-6 flex items-center gap-2">
+                A little bit about us 📖
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-ravn-textMain leading-[1.1] mb-8">
+                How a group chat turned into a <span class="text-transparent bg-clip-text bg-gradient-to-r from-ravn-primary to-ravn-accent">second home.</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl font-medium text-ravn-textMuted leading-relaxed mb-12">
+                We started RAVN because we were honestly just tired of the typical college club scene. Too much stress, too much politics, and not enough actual fun. We wanted a space where we could just grab some pizzas, watch terrible movies, and plan random weekend trips without overthinking it.
+            </p>
+        </div>
+    </header>
+
+    <section class="pb-24 relative z-10">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="image-collage-container reveal">
+                <!-- Large featured image -->
+                <div class="col-span-12 md:col-span-8 row-span-2 rounded-[32px] overflow-hidden shadow-lg border-4 border-white">
+                    <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=1200" alt="Friends hanging out" class="w-full h-full object-cover">
+                </div>
+                <!-- Small side image top -->
+                <div class="col-span-6 md:col-span-4 row-span-1 rounded-[32px] overflow-hidden shadow-sm border-4 border-white">
+                    <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=800" alt="Movie night" class="w-full h-full object-cover">
+                </div>
+                <!-- Small side image bottom -->
+                <div class="col-span-6 md:col-span-4 row-span-1 rounded-[32px] overflow-hidden shadow-sm border-4 border-white">
+                    <img src="https://images.unsplash.com/photo-1533561797500-4bad472836b7?auto=format&fit=crop&q=80&w=800" alt="Laughing together" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 relative z-10 bg-white/50 border-y border-ravn-border backdrop-blur-md">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-ravn-textMain">The house rules 📜</h2>
+                <p class="text-ravn-textMuted text-lg font-medium mt-4">What makes our community tick.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="reveal glass-card p-10">
+                    <div class="text-4xl mb-4">🤝</div>
+                    <h3 class="text-2xl font-extrabold text-ravn-textMain mb-3">Zero "Networking"</h3>
+                    <p class="text-ravn-textMuted font-medium leading-relaxed">Leave the resumes at the door. We aren't here to swap business cards or talk about GPAs. We're here to talk about our favorite TV shows, debate whether pineapple belongs on pizza, and just make actual friends.</p>
+                </div>
+
+                <div class="reveal delay-100 glass-card p-10">
+                    <div class="text-4xl mb-4">🧳</div>
+                    <h3 class="text-2xl font-extrabold text-ravn-textMain mb-3">Saying 'Yes' to Plans</h3>
+                    <p class="text-ravn-textMuted font-medium leading-relaxed">Someone dropped a link to a weird indie movie in the group chat? We're going. Found a cheap cabin two hours away? We're packing the cars. Life's better when you're spontaneous.</p>
+                </div>
+
+                <div class="reveal glass-card p-10 md:col-span-2 text-center md:text-left flex flex-col md:flex-row items-center gap-8">
+                    <div class="text-6xl bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm shrink-0">🛋️</div>
+                    <div>
+                        <h3 class="text-2xl font-extrabold text-ravn-textMain mb-3">Creating a Safe Haven</h3>
+                        <p class="text-ravn-textMuted font-medium leading-relaxed max-w-2xl">College and work can get incredibly overwhelming. RAVN is designed to be the comfortable couch you crash on at the end of a long week. It's a drama-free, stress-free zone where everyone looks out for each other.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 relative z-10">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="text-center mb-16 reveal">
+                <span class="text-sm font-extrabold text-ravn-primary uppercase tracking-widest mb-2 block">The Admins</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-ravn-textMain">Meet the original group chat 📱</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="reveal glass-card p-8 text-center flex flex-col items-center hover:bg-white transition-colors shadow-sm">
+                    <div class="text-6xl mb-6">🎨</div>
+                    <h3 class="text-2xl font-extrabold text-ravn-textMain mb-2">Ansh Gupta</h3>
+                    <p class="text-sm font-extrabold text-ravn-primary uppercase tracking-widest">Chief Vibe Curator</p>
+                    <p class="text-ravn-textMuted font-medium text-sm mt-4">Makes sure every meetup has the perfect playlist and the best energy.</p>
+                </div>
+                <div class="reveal delay-100 glass-card p-8 text-center flex flex-col items-center hover:bg-white transition-colors shadow-sm">
+                    <div class="text-6xl mb-6">🗺️</div>
+                    <h3 class="text-2xl font-extrabold text-ravn-textMain mb-2">Vishesh Nagaich</h3>
+                    <p class="text-sm font-extrabold text-blue-500 uppercase tracking-widest">Adventure Guide</p>
+                    <p class="text-ravn-textMuted font-medium text-sm mt-4">The guy who finds the hidden waterfalls and books the coolest cabins.</p>
+                </div>
+                <div class="reveal delay-200 glass-card p-8 text-center flex flex-col items-center hover:bg-white transition-colors shadow-sm">
+                    <div class="text-6xl mb-6">🥳</div>
+                    <h3 class="text-2xl font-extrabold text-ravn-textMain mb-2">Riddhima Singh</h3>
+                    <p class="text-sm font-extrabold text-ravn-accent uppercase tracking-widest">Minister of Fun</p>
+                    <p class="text-ravn-textMuted font-medium text-sm mt-4">Organizes the movie nights, board game battles, and keeps the group chat alive.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 relative z-10 mb-10">
+        <div class="container mx-auto px-6 max-w-4xl text-center reveal glass-card p-12 md:p-16 border-t-[6px] border-t-ravn-primary">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-ravn-textMain mb-4">Ready to pull up a chair? 🪑</h2>
+            <p class="text-ravn-textMuted font-medium text-lg mb-8 max-w-xl mx-auto">We're always excited to welcome new friends into the mix. Drop an intro and let's grab coffee!</p>
+            <a href="register.html" class="btn-glow text-base px-8 py-4 shadow-lg">Join the Family 🫂</a>
+        </div>
+    </section>
+
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto relative z-20">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12 border-b border-gray-200 pb-12">
+                <div class="max-w-sm">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="RAVN.png" alt="RAVN Logo" class="h-6 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('footer-fallback').style.display='block';">
+                        <span id="footer-fallback" style="display: none;" class="font-extrabold text-2xl tracking-widest text-ravn-textMain uppercase block">RAVN</span>
+                    </div>
+                    <p class="text-base text-ravn-textMuted font-medium leading-relaxed">
+                        Your vibe. Your tribe. A community built on shared laughs, spontaneous travel, and cinematic adventures. Come say hi! 👋
+                    </p>
+                </div>
+                
+                <div class="flex gap-16">
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">The Club</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="about.html" class="text-ravn-primary font-bold">About Us ✨</a></li>
+                            <li><a href="events.html" class="hover:text-ravn-primary transition-colors">Upcoming Plans 🗺️</a></li>
+                            <li><a href="register.html" class="hover:text-ravn-primary transition-colors">Join the Family 🫂</a></li>
+                            <li><a href="login.html" class="hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">Connect</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">Instagram 📸</a></li>
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">TikTok 🎵</a></li>
+                            <li><a href="contact.html" class="hover:text-ravn-primary transition-colors">Say Hello 👋</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-bold text-gray-400">
+                <p>Copyright © 2026 RAVN Community. Good Vibes Only. ✌️</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-ravn-primary transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-ravn-primary transition-colors">House Rules</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Preloader
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => preloader.style.display = 'none', 500);
+            }, 300);
+        });
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('ph-list');
+            icon.classList.toggle('ph-x');
+        });
+
+        // Intersection Observer for Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

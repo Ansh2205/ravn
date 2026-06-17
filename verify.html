@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Clubhouse Scanner 📸</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
+                    colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
+                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'fade-in': 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards', },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' }, }, fadeIn: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
+        .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; border: none; }
+        .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
+        #reader { border: none !important; border-radius: 24px; overflow: hidden; background: #ffffff; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
+        #reader video { object-fit: cover; border-radius: 24px; }
+        #reader__dashboard_section_csr span { color: #57534E !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 600; }
+        #reader__dashboard_section_swaplink { color: #FF6B6B !important; text-decoration: none; font-weight: 800; }
+        #reader__dashboard_section_csr button { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%) !important; color: #ffffff !important; border: none !important; padding: 12px 24px !important; border-radius: 100px !important; font-weight: 700 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 13px !important; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important; transition: all 0.3s ease; }
+        #reader__dashboard_section_csr button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important; }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-ravn-primary selection:text-white relative">
+
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none bg-ravn-bg">
+        <div class="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <!-- Auth Lock Screen -->
+    <div id="authOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/80 backdrop-blur-md transition-all duration-500">
+        <div class="glass-card p-10 md:p-12 w-full max-w-sm text-center mx-4 bg-white/90 animate-fade-in relative">
+            <div class="w-20 h-20 rounded-full bg-red-50 text-ravn-primary flex items-center justify-center mx-auto mb-6 shadow-sm border border-red-100"><i class="ph-fill ph-camera text-4xl"></i></div>
+            <h2 class="text-3xl font-extrabold tracking-tight mb-2 text-ravn-textMain">Scanner</h2>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8">Who's working the door? 🚪</p>
+            <form id="authForm" class="space-y-4">
+                <input type="password" id="adminKey" required placeholder="Secret Key" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-medium text-sm">
+                <button type="submit" class="btn-glow w-full py-4 text-sm mt-2">Unlock Scanner</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="h-[76px] glass-panel border-b border-gray-200/50 flex items-center justify-between px-6 md:px-8 shrink-0 z-50 shadow-sm relative sticky top-0 bg-white/70 backdrop-blur-xl">
+        <div class="flex items-center gap-3">
+            <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none';">
+            <span class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase hidden sm:block">RAVN</span>
+        </div>
+        <div class="flex items-center gap-2 bg-green-50 px-4 py-1.5 rounded-full border border-green-200 shadow-sm">
+            <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-[10px] font-extrabold text-green-600 uppercase tracking-widest">Scanner Active</span>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center p-6 relative">
+        <div class="w-full max-w-md flex flex-col gap-6 relative z-10 glass-card p-8 bg-white/60" id="scannerContainer">
+            <div class="text-center mb-2">
+                <h1 class="font-extrabold text-3xl md:text-4xl mb-1 tracking-tight text-ravn-textMain">Scan a Pass 🎟️</h1>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Point the camera at their QR code.</p>
+            </div>
+            
+            <div class="flex bg-white p-1.5 rounded-[20px] border border-gray-100 shadow-sm">
+                <button id="btnModeEntry" onclick="setScanMode('ENTRY')" class="flex-1 py-3 rounded-[16px] bg-ravn-primary text-white text-[11px] font-extrabold uppercase tracking-widest transition-colors shadow-sm">Door Entry</button>
+                <button id="btnModeLunch" onclick="setScanMode('LUNCH')" class="flex-1 py-3 rounded-[16px] text-gray-400 bg-transparent text-[11px] font-extrabold uppercase tracking-widest transition-colors hover:bg-gray-50">Lunch / Perks</button>
+            </div>
+
+            <div class="bg-white p-3 rounded-[32px] shadow-sm border border-gray-100">
+                <div id="reader" class="w-full aspect-square bg-gray-50"></div>
+            </div>
+            <p class="text-center text-[10px] uppercase font-extrabold tracking-widest text-ravn-primary animate-pulse" id="scanStatus">Awaiting Signal...</p>
+        </div>
+
+        <div id="resultOverlay" class="fixed inset-0 z-[110] bg-gray-900/40 backdrop-blur-sm hidden flex-col items-center justify-center p-4 transition-opacity">
+            <div class="glass-card p-10 w-full max-w-sm text-center transform scale-95 transition-transform bg-white/95 relative overflow-hidden" id="resultCard">
+                <div id="resultTopStrip" class="absolute top-0 left-0 right-0 h-2 bg-green-400"></div>
+                <div id="resultIconWrapper" class="w-24 h-24 rounded-[32px] flex items-center justify-center mx-auto mb-6 mt-4 shadow-sm"><i id="resultIcon" class="ph-fill text-5xl"></i></div>
+                <span id="passTypeBadge" class="inline-block px-4 py-1.5 rounded-full border text-[10px] font-extrabold uppercase tracking-widest mb-4"></span>
+                <h2 id="resultTitle" class="font-extrabold text-3xl mb-2 tracking-tight text-ravn-textMain">Status</h2>
+                <p id="resultDesc" class="text-sm text-ravn-textMuted font-medium mb-8 leading-relaxed">Details</p>
+
+                <div id="memberIdentityBlock" class="hidden bg-gray-50 p-4 rounded-3xl border border-gray-100 mb-8 items-center gap-4 text-left shadow-inner">
+                    <img id="resProfilePic" src="" class="w-14 h-14 rounded-[20px] object-cover bg-white border border-gray-200 shadow-sm">
+                    <div>
+                        <h4 id="resName" class="font-extrabold text-sm text-ravn-textMain">Name</h4>
+                        <p id="resId" class="text-[10px] text-ravn-primary font-mono tracking-widest mt-1 font-bold bg-white px-2 py-0.5 rounded-md border border-gray-100 w-fit">ID</p>
+                    </div>
+                </div>
+
+                <button onclick="resumeScanning()" class="btn-glow w-full py-4 text-sm gap-2"><span>Scan Next Pass</span> <i class="ph-bold ph-arrow-right text-lg"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let adminAuthToken = ''; let currentScanMode = 'ENTRY';
+
+        document.getElementById('authForm').addEventListener('submit', (e) => {
+            e.preventDefault(); adminAuthToken = document.getElementById('adminKey').value;
+            document.getElementById('authOverlay').classList.add('opacity-0');
+            setTimeout(() => { document.getElementById('authOverlay').classList.add('hidden'); document.getElementById('authOverlay').classList.remove('flex'); }, 300);
+            initScanner();
+        });
+
+        function setScanMode(mode) {
+            currentScanMode = mode;
+            const btnEntry = document.getElementById('btnModeEntry'); const btnLunch = document.getElementById('btnModeLunch');
+            if(mode === 'ENTRY') {
+                btnEntry.className = "flex-1 py-3 rounded-[16px] bg-ravn-primary text-white text-[11px] font-extrabold uppercase tracking-widest transition-colors shadow-sm";
+                btnLunch.className = "flex-1 py-3 rounded-[16px] text-gray-400 bg-transparent text-[11px] font-extrabold uppercase tracking-widest transition-colors hover:bg-gray-50";
+                document.getElementById('scanStatus').className = "text-center text-[10px] uppercase font-extrabold tracking-widest text-ravn-primary animate-pulse";
+            } else {
+                btnLunch.className = "flex-1 py-3 rounded-[16px] bg-orange-500 text-white text-[11px] font-extrabold uppercase tracking-widest transition-colors shadow-sm";
+                btnEntry.className = "flex-1 py-3 rounded-[16px] text-gray-400 bg-transparent text-[11px] font-extrabold uppercase tracking-widest transition-colors hover:bg-gray-50";
+                document.getElementById('scanStatus').className = "text-center text-[10px] uppercase font-extrabold tracking-widest text-orange-500 animate-pulse";
+            }
+        }
+
+        let html5QrcodeScanner;
+        function initScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+            html5QrcodeScanner.render(onScanSuccess, () => {});
+        }
+
+        // SECURITY FIX: Removed "ravn" mock fallback. Scanner MUST talk to live database.
+        async function onScanSuccess(decodedText) {
+            html5QrcodeScanner.pause(true);
+            document.getElementById('scanStatus').textContent = "Checking the list... 🔍";
+            
+            try {
+                const res = await fetch('/api/admin/scan', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminAuthToken}` },
+                    body: JSON.stringify({ qrData: decodedText, scanType: currentScanMode })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) { showResult('success', data.type, data.message, data.member); } 
+                else { throw new Error(data.error || "That didn't work. 🤔"); }
+            } catch (err) {
+                showResult('error', 'Hold up! 😅', err.message);
+            }
+        }
+
+        function showResult(type, title, desc, member = null) {
+            const overlay = document.getElementById('resultOverlay'); const card = document.getElementById('resultCard'); const topStrip = document.getElementById('resultTopStrip'); const iconWrapper = document.getElementById('resultIconWrapper'); const icon = document.getElementById('resultIcon'); const titleEl = document.getElementById('resultTitle'); const descEl = document.getElementById('resultDesc'); const badge = document.getElementById('passTypeBadge'); const idBlock = document.getElementById('memberIdentityBlock');
+
+            titleEl.textContent = title === 'Membership Active' || title === 'Entry Permitted' ? 'Good to go! 🎉' : title; descEl.textContent = desc;
+
+            if (type === 'success') {
+                topStrip.className = "absolute top-0 left-0 right-0 h-2 bg-green-400"; iconWrapper.className = "w-24 h-24 rounded-[32px] flex items-center justify-center mx-auto mb-6 mt-4 bg-green-50 text-green-500 border border-green-100 shadow-sm"; icon.className = "ph-fill ph-check-circle text-5xl";
+                badge.textContent = "Access Granted"; badge.className = "inline-block px-4 py-1.5 rounded-full bg-green-50 text-green-600 text-[10px] font-extrabold uppercase tracking-widest mb-4 border border-green-200";
+
+                if (member) { idBlock.classList.remove('hidden'); idBlock.classList.add('flex'); document.getElementById('resName').textContent = member.name; document.getElementById('resId').textContent = member.memberId || member.email; document.getElementById('resProfilePic').src = member.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(member.name)}&backgroundColor=FF6B6B`;
+                } else { idBlock.classList.add('hidden'); idBlock.classList.remove('flex'); }
+            } else {
+                topStrip.className = "absolute top-0 left-0 right-0 h-2 bg-red-400"; iconWrapper.className = "w-24 h-24 rounded-[32px] flex items-center justify-center mx-auto mb-6 mt-4 bg-red-50 text-red-500 border border-red-100 shadow-sm"; icon.className = "ph-fill ph-warning-circle text-5xl";
+                badge.textContent = "Uh oh!"; badge.className = "inline-block px-4 py-1.5 rounded-full bg-red-50 text-red-500 text-[10px] font-extrabold uppercase tracking-widest mb-4 border border-red-200"; idBlock.classList.add('hidden'); idBlock.classList.remove('flex');
+            }
+
+            overlay.classList.remove('hidden'); overlay.classList.add('flex'); void overlay.offsetWidth; card.classList.remove('scale-95'); card.classList.add('scale-100');
+        }
+
+        function resumeScanning() {
+            const overlay = document.getElementById('resultOverlay'); const card = document.getElementById('resultCard');
+            card.classList.remove('scale-100'); card.classList.add('scale-95');
+            setTimeout(() => { overlay.classList.add('hidden'); overlay.classList.remove('flex'); document.getElementById('scanStatus').textContent = "Awaiting Signal..."; html5QrcodeScanner.resume(); }, 200);
+        }
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

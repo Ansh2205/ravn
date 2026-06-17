@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Upcoming Adventures 🗺️</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Friendly, Round, Modern Font: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        ravn: {
+                            bg: '#FAFAF9', 
+                            surface: '#FFFFFF',
+                            border: '#F3F4F6', 
+                            primary: '#FF6B6B', 
+                            primaryHover: '#FA5252',
+                            accent: '#FCA311', 
+                            textMain: '#1C1917', 
+                            textMuted: '#57534E', 
+                        }
+                    },
+                    animation: {
+                        'float': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 8s ease-in-out 4s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                            '50%': { transform: 'translateY(-20px) scale(1.05)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 32px; 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(255, 107, 107, 0.3);
+            box-shadow: 0 15px 40px -10px rgba(255, 107, 107, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 100px;
+            padding: 16px 36px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.02em;
+            font-size: 14px;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1C1917;
+            font-weight: 700;
+            border: 1px solid rgba(200, 200, 200, 0.4);
+            border-radius: 100px;
+            padding: 16px 36px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .btn-glass:hover {
+            background: #ffffff;
+            border-color: rgba(255, 107, 107, 0.4);
+            color: #FF6B6B;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
+
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
+        </div>
+    </div>
+
+    <!-- Ambient Warm Background Glows -->
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full transition-all flex items-center px-6 md:px-8 shadow-sm" id="navbar">
+        <div class="w-full flex justify-between items-center h-full relative">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('nav-fallback').style.display='block';">
+                <span id="nav-fallback" style="display: none;" class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
+                <a href="events.html" class="text-sm font-bold text-ravn-primary transition-colors">Adventures ✈️</a>
+                <a href="about.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">About Us ✨</a>
+                <a href="contact.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Say Hello 👋</a>
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                <a href="login.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a>
+                <a href="register.html" class="btn-glow py-2.5 px-6 shadow-md">Join the Club 🫂</a>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary transition-colors">
+                <i class="ph-bold ph-list text-3xl"></i>
+            </button>
+
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+                <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
+                <a href="events.html" class="text-base font-bold text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
+                <a href="about.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">About Us <span>✨</span></a>
+                <a href="contact.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Say Hello <span>👋</span></a>
+                <div class="h-px w-full bg-gray-200 my-2"></div>
+                <a href="login.html" class="text-base font-semibold text-ravn-textMain py-2 flex justify-between">Clubhouse Login <span>🛋️</span></a>
+                <a href="register.html" class="text-base font-extrabold text-ravn-primary py-2 flex justify-between">Join the Club <span>🫂</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative pt-[200px] pb-[80px] w-full flex items-center justify-center">
+        <div class="container mx-auto px-6 text-center flex flex-col items-center max-w-4xl relative z-10">
+            <div class="px-5 py-2 rounded-full border border-ravn-primary/20 bg-white shadow-sm text-sm font-bold text-ravn-primary mb-6 flex items-center gap-2">
+                What's the plan? 🤔
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-ravn-textMain leading-[1.1] mb-8">
+                Upcoming <span class="text-transparent bg-clip-text bg-gradient-to-r from-ravn-primary to-ravn-accent">Adventures.</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl font-medium text-ravn-textMuted leading-relaxed mb-12 max-w-2xl mx-auto">
+                From spontaneous road trips to cozy indie movie nights, here's what the group chat is planning next. Find something you like, RSVP, and let's go! 🚐
+            </p>
+        </div>
+    </header>
+
+    <main class="relative z-10 px-6 pb-24 flex-grow">
+        <div class="container mx-auto max-w-6xl">
+            <div id="dynamicEventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Preloader for events -->
+                <div class="col-span-full text-center py-20 flex flex-col items-center justify-center">
+                    <i class="ph-bold ph-spinner-gap animate-spin text-4xl text-ravn-primary mb-4"></i>
+                    <p class="text-ravn-textMuted font-bold text-sm tracking-widest uppercase">Checking the group chat...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto relative z-20">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12 border-b border-gray-200 pb-12">
+                <div class="max-w-sm">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="RAVN.png" alt="RAVN Logo" class="h-6 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('footer-fallback').style.display='block';">
+                        <span id="footer-fallback" style="display: none;" class="font-extrabold text-2xl tracking-widest text-ravn-textMain uppercase block">RAVN</span>
+                    </div>
+                    <p class="text-base text-ravn-textMuted font-medium leading-relaxed">
+                        Your vibe. Your tribe. A community built on shared laughs, spontaneous travel, and cinematic adventures. Come say hi! 👋
+                    </p>
+                </div>
+                
+                <div class="flex gap-16">
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">The Club</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="about.html" class="hover:text-ravn-primary transition-colors">About Us ✨</a></li>
+                            <li><a href="events.html" class="text-ravn-primary font-bold">Upcoming Plans 🗺️</a></li>
+                            <li><a href="register.html" class="hover:text-ravn-primary transition-colors">Join the Family 🫂</a></li>
+                            <li><a href="login.html" class="hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">Connect</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">Instagram 📸</a></li>
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">TikTok 🎵</a></li>
+                            <li><a href="contact.html" class="hover:text-ravn-primary transition-colors">Say Hello 👋</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-bold text-gray-400">
+                <p>Copyright © 2026 RAVN Community. Good Vibes Only. ✌️</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-ravn-primary transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-ravn-primary transition-colors">House Rules</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- INTERSECTION OBSERVER ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { 
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active'); 
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // --- FETCH & RENDER FRIENDLY EVENTS ---
+        async function fetchPublicEvents() {
+            const container = document.getElementById('dynamicEventsContainer');
+            
+            // Hardcoded beautifully styled fallback events just in case the API isn't running yet!
+            const fallbackEventsHtml = `
+                <!-- Mock Event 1 -->
+                <div class="reveal glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white">
+                    <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0">
+                        <img src="https://images.unsplash.com/photo-1523580494112-071dcae2432f?auto=format&fit=crop&q=80&w=800" alt="Camping Trip" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    </div>
+                    <div class="flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full w-fit">Road Trip 🚐</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">The Mountain Cabin</h3>
+                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">Packing up the cars and heading for the hills. Bonfires, acoustic guitars, and disconnecting from Wi-Fi.</p>
+                        <a href="eventregister.html?id=demo" class="btn-glow w-full text-sm py-3">Grab a Seat 🫂</a>
+                    </div>
+                </div>
+                <!-- Mock Event 2 -->
+                <div class="reveal delay-100 glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white">
+                    <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0">
+                        <img src="https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&q=80&w=800" alt="Comedy Night" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    </div>
+                    <div class="flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-pink-100 text-ravn-primary px-3 py-1.5 rounded-full w-fit">Local Hangout 🎤</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">Comedy Under the Stars</h3>
+                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">We've booked out the local open-mic patio. Grab some food from the trucks outside and get ready to laugh.</p>
+                        <a href="eventregister.html?id=demo" class="btn-glow w-full text-sm py-3">RSVP & Grab Pizza 🍕</a>
+                    </div>
+                </div>
+                <!-- Mock Event 3 -->
+                <div class="reveal delay-200 glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white">
+                    <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0">
+                        <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=800" alt="Movie Night" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    </div>
+                    <div class="flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-blue-100 text-blue-600 px-3 py-1.5 rounded-full w-fit">Chill Night In 🍿</span>
+                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">Indie Cinema Marathon</h3>
+                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">Renting out the private screening room downtown. Popcorn and sodas are on the house!</p>
+                        <a href="eventregister.html?id=demo" class="btn-glow w-full text-sm py-3">Save a spot on the couch 🛋️</a>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const res = await fetch('/api/public/events');
+                if(!res.ok) throw new Error();
+                const events = await res.json();
+                
+                if(events.length === 0) {
+                    // Show beautiful fallback if API works but no events are scheduled
+                    container.innerHTML = fallbackEventsHtml;
+                    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+                    return;
+                }
+
+                // If we have real events from the DB, style them beautifully
+                container.innerHTML = events.map((e, index) => {
+                    const delayClass = index % 3 === 0 ? '' : (index % 3 === 1 ? 'delay-100' : 'delay-200');
+                    
+                    let actionBtn = '';
+                    if (e.isMembersOnly) {
+                        actionBtn = `<a href="login.html" class="btn-glass w-full py-3 text-sm flex items-center justify-center gap-2">Clubhouse Login Required 🔒</a>`;
+                    } else if (!e.rsvpOpen) {
+                        actionBtn = `<button disabled class="w-full py-3 bg-gray-100 text-gray-400 rounded-full font-bold text-sm cursor-not-allowed">Fully Booked 😅</button>`;
+                    } else {
+                        actionBtn = `<a href="eventregister.html?id=${e._id}" class="btn-glow w-full text-sm py-3 flex items-center justify-center gap-2">Count me in! 🙋‍♂️</a>`;
+                    }
+
+                    // Assign a friendly random placeholder image based on the event title length to make it look nice
+                    const imgTopics = ['party', 'friends', 'concert', 'camping', 'coffee'];
+                    const randomImage = `https://images.unsplash.com/photo-${e.title.length % 2 === 0 ? '1529333166437-7750a6dd5a70' : '1517604931442-7e0c8ed2963c'}?auto=format&fit=crop&q=80&w=800`;
+
+                    return `
+                    <div class="reveal ${delayClass} glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white transition-colors">
+                        <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0 bg-gray-100">
+                            <img src="${randomImage}" alt="Event image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        </div>
+                        
+                        <div class="flex flex-col flex-grow">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="text-[11px] font-extrabold uppercase tracking-widest ${e.isMembersOnly ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'} px-3 py-1.5 rounded-full w-fit">
+                                    ${e.isMembersOnly ? 'Members Only 🤫' : 'Open Invites 👋'}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">${e.title}</h3>
+                            <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow line-clamp-3">${e.description || 'Join us for another amazing adventure with the RAVN crew.'}</p>
+                            
+                            <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-100 mb-6">
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
+                                    <i class="ph-fill ph-calendar-blank text-ravn-primary text-base"></i> ${e.date || 'TBA'}
+                                </div>
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
+                                    <i class="ph-fill ph-map-pin text-blue-500 text-base"></i> ${e.venue || 'TBA'}
+                                </div>
+                            </div>
+
+                            ${actionBtn}
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+                // Trigger Reveal Animations
+                document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+            } catch(e) {
+                // If the backend fails, fall back to the beautiful static mockups!
+                container.innerHTML = fallbackEventsHtml;
+                document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => { preloader.style.display = 'none'; }, 300);
+            }, 300);
+            
+            fetchPublicEvents();
+        });
+
+        // --- MOBILE MENU ---
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('ph-list');
+            icon.classList.toggle('ph-x');
+        });
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

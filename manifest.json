@@ -1,0 +1,21 @@
+{
+    "name": "RAVN Community Hub",
+    "short_name": "RAVN",
+    "description": "Your second home. Book events, chat, and access your digital pass.",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#FAFAF9",
+    "theme_color": "#FF6B6B",
+    "icons": [
+        {
+            "src": "/RAVN.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/RAVN.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

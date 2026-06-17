@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Clubhouse Admin 🛋️</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
+                    colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
+                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both', 'fade-in': 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards', },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' }, }, fadeIn: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } }, shake: { '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' }, '20%, 80%': { transform: 'translate3d(2px, 0, 0)' }, '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' }, '40%, 60%': { transform: 'translate3d(4px, 0, 0)' } } }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow: hidden; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); }
+        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass-card:hover { box-shadow: 0 15px 35px -10px rgba(255, 107, 107, 0.1); }
+        .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
+        .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 12px 24px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; }
+        .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
+        .btn-glass { background: rgba(255, 255, 255, 0.9); color: #1C1917; font-weight: 700; border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 100px; padding: 12px 24px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; }
+        .btn-glass:hover { background: #ffffff; border-color: rgba(255, 107, 107, 0.4); color: #FF6B6B; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); }
+        .sidebar-item { transition: all 0.3s ease; border-radius: 16px; color: #57534E; font-weight: 600; }
+        .sidebar-item.active { background-color: rgba(255, 107, 107, 0.1); color: #FF6B6B; font-weight: 800; }
+        .sidebar-item:not(.active):hover { background-color: #F9FAFB; color: #1C1917; }
+        .status-badge { padding: 4px 12px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; border: 1px solid transparent; }
+        .status-paid { background-color: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
+        .status-pending { background-color: #FFF7ED; color: #C2410C; border-color: #FFEDD5; }
+        .status-free { background-color: #F0F9FF; color: #0369A1; border-color: #E0F2FE; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+        .toggle-checkbox:checked { right: 0; border-color: #FF6B6B; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #FF6B6B; }
+        .toggle-checkbox { right: 4px; z-index: 1; border-color: #D1D5DB; transition: all 0.3s; }
+        .toggle-label { background-color: #E5E7EB; transition: all 0.3s; }
+        .tab-content { display: none; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .tab-content.active { display: block; }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="h-screen flex flex-col antialiased selection:bg-ravn-primary selection:text-white relative">
+
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none bg-ravn-bg">
+        <div class="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
+        </div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/80 backdrop-blur-md transition-opacity duration-300 pt-16">
+        <div class="glass-card p-10 md:p-12 w-full max-w-md text-center mx-6 relative overflow-hidden bg-white/90">
+            <div class="w-20 h-20 rounded-full bg-red-50 text-ravn-primary flex items-center justify-center mx-auto mb-6 shadow-sm border border-red-100"><i class="ph-fill ph-lock-key text-4xl"></i></div>
+            <h2 class="font-extrabold text-3xl mb-2 tracking-tight text-ravn-textMain">Clubhouse Admin</h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-ravn-textMuted mb-8">Enter your crew passkey</p>
+            <form id="loginForm" class="space-y-4">
+                <input type="email" id="adminEmail" required placeholder="name@ravn.io" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-medium text-sm">
+                <input type="password" id="adminPassword" required placeholder="Secret Key" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-medium text-sm">
+                <p id="loginError" class="text-red-500 text-xs hidden font-bold">Oops, that wasn't right! 😅</p>
+                <button type="submit" id="loginSubmitBtn" class="btn-glow w-full py-4 text-sm mt-2">Unlock the Door 🚪</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="h-[76px] glass-panel border-b border-gray-200/50 flex items-center justify-between px-6 md:px-8 shrink-0 z-50 shadow-sm relative">
+        <div class="flex items-center gap-3">
+            <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none';">
+            <span class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase hidden sm:block">Admin</span>
+            <span id="roleBadge" class="ml-2 px-3 py-1 bg-red-50 text-ravn-primary border border-red-100 rounded-full text-[10px] font-extrabold uppercase tracking-widest">Crew</span>
+        </div>
+        <div class="flex items-center gap-4 md:gap-6">
+            <a href="verify.html" target="_blank" class="btn-glow !py-2 !px-4 text-[11px] gap-2 hidden md:flex">
+                <span>Open Scanner</span> <i class="ph-bold ph-qr-code text-lg"></i>
+            </a>
+            <a href="verify.html" target="_blank" class="md:hidden w-10 h-10 bg-red-50 text-ravn-primary border border-red-100 rounded-full flex items-center justify-center">
+                <i class="ph-bold ph-qr-code text-lg"></i>
+            </a>
+            <button onclick="fetchData()" class="text-[11px] font-bold text-ravn-textMuted hover:text-ravn-primary uppercase tracking-widest flex items-center gap-1.5 transition-colors">
+                <i class="ph-bold ph-arrows-clockwise text-lg"></i> <span class="hidden sm:inline">Sync</span>
+            </button>
+            <div class="h-5 w-px bg-gray-300 mx-1"></div>
+            <button onclick="location.reload()" class="text-[11px] font-bold text-red-500 uppercase tracking-widest hover:text-red-700">Leave 🚪</button>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex overflow-hidden hidden" id="adminPortal">
+        <!-- Sidebar -->
+        <aside class="w-64 glass-panel border-r border-gray-200/50 p-6 flex flex-col gap-6 shrink-0 overflow-y-auto z-40">
+            <div class="space-y-1">
+                <p class="px-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-3">Club Management</p>
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-chart-bar text-xl"></i> Dashboard
+                </button>
+                <button onclick="switchTab('members')" id="nav-members" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-users text-xl"></i> Members
+                </button>
+                <button onclick="switchTab('events')" id="nav-events" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-map-trifold text-xl"></i> Adventures
+                </button>
+                <button onclick="switchTab('broadcasts')" id="nav-broadcasts" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-megaphone text-xl"></i> Announcements
+                </button>
+                <button onclick="switchTab('inbox')" id="nav-inbox" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-envelope-open text-xl"></i> Inbox
+                </button>
+            </div>
+
+            <div class="space-y-1 border-t border-gray-200 pt-6">
+                <p class="px-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-3">Settings</p>
+                <button onclick="switchTab('settings')" id="nav-settings" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-gear-six text-xl"></i> Club Rules
+                </button>
+                <button onclick="switchTab('admins')" id="nav-admins" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm hidden">
+                    <i class="ph-fill ph-shield-check text-xl"></i> The Crew
+                </button>
+            </div>
+
+            <div class="mt-auto p-4 bg-green-50 rounded-[20px] border border-green-100 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 border border-green-200">
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                </div>
+                <div>
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-500">System Status</p>
+                    <p class="text-xs font-extrabold text-green-600">Online & Syncing</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Dynamic Content -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-10 relative z-10">
+            <div id="connectionError" class="hidden mb-8 p-5 bg-red-50 border border-red-100 rounded-[24px] flex items-center gap-3 text-red-600 shadow-sm">
+                <i class="ph-fill ph-warning-circle text-3xl shrink-0"></i>
+                <p class="text-sm font-bold">Failed to reach the database. Check your connection. 😅</p>
+            </div>
+
+            <!-- 1. Dashboard Tab -->
+            <div id="tab-dashboard-content" class="tab-content active space-y-8 max-w-6xl">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">Club Overview 📊</h1>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">How the family is growing.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card p-8 flex flex-col justify-between bg-white/60">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mb-4 border border-blue-100"><i class="ph-fill ph-users-three text-2xl"></i></div>
+                        <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Active Members</p>
+                        <h2 class="text-4xl font-black text-ravn-textMain" id="statMembers">0</h2>
+                    </div>
+                    <div class="glass-card p-8 flex flex-col justify-between bg-white/60">
+                        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center mb-4 border border-orange-100"><i class="ph-fill ph-hourglass text-2xl"></i></div>
+                        <p class="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Pending Approvals</p>
+                        <h2 class="text-4xl font-black text-orange-500" id="statPending">0</h2>
+                    </div>
+                    <div class="glass-card p-8 flex flex-col justify-between bg-green-50/50 border border-green-100">
+                        <div class="w-12 h-12 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center mb-4 border border-green-200"><i class="ph-fill ph-piggy-bank text-2xl"></i></div>
+                        <p class="text-[11px] font-extrabold text-green-600 uppercase tracking-widest mb-1">The Piggybank</p>
+                        <h2 class="text-4xl font-black text-ravn-textMain">₹<span id="statRevenue">0</span></h2>
+                    </div>
+                    <div class="glass-card p-8 flex flex-col justify-between bg-red-50/50 border border-red-100">
+                        <div class="w-12 h-12 rounded-2xl bg-red-100 text-ravn-primary flex items-center justify-center mb-4 border border-red-200"><i class="ph-fill ph-ticket text-2xl"></i></div>
+                        <p class="text-[11px] font-extrabold text-ravn-primary uppercase tracking-widest mb-1">Total RSVPs</p>
+                        <h2 class="text-4xl font-black text-ravn-textMain" id="statRSVPs">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Members Tab -->
+            <div id="tab-members-content" class="tab-content hidden space-y-8 max-w-6xl">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">The Family 🫂</h1>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Approve access and manage the roster.</p>
+                </div>
+                
+                <div class="glass-card overflow-hidden bg-white/60">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-50/80 text-[10px] font-extrabold uppercase tracking-widest text-gray-500 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-8 py-5">Friend</th>
+                                    <th class="px-8 py-5">Status</th>
+                                    <th class="px-8 py-5">Vibe Level</th>
+                                    <th class="px-8 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="memberList" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Initiatives Tab -->
+            <div id="tab-events-content" class="tab-content hidden space-y-8 max-w-7xl">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">Adventure Planner 🗺️</h1>
+                        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Plan trips, movie nights, and see who's coming.</p>
+                    </div>
+                    <button id="createEventBtn" onclick="toggleModal('eventModal', true)" class="btn-glow px-6 py-3.5 text-xs hidden gap-2">
+                        <span>Plan an Adventure</span> <i class="ph-bold ph-plus-circle text-lg"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="eventGrid"></div>
+            </div>
+
+            <!-- 4. Broadcasts Tab -->
+            <div id="tab-broadcasts-content" class="tab-content hidden space-y-8 max-w-5xl">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">Group Chat Blasts 📣</h1>
+                        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Send updates to everyone's portal.</p>
+                    </div>
+                    <button onclick="openNewBroadcast()" class="btn-glow px-6 py-3.5 text-xs gap-2">
+                        <span>Send Message</span> <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
+                    </button>
+                </div>
+                <div class="space-y-6" id="broadcastList"></div>
+            </div>
+
+            <!-- 5. Inbox Tab -->
+            <div id="tab-inbox-content" class="tab-content hidden space-y-8 max-w-4xl">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">Mailbox 📬</h1>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Messages from the public website.</p>
+                </div>
+                <div class="space-y-4" id="inboxList"></div>
+            </div>
+
+            <!-- 6. Settings Tab -->
+            <div id="tab-settings-content" class="tab-content hidden space-y-8 max-w-5xl pb-10">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">Club Rules & Settings ⚙️</h1>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Tweak how the club runs.</p>
+                </div>
+                
+                <form id="settingsForm" class="space-y-8">
+                    <div class="glass-card p-8 md:p-10 bg-white/60">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="w-14 h-14 rounded-[20px] bg-green-50 text-green-500 flex items-center justify-center border border-green-100">
+                                <i class="ph-fill ph-wallet text-3xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-xl text-ravn-textMain tracking-tight">The Piggybank Settings</h3>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-1">Manage sign-ups and fees</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <label class="flex items-center justify-between p-6 bg-white rounded-[24px] border border-gray-100 cursor-pointer hover:border-ravn-primary transition-colors shadow-sm">
+                                <div>
+                                    <span class="text-sm font-extrabold text-ravn-textMain block mb-1">Open Registrations 📝</span>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Allow new members</span>
+                                </div>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="setRegOpen" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setRegOpen" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label></div>
+                            </label>
+                            <label class="flex items-center justify-between p-6 bg-white rounded-[24px] border border-gray-100 cursor-pointer hover:border-ravn-primary transition-colors shadow-sm">
+                                <div>
+                                    <span class="text-sm font-extrabold text-ravn-textMain block mb-1">Free Promo Mode 🎉</span>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Waive entry fee</span>
+                                </div>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="setFreePromo" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="setFreePromo" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label></div>
+                            </label>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Lifetime Entry Fee (₹) 🍕</label>
+                                <input type="number" id="setMemFee" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Bank UPI ID 🏦</label>
+                                <input type="text" id="setUpiId" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button type="submit" class="btn-glow px-10 py-4 text-sm shadow-md">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 7. Admins Tab -->
+            <div id="tab-admins-content" class="tab-content hidden space-y-8 max-w-5xl">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-1">The Crew 🛡️</h1>
+                        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Manage who has the keys to the clubhouse.</p>
+                    </div>
+                    <button onclick="toggleModal('adminCreateModal', true)" class="btn-glow px-6 py-3.5 text-xs gap-2">
+                        <span>Add Crew Member</span> <i class="ph-bold ph-user-plus text-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="glass-card overflow-hidden bg-white/60">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-50/80 text-[10px] font-extrabold uppercase tracking-widest text-gray-500 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-8 py-5">Email</th>
+                                    <th class="px-8 py-5">Role</th>
+                                    <th class="px-8 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersList" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Admin Creation Modal -->
+    <div id="adminCreateModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card p-10 max-w-sm w-full relative transform scale-95 transition-transform bg-white/95" id="adminCreateModalContent">
+            <button onclick="toggleModal('adminCreateModal', false)" class="absolute top-6 right-6 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            <div class="w-16 h-16 rounded-[20px] bg-red-50 text-ravn-primary flex items-center justify-center mb-6 shadow-sm border border-red-100"><i class="ph-fill ph-shield-star text-3xl"></i></div>
+            <h2 class="text-2xl font-extrabold tracking-tight mb-6 text-ravn-textMain">New Crew Member</h2>
+            <form id="adminCreateForm" class="space-y-5">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Email 📧</label>
+                    <input type="email" id="newAdminEmail" required placeholder="friend@ravn.io" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Temporary Password 🔑</label>
+                    <input type="password" id="newAdminPassword" required placeholder="••••••••" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Role 🎭</label>
+                    <select id="newAdminRole" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium appearance-none cursor-pointer shadow-sm">
+                        <option value="Media">Hype Team (Events & Posts)</option>
+                        <option value="Finance">Banker (Approvals & Fees)</option>
+                        <option value="Core">Core (Super Admin)</option>
+                    </select>
+                </div>
+                <div class="pt-4"><button type="submit" class="btn-glow w-full py-4 text-sm">Add to Crew</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Broadcast Modal -->
+    <div id="broadcastModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card p-10 max-w-lg w-full relative overflow-y-auto max-h-[90vh] transform scale-95 transition-transform bg-white/95" id="broadcastModalContent">
+            <button onclick="toggleModal('broadcastModal', false)" class="absolute top-6 right-6 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            <div class="w-16 h-16 rounded-[20px] bg-blue-50 text-blue-500 flex items-center justify-center mb-6 shadow-sm border border-blue-100"><i class="ph-fill ph-megaphone text-3xl"></i></div>
+            <h2 class="text-2xl font-extrabold tracking-tight mb-6 text-ravn-textMain" id="broadcastModalTitle">Send a Message</h2>
+            <form id="broadcastForm" class="space-y-5">
+                <input type="hidden" id="editBroadcastId" value="">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Headline 📌</label>
+                    <input type="text" id="notifTitle" required placeholder="e.g. Movie night tomorrow!" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">The Message 💬</label>
+                    <textarea id="notifMsg" required rows="4" placeholder="What's the plan?" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium resize-none shadow-sm"></textarea>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Add an Image (URL) 📸</label>
+                    <input type="url" id="notifImage" placeholder="https://..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm">
+                </div>
+                <label class="flex items-center gap-4 cursor-pointer p-5 bg-white border border-gray-100 rounded-[20px] mt-4 hover:border-ravn-primary transition-colors shadow-sm" id="emailBlastContainer">
+                    <input type="checkbox" id="broadcastEmailBlast" class="w-5 h-5 rounded text-ravn-primary accent-ravn-primary cursor-pointer">
+                    <span class="text-sm font-extrabold text-ravn-textMain">Also send as an Email Blast 📧</span>
+                </label>
+                <div class="pt-4">
+                    <button type="submit" id="broadcastSubmitBtn" class="btn-glow w-full py-4 text-sm gap-2">
+                        <span>Send to Group Chat</span> <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Creation Modal -->
+    <div id="eventModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card p-10 max-w-xl w-full relative overflow-y-auto max-h-[90vh] transform scale-95 transition-transform bg-white/95" id="eventModalContent">
+            <button onclick="toggleModal('eventModal', false)" class="absolute top-6 right-6 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            <div class="w-16 h-16 rounded-[20px] bg-orange-50 text-orange-500 flex items-center justify-center mb-6 shadow-sm border border-orange-100"><i class="ph-fill ph-map-trifold text-3xl"></i></div>
+            <h2 class="text-2xl font-extrabold tracking-tight mb-6 text-ravn-textMain">Plan an Adventure</h2>
+            <form id="eventForm" class="space-y-6">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">What are we calling it? 🏷️</label>
+                    <input type="text" id="evTitle" required placeholder="e.g. Weekend Camping Trip" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">The Details ✍️</label>
+                    <textarea id="evDesc" rows="3" required placeholder="Tell everyone what we're doing..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium resize-none shadow-sm"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">When is it? 🗓️</label>
+                        <input type="date" id="evStartDate" required class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium cursor-text shadow-sm">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">How many can come? 🪑</label>
+                        <input type="number" id="evCapacity" required value="50" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-extrabold text-ravn-primary shadow-sm">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-ravn-textMain ml-1">Where are we meeting? 📍</label>
+                    <input type="text" id="evVenue" required placeholder="e.g. Central Park" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4 border-t border-gray-200 pt-6">
+                    <label class="flex items-center justify-between p-5 bg-white rounded-[20px] border border-gray-100 cursor-pointer hover:border-ravn-primary transition-colors shadow-sm">
+                        <div>
+                            <span class="text-sm font-extrabold text-ravn-textMain block mb-0.5">Members Only 🤫</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Require Login</span>
+                        </div>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="evMembersOnly" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="evMembersOnly" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label></div>
+                    </label>
+                    <label class="flex items-center justify-between p-5 bg-white rounded-[20px] border border-gray-100 cursor-pointer hover:border-gray-800 transition-colors shadow-sm">
+                        <div>
+                            <span class="text-sm font-extrabold text-ravn-textMain block mb-0.5">Hidden Link 🕵️</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Hide from Feed</span>
+                        </div>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="evVisibility" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="evVisibility" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label></div>
+                    </label>
+                    <label class="flex items-center justify-between p-5 bg-white rounded-[20px] border border-gray-100 cursor-pointer hover:border-ravn-primary transition-colors shadow-sm lg:col-span-1 sm:col-span-2">
+                        <div>
+                            <span class="text-sm font-extrabold text-ravn-textMain block mb-0.5">Costs Money 💸</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Needs payment</span>
+                        </div>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="evIsPayable" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="document.getElementById('tiersBox').classList.toggle('hidden', !this.checked)"/>
+                            <label for="evIsPayable" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"></label>
+                        </div>
+                    </label>
+                </div>
+                <div id="tiersBox" class="hidden border border-red-100 p-6 rounded-[24px] bg-red-50/50 shadow-inner">
+                    <p class="text-[10px] font-extrabold uppercase tracking-widest text-ravn-primary mb-4">Ticket Options 🎟️</p>
+                    <div id="tiersList" class="space-y-4 mb-4">
+                        <div class="flex gap-4 tier-row">
+                            <input type="text" placeholder="Pass Name (e.g. VIP)" class="tier-name friendly-input flex-1 px-5 py-3.5 rounded-[16px] text-sm font-bold shadow-sm bg-white">
+                            <input type="number" placeholder="Price (₹)" class="tier-price friendly-input w-32 px-5 py-3.5 rounded-[16px] text-sm font-bold shadow-sm bg-white">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addTierRow()" class="text-[11px] font-extrabold uppercase tracking-widest text-ravn-primary hover:text-ravn-primaryHover flex items-center gap-1"><i class="ph-bold ph-plus"></i> Add another option</button>
+                </div>
+                <div class="pt-4 flex"><button type="submit" class="btn-glow w-full py-4 text-sm gap-2 text-center"><span>Put it on the Calendar</span> <i class="ph-bold ph-calendar-check text-lg"></i></button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Attendees List Modal -->
+    <div id="attendeesModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card p-0 max-w-5xl w-full relative max-h-[85vh] flex flex-col transform scale-95 transition-transform overflow-hidden bg-white/95" id="attendeesModalContent">
+            <div class="p-8 border-b border-gray-200/50 flex flex-col md:flex-row justify-between items-start md:items-center bg-white/60 gap-4">
+                <div>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-ravn-textMain mb-1">The Guest List 📋</h2>
+                    <p id="rosterTitle" class="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading...</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- NEW 0-COMMISSION UTR SCANNER -->
+                    <input type="file" id="bankCsvUpload" accept=".csv,.txt,.xls,.xlsx" class="hidden" onchange="processBankStatement(event)">
+                    <button onclick="document.getElementById('bankCsvUpload').click()" class="btn-glow !py-2.5 !px-5 text-[11px] gap-2 !bg-gradient-to-r !from-green-400 !to-emerald-500 shadow-green-500/30">
+                        <i class="ph-bold ph-bank text-lg"></i> Bank Auto-Verify
+                    </button>
+                    
+                    <button onclick="document.getElementById('vaultUploadBox').classList.toggle('hidden')" class="btn-glass !py-2.5 !px-5 text-[11px] gap-2">
+                        <i class="ph-bold ph-backpack text-lg"></i> Add to Backpack
+                    </button>
+                    <button id="exportCsvBtn" class="btn-glass !py-2.5 !px-5 text-[11px] gap-2">
+                        <i class="ph-bold ph-download-simple text-lg"></i> Download CSV
+                    </button>
+                    <button onclick="toggleModal('attendeesModal', false)" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors ml-2"><i class="ph-bold ph-x text-lg"></i></button>
+                </div>
+            </div>
+            <div id="vaultUploadBox" class="hidden p-8 bg-blue-50/50 border-b border-blue-100 flex-col md:flex-row gap-6 shadow-inner">
+                <div class="flex-1 flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-blue-600 ml-1">Memory / Resource Title 📸</label>
+                    <input type="text" id="vTitle" placeholder="e.g. Group Photo Link" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium bg-white shadow-sm">
+                </div>
+                <div class="flex-1 flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-blue-600 ml-1">Link URL 🔗</label>
+                    <input type="url" id="vUrl" placeholder="https://drive.google.com/..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium bg-white shadow-sm">
+                </div>
+                <div class="flex items-end"><button onclick="addResource()" class="btn-glow w-full md:w-auto py-4 text-sm bg-blue-500 hover:bg-blue-600 shadow-blue-500/30">Add to Backpack</button></div>
+            </div>
+            <div class="overflow-y-auto flex-grow bg-white/60 p-8">
+                <h3 class="text-[10px] font-extrabold text-green-500 uppercase tracking-widest mb-4 border-b border-green-100 pb-2 flex items-center gap-2"><i class="ph-fill ph-check-circle text-base"></i> Going</h3>
+                <div class="overflow-x-auto mb-12 bg-white rounded-[24px] border border-gray-100 shadow-sm">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/80 text-[10px] font-extrabold uppercase tracking-widest text-gray-400 border-b border-gray-100">
+                            <tr><th class="px-6 py-5">Friend</th><th class="px-6 py-5">Ticket</th><th class="px-6 py-5">Payment Status</th><th class="px-6 py-5 text-right">Actions</th></tr>
+                        </thead>
+                        <tbody id="attendeesList" class="divide-y divide-gray-50"></tbody>
+                    </table>
+                </div>
+                <h3 class="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest mb-4 border-b border-orange-100 pb-2 flex items-center gap-2"><i class="ph-fill ph-clock text-base"></i> Waitlist</h3>
+                <div class="overflow-x-auto bg-white rounded-[24px] border border-gray-100 shadow-sm">
+                    <table class="w-full text-left">
+                        <tbody id="waitlistList" class="divide-y divide-gray-50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        let adminKey = ''; let currentRole = '';
+        let stats = {}; let members = []; let events = []; let messages = []; let notifications = []; let adminUsers = [];
+        window.currentEventAttendees = []; let currentEventId = '';
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-white border-gray-100 text-ravn-textMain shadow-lg';
+            const iconClass = type === 'error' ? 'ph-warning-circle text-red-500' : 'ph-check-circle text-green-500';
+            toast.className = `p-4 rounded-2xl backdrop-blur-md text-sm font-bold flex items-center gap-3 transition-all duration-500 transform translate-y-10 opacity-0 border ${bgClass}`;
+            toast.innerHTML = `<i class="ph-fill ${iconClass} text-2xl"></i> <span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }); });
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 4000); }, 4000);
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const err = document.getElementById('loginError');
+            const btn = document.getElementById('loginSubmitBtn');
+            const origText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>';
+
+            try {
+                const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+                if (!res.ok) throw new Error("Auth Failed");
+                const data = await res.json();
+                
+                adminKey = data.token; currentRole = data.role;
+                updateRoleBadge(); applyRBAC(); await fetchData();
+                hideLoginOverlay();
+            } catch (error) { err.classList.remove('hidden'); }
+            btn.innerHTML = origText;
+        });
+
+        function updateRoleBadge() {
+            const badge = document.getElementById('roleBadge');
+            badge.textContent = currentRole;
+            badge.className = `ml-2 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${currentRole === 'Core' ? 'bg-purple-50 text-purple-600 border-purple-100' : currentRole === 'Finance' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`;
+        }
+
+        function hideLoginOverlay() {
+            const overlay = document.getElementById('loginOverlay');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => { overlay.classList.add('hidden'); }, 300);
+            const portal = document.getElementById('adminPortal');
+            portal.classList.remove('hidden'); portal.classList.add('flex');
+        }
+
+        function applyRBAC() {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.add('hidden'));
+            if (currentRole === 'Core') { document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('hidden')); document.getElementById('createEventBtn').classList.remove('hidden'); switchTab('dashboard'); } 
+            else if (currentRole === 'Media') { document.getElementById('nav-events').classList.remove('hidden'); document.getElementById('nav-broadcasts').classList.remove('hidden'); document.getElementById('createEventBtn').classList.remove('hidden'); switchTab('events'); } 
+            else if (currentRole === 'Finance') { document.getElementById('nav-members').classList.remove('hidden'); document.getElementById('nav-events').classList.remove('hidden'); document.getElementById('createEventBtn').classList.add('hidden'); switchTab('members'); }
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/admin/data', { headers: { 'Authorization': `Bearer ${adminKey}` } });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                members = data.members || []; events = data.events || []; messages = data.messages || []; notifications = data.notifications || []; stats = data.statistics || {};
+                
+                try { const notifRes = await fetch('/api/public/notifications'); if(notifRes.ok) notifications = await notifRes.json(); } catch(e) {}
+                if (currentRole === 'Core') { try { const adminRes = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${adminKey}` } }); if(adminRes.ok) adminUsers = await adminRes.json(); } catch(e) {} }
+                
+                renderDashboard();
+                if (currentRole === 'Core') renderSettings(data.settings);
+                if (currentRole === 'Core' || currentRole === 'Finance') renderMembers();
+                renderEvents();
+                if (currentRole === 'Core' || currentRole === 'Media') renderBroadcasts();
+                if (currentRole === 'Core') { renderInbox(); renderAdmins(); }
+            } catch (error) { document.getElementById('connectionError').classList.remove('hidden'); document.getElementById('connectionError').classList.add('flex'); }
+        }
+
+        function renderDashboard() {
+            document.getElementById('statMembers').textContent = stats.totalMembers || 0; document.getElementById('statPending').textContent = stats.pendingMembers || 0;
+            document.getElementById('statRevenue').textContent = stats.revenue || 0; document.getElementById('statRSVPs').textContent = stats.totalRSVPs || 0;
+        }
+
+        function renderSettings(s) {
+            if(!s) return;
+            const safeSet = (id, val, isCheck) => { const el = document.getElementById(id); if(el) { if(isCheck) el.checked = val; else el.value = val; } };
+            safeSet('setRegOpen', s.registrationOpen !== false, true); safeSet('setFreePromo', s.freePromoActive === true, true);
+            safeSet('setMemFee', s.membershipFee || 500, false); safeSet('setUpiId', s.upiId || 'ravn@bank', false);
+        }
+
+        function renderMembers() {
+            const list = document.getElementById('memberList');
+            list.innerHTML = members.map(m => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-4">
+                            <img src="${m.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(m.name)}&backgroundColor=FF6B6B`}" class="w-12 h-12 rounded-[18px] border border-gray-200 object-cover bg-white shadow-sm">
+                            <div><h4 class="text-sm font-extrabold text-ravn-textMain">${m.name}</h4><p class="text-[10px] font-mono font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md w-fit mt-1">${m.memberId}</p></div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5"><span class="status-badge status-${(m.paymentStatus || 'Pending').toLowerCase()}">${m.paymentStatus || 'Pending'}</span></td>
+                    <td class="px-8 py-5"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center font-black text-xs border border-orange-100">${m.clearanceLevel || 1}</div><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${m.attendanceCount || 0} Trips</p></div></td>
+                    <td class="px-8 py-5 text-right space-x-2">
+                        ${(currentRole === 'Core' || currentRole === 'Finance') && m.paymentStatus === 'Pending' ? `<button onclick="verifyMember('${m.memberId}')" class="btn-glass !py-2 !px-4 text-[11px] !border-green-200 !text-green-600 hover:!bg-green-50">Approve</button>` : ''}
+                        ${currentRole === 'Core' ? `<button onclick="deleteMember('${m.memberId}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 inline-flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"><i class="ph-bold ph-trash"></i></button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function copyEventLink(id) {
+            const link = `${window.location.origin}/eventregister.html?id=${id}`;
+            navigator.clipboard.writeText(link).then(() => showToast("Secret link copied! 🤫"));
+        }
+
+        function renderEvents() {
+            const grid = document.getElementById('eventGrid');
+            grid.innerHTML = events.map(e => {
+                const randomImage = `https://images.unsplash.com/photo-${e.title.length % 2 === 0 ? '1529333166437-7750a6dd5a70' : '1517604931442-7e0c8ed2963c'}?auto=format&fit=crop&q=80&w=800`;
+                const isUnlisted = e.visibility === 'Unlisted';
+                
+                return `
+                <div class="glass-card p-6 md:p-8 flex flex-col justify-between bg-white/80 border-t-4 ${isUnlisted ? 'border-t-gray-800' : 'border-t-ravn-primary'} group hover:bg-white">
+                    <div>
+                        <div class="w-full h-32 rounded-[20px] overflow-hidden mb-6 relative">
+                            <img src="${randomImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <div class="absolute top-3 left-3 flex gap-2">
+                                <span class="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-ravn-textMain shadow-sm">${e.attendees.length}/${e.capacity || '∞'} Seats</span>
+                                ${isUnlisted ? '<span class="bg-gray-900/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm flex items-center gap-1"><i class="ph-bold ph-detective"></i> Secret</span>' : ''}
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-extrabold tracking-tight text-ravn-textMain mb-2 line-clamp-1">${e.title}</h3>
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-6"><i class="ph-fill ph-calendar-blank text-ravn-primary text-base"></i> ${e.date || 'TBD'}</p>
+                    </div>
+                    <div class="mt-auto flex flex-col gap-3">
+                        <div class="flex justify-between items-center bg-gray-50 p-2 rounded-2xl border border-gray-100 gap-2">
+                            <button onclick="viewAttendees('${e._id}')" class="flex-1 text-[11px] font-extrabold text-blue-600 hover:bg-white py-2 rounded-xl transition-colors text-center">Guest List</button>
+                            ${isUnlisted ? `<div class="w-px h-6 bg-gray-200"></div><button onclick="copyEventLink('${e._id}')" class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-600 hover:bg-white transition-colors" title="Copy Secret Link"><i class="ph-bold ph-link text-lg"></i></button>` : ''}
+                            ${(currentRole === 'Core' || currentRole === 'Media') ? `<div class="w-px h-6 bg-gray-200"></div><button onclick="deleteEvent('${e._id}')" class="w-10 h-10 rounded-xl flex items-center justify-center text-red-400 hover:bg-white hover:text-red-500 transition-colors"><i class="ph-bold ph-trash text-lg"></i></button>` : ''}
+                        </div>
+                        ${(currentRole === 'Core' || currentRole === 'Media') ? `<button onclick="toggleRSVP('${e._id}')" class="w-full py-3.5 border-2 ${e.rsvpOpen ? 'border-green-100 text-green-600 bg-green-50 hover:bg-green-100' : 'border-red-100 text-red-500 bg-red-50 hover:bg-red-100'} rounded-2xl font-extrabold uppercase text-[10px] tracking-widest transition-colors">${e.rsvpOpen ? 'Registrations Open (Click to Close)' : 'Registrations Closed (Click to Open)'}</button>` : ''}
+                    </div>
+                </div>`
+            }).join('');
+        }
+
+        function renderBroadcasts() {
+            const list = document.getElementById('broadcastList');
+            list.innerHTML = notifications.map(n => {
+                const imgSrc = n.imageUrl || n.image;
+                return `
+                <div class="glass-card p-6 flex flex-col md:flex-row gap-6 items-center bg-white/80 hover:bg-white transition-colors group">
+                    ${imgSrc ? `<img src="${imgSrc}" class="w-full md:w-48 h-32 object-cover rounded-[20px] shrink-0 shadow-sm border border-gray-100">` : `<div class="w-full md:w-48 h-32 bg-blue-50 rounded-[20px] border border-blue-100 shrink-0 flex items-center justify-center text-blue-300"><i class="ph-fill ph-megaphone text-5xl"></i></div>`}
+                    <div class="flex-1 w-full flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-2xl font-extrabold tracking-tight text-ravn-textMain">${n.title}</h3>
+                            <div class="flex gap-2 shrink-0">
+                                <button onclick="openEditBroadcast('${n._id}')" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-white hover:text-ravn-primary transition-colors border border-gray-200"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                                <button onclick="deleteBroadcast('${n._id}')" class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-100"><i class="ph-bold ph-trash text-lg"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-sm text-ravn-textMuted font-medium leading-relaxed">${n.message}</p>
+                    </div>
+                </div>`
+            }).join('') || '<div class="glass-card p-12 text-center border-dashed border-2 border-gray-200 shadow-none bg-transparent"><p class="text-gray-400 font-bold text-sm uppercase tracking-widest">No announcements sent yet. 🤫</p></div>';
+        }
+
+        function renderInbox() {
+            const list = document.getElementById('inboxList');
+            list.innerHTML = messages.map(m => `
+                <div class="glass-card p-6 flex flex-col md:flex-row justify-between items-start gap-6 bg-white/80">
+                    <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-400 flex items-center justify-center shrink-0 border border-orange-100"><i class="ph-fill ph-envelope-open text-2xl"></i></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="flex items-center gap-3"><span class="text-[9px] font-extrabold text-white bg-ravn-textMain px-3 py-1 rounded-full uppercase tracking-widest">${m.type}</span><h4 class="font-bold text-base text-ravn-textMain">${m.name}</h4></div>
+                        <p class="text-sm text-ravn-textMuted font-medium leading-relaxed bg-gray-50 p-4 rounded-[16px] border border-gray-100">${m.message}</p>
+                    </div>
+                    <div class="shrink-0 flex flex-col items-end gap-3 pt-2">
+                        <span class="status-badge ${m.status === 'Pending' ? 'status-pending' : 'status-paid'}">${m.status}</span>
+                        ${m.status === 'Pending' ? `<button onclick="resolveMessage('${m._id}')" class="text-[10px] font-black uppercase text-ravn-primary hover:text-ravn-primaryHover flex items-center gap-1"><i class="ph-bold ph-check"></i> Mark Done</button>` : ''}
+                    </div>
+                </div>
+            `).join('') || '<div class="glass-card p-12 text-center border-dashed border-2 border-gray-200 shadow-none bg-transparent"><p class="text-gray-400 font-bold text-sm uppercase tracking-widest">Inbox is empty. 📬</p></div>';
+        }
+
+        function renderAdmins() {
+            const list = document.getElementById('adminUsersList');
+            list.innerHTML = adminUsers.map(a => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-8 py-5"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-[14px] bg-red-50 flex items-center justify-center text-ravn-primary border border-red-100"><i class="ph-fill ph-shield-check text-xl"></i></div><h4 class="text-sm font-bold text-ravn-textMain">${a.email}</h4></div></td>
+                    <td class="px-8 py-5"><span class="status-badge ${a.role === 'Core' ? 'bg-purple-50 text-purple-600 border-purple-100' : (a.role === 'Finance' ? 'status-paid' : 'status-free')}">${a.role}</span></td>
+                    <td class="px-8 py-5 text-right">${a.role !== 'Core' ? `<button onclick="deleteAdmin('${a._id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 inline-flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"><i class="ph-bold ph-trash text-sm"></i></button>` : `<span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-100 px-3 py-1.5 rounded-full">Untouchable</span>`}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('adminCreateForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
+            try {
+                await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify({ email: document.getElementById('newAdminEmail').value, passwordHash: document.getElementById('newAdminPassword').value, role: document.getElementById('newAdminRole').value }) });
+                toggleModal('adminCreateModal', false); document.getElementById('adminCreateForm').reset(); showToast("Crew Member Added 🎉"); fetchData();
+            } catch(e) { showToast("Failed to add crew member", "error"); } finally { btn.innerHTML = 'Add to Crew'; }
+        });
+
+        async function deleteAdmin(id) {
+            if(!confirm("Are you sure you want to remove them from the crew?")) return;
+            try { await fetch(`/api/admin/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Crew Member Removed"); fetchData(); } catch(e) { showToast("Deletion Failed", "error"); }
+        }
+
+        function openNewBroadcast() { document.getElementById('broadcastForm').reset(); document.getElementById('editBroadcastId').value = ''; document.getElementById('broadcastModalTitle').innerHTML = `Send a Message 💬`; document.getElementById('emailBlastContainer').classList.remove('hidden'); document.getElementById('emailBlastContainer').classList.add('flex'); toggleModal('broadcastModal', true); }
+        function openEditBroadcast(id) { const n = notifications.find(x => x._id === id); if(!n) return; document.getElementById('editBroadcastId').value = n._id; document.getElementById('notifTitle').value = n.title || ''; document.getElementById('notifMsg').value = n.message || ''; document.getElementById('notifImage').value = n.imageUrl || n.image || ''; document.getElementById('broadcastModalTitle').innerHTML = `Edit Message ✏️`; document.getElementById('emailBlastContainer').classList.add('hidden'); document.getElementById('emailBlastContainer').classList.remove('flex'); toggleModal('broadcastModal', true); }
+        
+        document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btn = document.getElementById('broadcastSubmitBtn'); const origHTML = btn.innerHTML; btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
+            const id = document.getElementById('editBroadcastId').value;
+            const payload = { title: document.getElementById('notifTitle').value, message: document.getElementById('notifMsg').value, imageUrl: document.getElementById('notifImage').value, triggerBlast: document.getElementById('broadcastEmailBlast').checked };
+            try {
+                if (id) { await fetch(`/api/admin/notifications/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); showToast("Message Updated"); } 
+                else { await fetch('/api/admin/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); showToast("Message Sent! 🚀"); }
+                toggleModal('broadcastModal', false); fetchData();
+            } catch (e) { showToast("Failed to send message", "error"); } finally { btn.innerHTML = origHTML; }
+        });
+
+        async function deleteBroadcast(id) { if(confirm("Delete this message?")) { try { await fetch(`/api/admin/notifications/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Message Deleted"); fetchData(); } catch(e) { showToast("Deletion Failed", "error"); } } }
+        
+        function addTierRow() {
+            const div = document.createElement('div'); div.className = "flex gap-4 tier-row mt-3";
+            div.innerHTML = `<input type="text" placeholder="Pass Name" class="tier-name friendly-input flex-1 px-5 py-3.5 rounded-[16px] text-sm font-bold shadow-sm bg-white"><input type="number" placeholder="Price (₹)" class="tier-price friendly-input w-32 px-5 py-3.5 rounded-[16px] text-sm font-bold shadow-sm bg-white">`;
+            document.getElementById('tiersList').appendChild(div);
+        }
+
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>';
+            const isPayable = document.getElementById('evIsPayable').checked; const tiers = [];
+            if(isPayable) document.querySelectorAll('.tier-row').forEach(row => { const name = row.querySelector('.tier-name').value; const price = row.querySelector('.tier-price').value; if(name && price) tiers.push({ name, price: Number(price) }); });
+            
+            const isUnlisted = document.getElementById('evVisibility').checked;
+
+            const payload = { 
+                title: document.getElementById('evTitle').value, 
+                description: document.getElementById('evDesc').value, 
+                date: document.getElementById('evStartDate').value, 
+                venue: document.getElementById('evVenue').value || 'TBD', 
+                capacity: Number(document.getElementById('evCapacity').value) || 50, 
+                isPayable: isPayable, 
+                eventFee: isPayable && tiers.length > 0 ? tiers[0].price : 0, 
+                isMembersOnly: document.getElementById('evMembersOnly').checked, 
+                visibility: isUnlisted ? 'Unlisted' : 'Public',
+                tiers: tiers, 
+                rsvpOpen: true 
+            };
+            try { await fetch('/api/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); toggleModal('eventModal', false); document.getElementById('eventForm').reset(); document.getElementById('tiersBox').classList.add('hidden'); showToast("Added to Calendar! 🗓️"); fetchData(); } catch(e) { showToast("Failed to save", "error"); } finally { btn.innerHTML = 'Put it on the Calendar'; }
+        });
+
+        // HANDLE SETTINGS FORM SUBMISSION (Fixes reload/logout bug)
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevents page reload
+            const btn = e.target.querySelector('button[type="submit"]');
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-sm"></i>';
+            btn.disabled = true;
+
+            const payload = {
+                registrationOpen: document.getElementById('setRegOpen').checked,
+                freePromoActive: document.getElementById('setFreePromo').checked,
+                membershipFee: Number(document.getElementById('setMemFee').value) || 500,
+                upiId: document.getElementById('setUpiId').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` },
+                    body: JSON.stringify(payload)
+                });
+                if(!res.ok) throw new Error();
+                showToast("Settings Saved Successfully! ⚙️");
+                fetchData(); // Refresh local config
+            } catch(err) {
+                showToast("Failed to save settings.", "error");
+            } finally {
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+            }
+        });
+
+        async function toggleRSVP(id) { try { await fetch(`/api/admin/events/${id}/toggle`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Registration status changed."); fetchData(); } catch(e) { showToast("Failed to update", "error"); } }
+        async function deleteEvent(id) { if(confirm("Cancel adventure?")) { try { await fetch(`/api/admin/events/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Cancelled"); fetchData(); } catch(e) { showToast("Deletion Failed", "error"); } } }
+
+        async function viewAttendees(id) {
+            currentEventId = id; toggleModal('attendeesModal', true);
+            const roster = document.getElementById('attendeesList'); const waitlist = document.getElementById('waitlistList');
+            roster.innerHTML = '<tr><td colspan="4" class="text-center py-10"><i class="ph-bold ph-spinner animate-spin text-3xl text-ravn-primary"></i></td></tr>'; waitlist.innerHTML = '';
+            try {
+                const res = await fetch(`/api/admin/events/${id}/attendees`, { headers: { 'Authorization': `Bearer ${adminKey}` } });
+                if(!res.ok) throw new Error(); const data = await res.json(); window.currentEventAttendees = data.attendees || [];
+                
+                roster.innerHTML = (data.attendees || []).map(a => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4"><h4 class="text-sm font-extrabold text-ravn-textMain">${a.name}</h4><p class="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md w-fit mt-1">${a.memberId || a.email}</p></td>
+                        <td class="px-6 py-4"><span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-100">${a.tier || 'Standard'}</span></td>
+                        <td class="px-6 py-4"><span class="status-badge status-${(a.status || 'pending').toLowerCase()} mb-1 block w-fit">${a.status || 'Pending'}</span><span class="text-[9px] text-gray-400 uppercase tracking-widest font-mono font-bold">${a.utr || ''}</span></td>
+                        <td class="px-6 py-4 text-right">${(currentRole === 'Core' || currentRole === 'Finance') && a.status === 'Pending' ? `<button onclick="verifyEventAttendee('${id}', '${a._id}')" class="btn-glow !py-1.5 !px-3 text-[10px] shadow-sm">Verify Pass</button>` : `<span class="text-[10px] text-green-500 uppercase font-extrabold tracking-widest bg-green-50 px-3 py-1.5 rounded-full border border-green-100"><i class="ph-bold ph-check"></i> Good to go</span>`}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4" class="text-center text-gray-400 py-10 font-bold text-sm uppercase tracking-widest">Nobody has RSVP\'d yet.</td></tr>';
+
+                waitlist.innerHTML = (data.waitlist || []).map(w => `<tr class="hover:bg-gray-50 transition-colors"><td class="px-6 py-4"><h4 class="text-sm font-extrabold text-ravn-textMain">${w.name}</h4><p class="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md w-fit mt-1">${w.email}</p></td><td colspan="3" class="px-6 py-4 text-right"><span class="text-[10px] text-orange-500 uppercase font-bold tracking-widest bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">Waiting in line</span></td></tr>`).join('') || '<tr><td colspan="4" class="text-center text-gray-400 py-6 font-bold text-[10px] uppercase tracking-widest">Nobody in the queue.</td></tr>';
+            } catch (e) { roster.innerHTML = '<tr><td colspan="4" class="text-center text-red-500 py-10 font-bold text-sm">Failed to load the list.</td></tr>'; }
+        }
+
+        async function addResource() {
+            const title = document.getElementById('vTitle').value; const url = document.getElementById('vUrl').value;
+            if(!title || !url) return showToast("Need both a title and a link! 🔗", "error");
+            try { await fetch(`/api/admin/events/${currentEventId}/resources`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify({ title, url }) }); document.getElementById('vTitle').value = ''; document.getElementById('vUrl').value = ''; document.getElementById('vaultUploadBox').classList.add('hidden'); showToast("Added to Backpack! 🎒"); } catch(e) { showToast("Couldn't add it right now.", "error"); }
+        }
+
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            if (!window.currentEventAttendees.length) return showToast("Nobody to download!", "error");
+            let csvContent = "data:text/csv;charset=utf-8,Name,Email,Type,Status,UTR\n";
+            window.currentEventAttendees.forEach(a => { csvContent += `"${a.name}","${a.email}",${a.memberId ? 'Club Member' : 'Guest'},${a.status || 'Pending'},${a.utr || "N/A"}\n`; });
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `GuestList.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Downloading CSV! 📊");
+        });
+
+        async function verifyEventAttendee(eventId, subId) {
+            try { await fetch(`/api/admin/events/${eventId}/verify/${subId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Pass verified! 🎫"); viewAttendees(eventId); fetchData(); } catch(e) { showToast("Verification failed.", "error"); }
+        }
+
+        // ZERO COMMISSION UTR EXTRACTOR
+        function processBankStatement(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                // Regex to find 12-digit Indian UPI UTR numbers
+                const utrMatches = text.match(/\b\d{12}\b/g) || [];
+                const uniqueUtrs = [...new Set(utrMatches)];
+
+                if (uniqueUtrs.length === 0) {
+                    return showToast("No 12-digit UTRs found in that file.", "error");
+                }
+
+                showToast(`Scanning for ${uniqueUtrs.length} UTRs...`);
+
+                try {
+                    const res = await fetch(`/api/admin/events/${currentEventId}/bulk-verify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` },
+                        body: JSON.stringify({ utrs: uniqueUtrs })
+                    });
+                    const data = await res.json();
+                    
+                    showToast(`Boom! 💥 Auto-verified ${data.matched} tickets.`);
+                    viewAttendees(currentEventId);
+                    fetchData();
+                } catch (err) {
+                    showToast("Failed to run bulk verification.", "error");
+                }
+            };
+            reader.readAsText(file);
+            // Reset input so you can upload the same file again if needed
+            event.target.value = '';
+        }
+
+        async function verifyMember(mid) {
+            try { await fetch(`/api/admin/members/${mid}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify({ paymentStatus: 'Paid' }) }); showToast("Member Approved! 🫂"); fetchData(); } catch (e) { showToast("Failed to approve.", "error"); }
+        }
+
+        function switchTab(id) { document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); void c.offsetWidth; c.classList.add('hidden'); }); const activeContent = document.getElementById(`tab-${id}-content`); activeContent.classList.remove('hidden'); activeContent.classList.add('active'); document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active')); document.getElementById(`nav-${id}`).classList.add('active'); }
+        function toggleModal(id, show) { const m = document.getElementById(id); const content = m.querySelector('div[id$="Content"]'); if(show) { m.classList.remove('hidden'); m.classList.add('flex'); void m.offsetWidth; if(content) { content.classList.remove('scale-95'); content.classList.add('scale-100'); } } else { if(content) { content.classList.add('scale-95'); content.classList.remove('scale-100'); } setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 200); } }
+
+        document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { const preloader = document.getElementById('preloader'); if(preloader) { preloader.style.opacity = '0'; setTimeout(() => { preloader.style.display = 'none'; }, 300); } }, 500); });
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

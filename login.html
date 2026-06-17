@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Clubhouse Login 🛋️</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Friendly, Round, Modern Font: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        ravn: {
+                            bg: '#FAFAF9', 
+                            surface: '#FFFFFF',
+                            border: '#F3F4F6', 
+                            primary: '#FF6B6B', 
+                            primaryHover: '#FA5252',
+                            accent: '#FCA311', 
+                            textMain: '#1C1917', 
+                            textMuted: '#57534E', 
+                        }
+                    },
+                    animation: {
+                        'float': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 8s ease-in-out 4s infinite',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                            '50%': { transform: 'translateY(-20px) scale(1.05)' },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 32px; 
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .friendly-input {
+            background-color: #F9FAFB;
+            border: 2px solid transparent;
+            color: #1C1917;
+            transition: all 0.3s ease;
+        }
+        .friendly-input:focus {
+            background-color: #FFFFFF;
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+            outline: none;
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 100px;
+            padding: 16px 36px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.02em;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-glow:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slide-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            transition: height 0.4s ease;
+        }
+        .slide-step {
+            width: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .step-active {
+            position: relative;
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .step-left {
+            transform: translateX(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .step-right {
+            transform: translateX(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
+
+    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
+        </div>
+    </div>
+
+    <!-- Ambient Warm Background Glows -->
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full transition-all flex items-center px-6 md:px-8 shadow-sm" id="navbar">
+        <div class="w-full flex justify-between items-center h-full relative">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('nav-fallback').style.display='block';">
+                <span id="nav-fallback" style="display: none;" class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
+                <a href="events.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Adventures ✈️</a>
+                <a href="about.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">About Us ✨</a>
+                <a href="contact.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Say Hello 👋</a>
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                <a href="login.html" class="text-sm font-bold text-ravn-primary transition-colors">Clubhouse Login 🛋️</a>
+                <a href="register.html" class="btn-glow py-2.5 px-6 shadow-md">Join the Club 🫂</a>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary transition-colors">
+                <i class="ph-bold ph-list text-3xl"></i>
+            </button>
+
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+                <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
+                <a href="events.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
+                <a href="about.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">About Us <span>✨</span></a>
+                <a href="contact.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Say Hello <span>👋</span></a>
+                <div class="h-px w-full bg-gray-200 my-2"></div>
+                <a href="login.html" class="text-base font-bold text-ravn-primary py-2 flex justify-between">Clubhouse Login <span>🛋️</span></a>
+                <a href="register.html" class="text-base font-extrabold text-ravn-primary py-2 flex justify-between">Join the Club <span>🫂</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 px-6 pt-[120px] pb-24 flex-grow flex items-center justify-center">
+        <div class="container mx-auto max-w-md w-full">
+            
+            <div class="glass-card p-10 md:p-12 text-center relative overflow-hidden bg-white/60">
+                
+                <!-- Friendly Icon Header -->
+                <div class="w-20 h-20 rounded-[24px] bg-red-50 flex items-center justify-center mx-auto mb-8 relative z-10 shadow-sm border border-red-100">
+                    <i class="ph-fill ph-couch text-4xl text-ravn-primary"></i>
+                </div>
+                
+                <h2 class="text-3xl font-extrabold tracking-tight text-ravn-textMain mb-2 relative z-10">Welcome back!</h2>
+                <p class="text-ravn-textMuted font-medium text-sm mb-8 relative z-10" id="loginSubtitle">Enter your member ID to access the Clubhouse.</p>
+
+                <!-- Error Message Box -->
+                <div id="errorContainer" class="hidden mb-6 p-4 rounded-[16px] bg-red-50 border border-red-100 flex items-center justify-center gap-2 text-red-600 transition-opacity">
+                    <i class="ph-bold ph-warning-circle text-lg"></i>
+                    <p id="errorMessage" class="text-sm font-bold">Oops! Something went wrong.</p>
+                </div>
+
+                <!-- Google-style Sliding Container -->
+                <div class="slide-container" id="slideWrapper">
+                    
+                    <!-- STEP 1: Enter Member ID -->
+                    <div id="step1" class="slide-step step-active">
+                        <form id="idForm" class="space-y-6 text-left" onsubmit="handleIdSubmit(event)">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-ravn-textMain ml-1">What's your Member ID? 🪪</label>
+                                <input type="text" id="memberIdInput" required placeholder="e.g. RVN-XXXXXX" 
+                                    class="friendly-input w-full px-5 py-4 rounded-[20px] font-mono font-medium tracking-widest text-center uppercase text-base shadow-sm">
+                            </div>
+
+                            <button type="submit" id="nextBtn" class="btn-glow w-full py-4 text-sm gap-2 mt-4">
+                                <span>Find my profile</span> <i class="ph-bold ph-arrow-right text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- STEP 2: Profile Picture & Password -->
+                    <div id="step2" class="slide-step step-right">
+                        
+                        <!-- Dynamic Profile Pill -->
+                        <div class="mx-auto w-fit bg-white border border-gray-200 shadow-sm rounded-full p-1.5 pr-4 flex items-center gap-3 mb-8 cursor-pointer hover:bg-gray-50 transition-colors group" onclick="goBackToId()" title="Switch Account">
+                            <img id="profileAvatar" src="" class="w-8 h-8 rounded-full object-cover bg-gray-100">
+                            <span id="profileName" class="text-sm font-bold text-ravn-textMain truncate max-w-[120px]">Hi, Friend!</span>
+                            <i class="ph-bold ph-caret-down text-gray-400 group-hover:text-ravn-primary transition-colors ml-1"></i>
+                        </div>
+
+                        <form id="passwordForm" class="space-y-6 text-left" onsubmit="handlePasswordSubmit(event)">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-ravn-textMain ml-1">Enter your password 🔒</label>
+                                <input type="password" id="passwordInput" required placeholder="••••••••" 
+                                    class="friendly-input w-full px-5 py-4 rounded-[20px] text-center text-base font-medium tracking-widest shadow-sm">
+                            </div>
+
+                            <button type="submit" id="loginBtn" class="btn-glow w-full py-4 text-sm gap-2 mt-4">
+                                <span>Open the door</span> <span class="text-lg">🛋️</span>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <div class="mt-10 pt-8 border-t border-gray-200 relative z-10">
+                    <p class="text-ravn-textMuted font-medium text-sm leading-relaxed">
+                        Don't have a Clubhouse pass yet? <br> <a href="register.html" class="text-ravn-primary font-bold hover:text-ravn-primaryHover transition-colors mt-1 inline-block">Join the family 🫂</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto relative z-20">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12 border-b border-gray-200 pb-12">
+                <div class="max-w-sm">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="RAVN.png" alt="RAVN Logo" class="h-6 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('footer-fallback').style.display='block';">
+                        <span id="footer-fallback" style="display: none;" class="font-extrabold text-2xl tracking-widest text-ravn-textMain uppercase block">RAVN</span>
+                    </div>
+                    <p class="text-base text-ravn-textMuted font-medium leading-relaxed">
+                        Your vibe. Your tribe. A community built on shared laughs, spontaneous travel, and cinematic adventures. Come say hi! 👋
+                    </p>
+                </div>
+                
+                <div class="flex gap-16">
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">The Club</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="about.html" class="hover:text-ravn-primary transition-colors">About Us ✨</a></li>
+                            <li><a href="events.html" class="hover:text-ravn-primary transition-colors">Upcoming Plans 🗺️</a></li>
+                            <li><a href="register.html" class="hover:text-ravn-primary transition-colors">Join the Family 🫂</a></li>
+                            <li><a href="login.html" class="text-ravn-primary font-bold">Clubhouse Login 🛋️</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">Connect</h4>
+                        <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">Instagram 📸</a></li>
+                            <li><a href="#" class="hover:text-ravn-primary transition-colors">TikTok 🎵</a></li>
+                            <li><a href="contact.html" class="hover:text-ravn-primary transition-colors">Say Hello 👋</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-bold text-gray-400">
+                <p>Copyright © 2026 RAVN Community. Good Vibes Only. ✌️</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-ravn-primary transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-ravn-primary transition-colors">House Rules</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- PRELOADER ---
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => { preloader.style.display = 'none'; }, 300);
+            }, 300);
+            
+            // Adjust initial slider height
+            adjustWrapperHeight('step1');
+        });
+
+        // --- DOM Elements ---
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const slideWrapper = document.getElementById('slideWrapper');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        let verifiedMemberId = '';
+        let memberDataCache = null;
+
+        // --- HEIGHT ADJUSTMENT HELPER ---
+        function adjustWrapperHeight(stepId) {
+            const activeStep = document.getElementById(stepId);
+            slideWrapper.style.height = activeStep.offsetHeight + 'px';
+        }
+
+        // --- ERROR HELPER ---
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorContainer.classList.remove('hidden');
+            errorContainer.classList.add('flex', 'animate-shake');
+            setTimeout(() => errorContainer.classList.remove('animate-shake'), 500);
+            adjustWrapperHeight(step1.classList.contains('step-active') ? 'step1' : 'step2');
+        }
+
+        function hideError() {
+            errorContainer.classList.add('hidden');
+            errorContainer.classList.remove('flex');
+            adjustWrapperHeight(step1.classList.contains('step-active') ? 'step1' : 'step2');
+        }
+
+        // --- STEP 1: VERIFY ID AND FETCH PROFILE ---
+        async function handleIdSubmit(e) {
+            e.preventDefault();
+            hideError();
+
+            const idInput = document.getElementById('memberIdInput').value.trim().toUpperCase();
+            const btn = document.getElementById('nextBtn');
+            const originalContent = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>';
+            btn.disabled = true;
+
+            try {
+                // Fetch member details from backend API
+                const res = await fetch(`/api/member/${idInput}`);
+                if (!res.ok) throw new Error("Oops! We couldn't find that ID 😅");
+                const data = await res.json();
+
+                verifiedMemberId = idInput;
+                memberDataCache = data.member;
+
+                // Set up Profile Pill
+                const firstName = memberDataCache.name ? memberDataCache.name.split(' ')[0] : 'Friend';
+                document.getElementById('profileName').textContent = `Hi, ${firstName}!`;
+                document.getElementById('profileAvatar').src = memberDataCache.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firstName)}&backgroundColor=FF6B6B`;
+                document.getElementById('loginSubtitle').textContent = "Great to see you! Just one more step.";
+
+                // Check if they need a password setup (legacy accounts)
+                if(!data.hasPassword) {
+                    // For demo purposes, we will mock a successful legacy login
+                    // In real life, redirect to a "Set Password" screen
+                    completeLogin(verifiedMemberId, null);
+                    return;
+                }
+
+                // Smoothly slide to Step 2
+                step1.classList.replace('step-active', 'step-left');
+                step2.classList.replace('step-right', 'step-active');
+                
+                // Readjust wrapper height for Step 2
+                setTimeout(() => adjustWrapperHeight('step2'), 50);
+
+                // Auto-focus password input after transition
+                setTimeout(() => document.getElementById('passwordInput').focus(), 500);
+
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+
+        // --- STEP 2: VERIFY PASSWORD ---
+        async function handlePasswordSubmit(e) {
+            e.preventDefault();
+            hideError();
+
+            const passInput = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('loginBtn');
+            const originalContent = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>';
+            btn.disabled = true;
+
+            await completeLogin(verifiedMemberId, passInput, btn, originalContent);
+        }
+
+        // --- LOGIN ACTION ---
+        async function completeLogin(memberId, password, btnEl, origHtml) {
+            try {
+                const res = await fetch('/api/member/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ memberId, password })
+                });
+                
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || "Hmm, that password isn't right 🤔");
+                }
+                const data = await res.json();
+
+                // Persist session securely locally
+                sessionStorage.setItem('ravn_member_session', JSON.stringify(data.member));
+                
+                // Show success state on button before redirecting
+                if (btnEl) btnEl.innerHTML = '<i class="ph-bold ph-check-circle text-xl"></i> Welcome back!';
+                
+                setTimeout(() => {
+                    window.location.href = 'member.html';
+                }, 500);
+
+            } catch (err) {
+                showError(err.message);
+                if (btnEl) {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        // --- BACK BUTTON (SWITCH ACCOUNT) ---
+        function goBackToId() {
+            hideError();
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginSubtitle').textContent = "Enter your member ID to access the Clubhouse.";
+            
+            step2.classList.replace('step-active', 'step-right');
+            step1.classList.replace('step-left', 'step-active');
+            
+            setTimeout(() => adjustWrapperHeight('step1'), 50);
+            setTimeout(() => document.getElementById('memberIdInput').focus(), 500);
+        }
+
+        // --- MOBILE MENU ---
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('ph-list');
+            icon.classList.toggle('ph-x');
+        });
+    </script>
+
+    <!-- RAVN Offline PWA Engine -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
+                    .catch(err => console.error('Offline Engine Failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

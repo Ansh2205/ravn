@@ -325,14 +325,14 @@
                                         <i class="ph-fill ph-ticket text-3xl text-ravn-accent"></i>
                                     </div>
                                     <h4 class="text-lg font-extrabold text-ravn-textMain mb-2">First 100 Grant Applied! 🎉</h4>
-                                    <p class="text-sm text-ravn-textMuted font-medium max-w-sm">Your lifetime club access fee has been waived. You're getting in totally free.</p>
+                                    <p class="text-sm text-ravn-textMuted font-medium max-w-sm">Your first year's club access fee has been waived. You're getting in totally free.</p>
                                 </div>
 
                                 <!-- Dynamic Payment State -->
                                 <div id="paymentState" class="hidden flex-col items-center space-y-6 py-6">
                                     <div class="text-center">
-                                        <p class="text-xs font-bold text-ravn-textMuted mb-2">Lifetime Access Fee 🍕</p>
-                                        <h3 class="text-4xl font-extrabold text-ravn-textMain">₹<span id="feeAmount">500</span></h3>
+                                        <p class="text-xs font-bold text-ravn-textMuted mb-2">Annual Access Fee 🍕</p>
+                                        <h3 class="text-4xl font-extrabold text-ravn-textMain">₹<span id="feeAmount">500</span><span class="text-xl text-gray-400">/yr</span></h3>
                                     </div>
                                     <div class="p-6 bg-white rounded-[24px] shadow-sm border border-gray-100 w-full text-center">
                                         <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100"><i class="ph-fill ph-shield-check text-2xl"></i></div>
@@ -621,7 +621,7 @@
                         "amount": data.order.amount,
                         "currency": "INR",
                         "name": "RAVN Community",
-                        "description": "Lifetime Membership",
+                        "description": "Annual Membership",
                         "order_id": data.order.id,
                         "handler": async function (response) {
                             try {

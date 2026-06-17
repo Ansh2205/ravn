@@ -9,6 +9,8 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Add local QR Code library to fix download bugs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,6 +56,7 @@
     <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
         <div class="flex flex-col items-center gap-4">
             <img src="RAVN.png" alt="RAVN" class="h-8 w-auto animate-pulse filter brightness-0 opacity-80" onerror="this.style.display='none'; document.getElementById('loader-text').style.display='block';">
+            <span id="loader-text" style="display:none;" class="text-xl font-extrabold tracking-widest uppercase text-ravn-textMain animate-pulse">RAVN ✨</span>
         </div>
     </div>
 
@@ -68,6 +71,7 @@
         <div class="w-full flex justify-between items-center h-full relative">
             <a href="index.html" class="flex items-center gap-2 group">
                 <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none';">
+                <span class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
             </a>
             <div class="hidden md:flex items-center space-x-8">
                 <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
@@ -250,9 +254,9 @@
                             </div>
                         </div>
 
-                        <!-- QR Code -->
-                        <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100 w-fit mx-auto mb-4">
-                            <img id="passQrCode" src="" class="w-32 h-32 object-cover rounded-xl mix-blend-multiply" crossorigin="anonymous">
+                        <!-- Replace the Image tag with a pure HTML div for the local QR code generator -->
+                        <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100 w-fit mx-auto mb-4 flex justify-center items-center" style="min-height: 140px; min-width: 140px;">
+                            <div id="passQrCode" class="mix-blend-multiply"></div>
                         </div>
                     </div>
 
@@ -502,9 +506,9 @@
                 const emojis = ['👤', '🌟', '🚀', '😎', '✌️', '🎈'];
                 document.getElementById('passEmoji').textContent = emojis[Math.floor(Math.random() * emojis.length)];
 
-                const qrImg = document.getElementById('passQrCode');
-                qrImg.crossOrigin = "Anonymous"; 
-                qrImg.src = passData.qrUrl + `&v=${new Date().getTime()}`;
+                // Generate robust local QR code (fixes html2canvas CORS image fetching bugs)
+                document.getElementById('passQrCode').innerHTML = '';
+                new QRCode(document.getElementById("passQrCode"), { text: passData.qrPayload, width: 140, height: 140, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
 
                 const statusLabel = document.getElementById('passStatusLabel');
                 if(passData.event.isPayable) {
@@ -537,12 +541,49 @@
             const element = document.getElementById('printableTicketArea');
             
             try {
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff' });
-                const link = document.createElement('a');
-                link.download = `RAVN-Event-Pass.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                showToast("Digital Pass Downloaded! 🎉");
+                const res = await fetch(`/api/public/events/${currentEvent._id}/rsvp`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "RSVP Failed");
+
+                if (data.waitlist) {
+                    showToast("Event is full! You're on the waitlist. ⏳");
+                    setTimeout(() => window.location.href = 'index.html', 3000);
+                    return;
+                }
+
+                if (data.pending) {
+                    const options = {
+                        "key": data.key, "amount": data.order.amount, "currency": "INR",
+                        "name": "RAVN Community", "description": `Pass for ${currentEvent.title}`,
+                        "order_id": data.order.id,
+                        "handler": async function (response) {
+                            try {
+                                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Verifying...';
+                                const verifyRes = await fetch(`/api/public/events/${currentEvent._id}/rsvp/verify`, {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ ...response, attendeeId: data.attendeeId })
+                                });
+                                const verifyData = await verifyRes.json();
+                                if (!verifyRes.ok) throw new Error(verifyData.error);
+                                
+                                const refId = `REF-${Math.floor(Math.random()*1000)}`;
+                                const qrPayload = `${payload.email}-${currentEvent._id}-${refId}`;
+
+                                showSuccessState(currentEvent.title, "Payment Successful! Pass sent to your email.", { event: currentEvent, guest: payload, qrPayload: qrPayload });
+                            } catch (err) { alert("Verification Failed: " + err.message); btn.innerHTML = origHtml; btn.disabled = false; }
+                        },
+                        "theme": { "color": "#FF6B6B" }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function () { alert("Payment Failed. Try again."); btn.innerHTML = origHtml; btn.disabled = false; });
+                    rzp.open();
+                } else {
+                    const refId = `REF-${Math.floor(Math.random()*1000)}`;
+                    const qrPayload = `${payload.email}-${currentEvent._id}-${refId}`;
+                    showSuccessState(currentEvent.title, "RSVP Confirmed! See you there.", { event: currentEvent, guest: payload, qrPayload: qrPayload });
+                }
             } catch (err) {
                 console.error("Download error:", err);
                 showToast("Failed to save image. Try printing to PDF instead.", "error");

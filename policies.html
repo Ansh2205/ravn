@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | Policies & House Rules 📜</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
+                    colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
+                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'fade-in': 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards', },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' }, }, fadeIn: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.8); }
+        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.6) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); }
+        .prose p { margin-bottom: 1.25rem; line-height: 1.7; color: #57534E; }
+        .prose ul { margin-bottom: 1.5rem; padding-left: 1.5rem; list-style-type: none; }
+        .prose li { margin-bottom: 0.75rem; position: relative; color: #57534E; line-height: 1.6; }
+        .prose li::before { content: "•"; position: absolute; left: -1.25rem; color: #FF6B6B; font-weight: bold; }
+        .prose h3 { font-size: 1.25rem; font-weight: 800; color: #1C1917; margin-top: 2.5rem; margin-bottom: 1rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.5rem; }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-ravn-primary selection:text-white relative">
+
+    <!-- Animated Background Background -->
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none bg-ravn-bg">
+        <div class="absolute top-[5%] left-[-5%] w-[600px] h-[600px] rounded-full bg-ravn-primary/5 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-5%] w-[700px] h-[700px] rounded-full bg-ravn-accent/5 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="h-[76px] glass-panel flex items-center justify-between px-6 md:px-12 shrink-0 z-50 sticky top-0">
+        <div class="flex items-center gap-3">
+            <img src="RAVN.png" alt="RAVN Logo" class="h-6 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none';">
+        </div>
+        <div class="flex items-center gap-4 text-sm font-bold text-ravn-textMuted">
+            <a href="index.html" class="hover:text-ravn-primary transition-colors">Home</a>
+            <a href="login.html" class="hover:text-ravn-primary transition-colors">Portal</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-4xl mx-auto px-6 py-12 md:py-20 relative z-10 animate-fade-in">
+        
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-[20px] bg-red-50 text-ravn-primary mb-6 border border-red-100 shadow-sm">
+                <i class="ph-fill ph-scales text-3xl"></i>
+            </div>
+            <h1 class="font-extrabold text-4xl md:text-5xl mb-4 tracking-tight text-ravn-textMain">House Rules & Privacy</h1>
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Effective: June 17, 2026 • v2.1.0</p>
+        </div>
+
+        <div class="glass-card p-8 md:p-12 mb-12 prose max-w-none">
+            <p class="text-lg font-medium text-ravn-textMain leading-relaxed mb-8">
+                Welcome to the RAVN Clubhouse. To ensure a safe, highly professional, and deeply enjoyable environment for all our student members, innovators, and public guests, we require everyone to adhere to the following operational guidelines. By accessing our platform, utilizing our network, or attending our events, you formally agree to these terms.
+            </p>
+
+            <div class="h-px w-full bg-gray-200 my-10"></div>
+
+            <!-- SECTION 1: HOUSE RULES -->
+            <h2 class="font-extrabold text-2xl md:text-3xl text-ravn-textMain mb-2 tracking-tight">Part 1: The House Rules</h2>
+            <p class="text-sm font-bold text-ravn-primary uppercase tracking-widest mb-8">Community Guidelines & Conduct</p>
+
+            <h3><i class="ph-fill ph-users-three text-ravn-accent"></i> 1. Code of Conduct & Ethics</h3>
+            <p>The RAVN ecosystem thrives on mutual respect. We maintain a zero-tolerance policy for behaviors that disrupt the community.</p>
+            <ul>
+                <li><strong>Respect & Inclusivity:</strong> RAVN is an inclusive student community. Harassment, discrimination, hate speech, or abusive behavior towards any member, guest, or administrative staff will result in an immediate, unappealable ban from the network.</li>
+                <li><strong>Professionalism:</strong> Members are expected to maintain professional conduct during all official events, workshops, and meetups. You represent the club.</li>
+                <li><strong>Substance Policy:</strong> Unless explicitly stated for specific vetted venues, the consumption or distribution of illegal substances at RAVN events is strictly prohibited and will result in involvement of local authorities.</li>
+            </ul>
+
+            <h3><i class="ph-fill ph-ticket text-ravn-accent"></i> 2. Event Registration & Digital Passes</h3>
+            <p>Our infrastructure relies on accurate headcounts to deliver premium experiences.</p>
+            <ul>
+                <li><strong>Mandatory RSVP:</strong> All attendees must RSVP through the official RAVN platform. Walk-ins without prior digital registration may be denied entry due to venue capacity limits and security protocols.</li>
+                <li><strong>Digital Pass Security:</strong> Your auto-generated Digital Pass (QR Code) is strictly non-transferable. Our door scanners ping live databases; screenshots shared with non-members will be flagged. You must present the dynamic pass along with a valid College/Student ID at the venue gates.</li>
+                <li><strong>The Cancellation Courtesy:</strong> If you RSVP for an event but can no longer attend, you must cancel via the member portal or notify the administration at least 24 hours in advance. Repeated "no-shows" will temporarily restrict your account from RSVPing to future high-demand events.</li>
+            </ul>
+
+            <h3><i class="ph-fill ph-credit-card text-ravn-accent"></i> 3. Payments & Financial Integrity</h3>
+            <p>We process all finances transparently through industry-standard gateways.</p>
+            <ul>
+                <li><strong>Gateway Security:</strong> All payments for memberships, subscriptions, and premium events are processed securely via Razorpay. RAVN does not store any card details, UPI PINs, or raw bank data on our servers.</li>
+                <li><strong>Refund Policy:</strong> Due to the upfront costs of venue bookings and logistics, refunds are generally <strong>not provided</strong> for event tickets or memberships unless an event is officially canceled or heavily rescheduled by RAVN Administration.</li>
+                <li><strong>Financial Fraud:</strong> Fraudulent chargebacks, forged UPI transaction IDs, or attempting to bypass the payment verification system will result in permanent expulsion from the club and reporting to relevant financial institutions.</li>
+            </ul>
+
+            <div class="h-px w-full bg-gray-200 my-10"></div>
+
+            <!-- SECTION 2: PRIVACY POLICY -->
+            <h2 class="font-extrabold text-2xl md:text-3xl text-ravn-textMain mb-2 tracking-tight">Part 2: Privacy Policy</h2>
+            <p class="text-sm font-bold text-ravn-primary uppercase tracking-widest mb-8">Data Collection & Security</p>
+
+            <h3><i class="ph-fill ph-database text-ravn-accent"></i> 1. Information We Collect</h3>
+            <p>When you register for a RAVN membership or RSVP for an event, we collect minimal necessary operational data:</p>
+            <ul>
+                <li><strong>Identity Metrics:</strong> Full Name, Age, Gender, and Educational Institution.</li>
+                <li><strong>Contact Vectors:</strong> Email address and Phone number (for vital event communications and account recovery).</li>
+                <li><strong>Transaction Data:</strong> Cryptographic payment references (e.g., Razorpay Order IDs and Signatures).</li>
+                <li><strong>System Logs:</strong> Basic device data and IP logs strictly for security monitoring and abuse prevention.</li>
+            </ul>
+
+            <h3><i class="ph-fill ph-cpu text-ravn-accent"></i> 2. How We Utilize Your Data</h3>
+            <p>Your data is strictly localized for club operations and improving your member experience:</p>
+            <ul>
+                <li>Generating and cryptographically signing your unique Digital Member Pass.</li>
+                <li>Sending automated event updates, RSVP confirmations, and password reset protocols via our secure EmailJS provider.</li>
+                <li>Verifying your identity dynamically at venue checkpoints via the RAVN Scanner.</li>
+            </ul>
+
+            <h3><i class="ph-fill ph-shield-check text-ravn-accent"></i> 3. Security Infrastructure & Sharing</h3>
+            <p>We treat your digital footprint with the highest level of respect.</p>
+            <ul>
+                <li><strong>Zero Third-Party Selling:</strong> RAVN will never sell, rent, trade, or expose your personal information to third-party marketers, advertisers, or data brokers.</li>
+                <li><strong>Cryptographic Storage:</strong> Member passwords are cryptographically hashed using industry-standard `bcrypt` algorithms before being stored in our MongoDB Atlas clusters. The core administration team cannot see your password.</li>
+                <li><strong>Trusted Service Providers:</strong> We share minimal, compartmentalized data with trusted service providers (such as EmailJS for notifications and Razorpay for payment processing) strictly for functional execution.</li>
+            </ul>
+
+            <h3><i class="ph-fill ph-envelope-simple-open text-ravn-accent"></i> 4. Your Digital Rights & Contact</h3>
+            <p>As a member of the network, you have absolute control over your digital footprint.</p>
+            <ul>
+                <li>You maintain the right to request a complete export of your data profile.</li>
+                <li>You maintain the right to request full account deletion ("The Right to be Forgotten"), which will permanently wipe your identity from our active operational databases.</li>
+            </ul>
+            <p class="mt-6">
+                If you have any questions regarding these rules, your data, or if you need to report a violation of the Code of Conduct, please contact the core team via the RAVN Portal or securely email us at: <br>
+                <a href="mailto:ravnclubofficial@gmail.com" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gray-50 text-ravn-primary font-bold rounded-xl border border-gray-100 hover:bg-white transition-colors"><i class="ph-bold ph-envelope"></i> ravnclubofficial@gmail.com</a>
+            </p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center border-t border-gray-200/60 bg-white/40 backdrop-blur-md relative z-10">
+        <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">
+            &copy; 2026 RAVN COMMUNITY. ALL SYSTEMS SECURE.
+        </p>
+    </footer>
+
+</body>
+</html>

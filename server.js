@@ -8,7 +8,10 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-app.use(express.json());
+
+// Increase JSON payload limit to 10mb so Base64 Profile Pictures save perfectly
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Serve Static Frontend Files (HTML, CSS, JS, Images)
 app.use(express.static(path.join(__dirname), {
@@ -31,7 +34,6 @@ mongoose.connect(process.env.MONGO_URI)
     .then(async () => {
         console.log("Connected to RAVN Database! 🚀");
         
-        // --- ADD THIS SEEDER BLOCK ---
         const adminCount = await AdminUser.countDocuments();
         if (adminCount === 0) {
             const hash = await bcrypt.hash('admin123', 10);
@@ -42,14 +44,12 @@ mongoose.connect(process.env.MONGO_URI)
             });
             console.log("🌱 Default Admin Created! -> Email: admin@ravn.io | Password: admin123");
         }
-        // ------------------------------
     })
     .catch(err => console.error("Database connection failed:", err));
 
 // ==========================================
-// 2. EMAILJS CONFIGURATION
+// 2. EMAILJS & RAZORPAY CONFIGURATION
 // ==========================================
-// Native fetch to EmailJS REST API (No extra npm packages needed in Node 18+)
 const sendViaEmailJS = async (toEmail, subject, htmlContent) => {
     try {
         const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -59,12 +59,10 @@ const sendViaEmailJS = async (toEmail, subject, htmlContent) => {
                 service_id: process.env.EMAILJS_SERVICE_ID,
                 template_id: process.env.EMAILJS_TEMPLATE_ID,
                 user_id: process.env.EMAILJS_PUBLIC_KEY,
-                accessToken: process.env.EMAILJS_PRIVATE_KEY, // Optional, depending on your EmailJS security settings
+                accessToken: process.env.EMAILJS_PRIVATE_KEY, 
                 template_params: {
                     to_email: toEmail,
                     subject: subject,
-                    // CRITICAL: In your EmailJS template on their website, you MUST use {{{message}}} 
-                    // (with 3 brackets) so it renders this HTML instead of printing raw code.
                     message: htmlContent 
                 }
             })
@@ -80,9 +78,6 @@ const sendViaEmailJS = async (toEmail, subject, htmlContent) => {
     }
 };
 
-// ==========================================
-// 2.5 RAZORPAY CONFIGURATION
-// ==========================================
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_mock',
     key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret_mock'
@@ -95,7 +90,8 @@ const memberSchema = new mongoose.Schema({
     name: String, email: String, phone: String, age: Number, gender: String, address: String, 
     memberId: { type: String, unique: true }, passwordHash: String, paymentStatus: { type: String, default: 'Pending' }, 
     paymentMethod: String, paymentVerified: { type: Boolean, default: false }, clearanceLevel: { type: Number, default: 1 }, 
-    attendanceCount: { type: Number, default: 0 }, profilePic: String, joinedAt: { type: Date, default: Date.now }
+    attendanceCount: { type: Number, default: 0 }, profilePic: String, joinedAt: { type: Date, default: Date.now },
+    subscriptionExpiry: { type: Date } // Tracks the 1-year club access
 });
 
 const eventSchema = new mongoose.Schema({
@@ -120,11 +116,23 @@ const notificationSchema = new mongoose.Schema({
 
 const settingsSchema = new mongoose.Schema({
     registrationOpen: { type: Boolean, default: true }, freePromoActive: { type: Boolean, default: false }, 
-    membershipFee: { type: Number, default: 500 }, upiId: { type: String, default: 'ravn@bank' }
+    membershipFee: { type: Number, default: 500 },
+    supportEmail: { type: String, default: 'hello@ravn.club' },
+    autoApprove: { type: Boolean, default: false },
+    maintenanceMode: { type: Boolean, default: false },
+    strictVerification: { type: Boolean, default: false }
 });
 
 const adminUserSchema = new mongoose.Schema({
     email: String, passwordHash: String, role: { type: String, enum: ['Core', 'Finance', 'Media'], default: 'Media' }
+});
+
+const refundSchema = new mongoose.Schema({
+    memberId: String, memberName: String, email: String, phone: String, upiId: String,
+    eventId: String, eventTitle: String, amount: Number,
+    status: { type: String, enum: ['Pending', 'Settled'], default: 'Pending' },
+    createdAt: { type: Date, default: Date.now },
+    settledAt: Date
 });
 
 const Member = mongoose.model('Member', memberSchema);
@@ -133,6 +141,7 @@ const Message = mongoose.model('Message', messageSchema);
 const Notification = mongoose.model('Notification', notificationSchema);
 const Settings = mongoose.model('Settings', settingsSchema);
 const AdminUser = mongoose.model('AdminUser', adminUserSchema);
+const Refund = mongoose.model('Refund', refundSchema);
 
 // ==========================================
 // 4. AUTHENTICATION MIDDLEWARE
@@ -191,8 +200,9 @@ app.post('/api/contact', async (req, res) => {
             <p><strong>Topic:</strong> ${req.body.type}</p>
             <p><strong>Message:</strong><br/>${req.body.message}</p>
         `;
-        // Send to Admin Team (Replace with your actual admin email)
-        await sendViaEmailJS('admin@ravn.club', `New Message: ${req.body.type}`, htmlEmail);
+        const settings = await Settings.findOne();
+        const supportEmail = settings ? settings.supportEmail : 'admin@ravn.club';
+        await sendViaEmailJS(supportEmail, `New Message: ${req.body.type}`, htmlEmail);
 
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to save message" }); }
@@ -209,11 +219,18 @@ app.post('/api/register', async (req, res) => {
         const memberId = 'RVN-' + Math.random().toString(36).substr(2, 6).toUpperCase();
         const isFree = req.body.paymentMethod.includes('Free');
         
+        let expiryDate = null;
+        if (isFree) {
+            expiryDate = new Date();
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Grants exactly 1 year of access
+        }
+        
         const newMember = new Member({
             ...req.body,
             memberId,
             paymentStatus: isFree ? 'Paid' : 'Pending',
-            paymentVerified: isFree
+            paymentVerified: isFree,
+            subscriptionExpiry: expiryDate
         });
         await newMember.save();
 
@@ -242,7 +259,15 @@ app.post('/api/register/verify', async (req, res) => {
         const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
 
         if (expectedSignature === razorpay_signature) {
-            const member = await Member.findOneAndUpdate({ memberId }, { paymentStatus: 'Paid', paymentMethod: 'Razorpay', paymentVerified: true });
+            const expiryDate = new Date();
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1); // 1-Year Access
+            
+            const member = await Member.findOneAndUpdate(
+                { memberId }, 
+                { paymentStatus: 'Paid', paymentMethod: 'Razorpay', paymentVerified: true, subscriptionExpiry: expiryDate },
+                { new: true }
+            );
+            
             const htmlEmail = `
                 <div style="font-family: sans-serif; padding: 20px;">
                     <h2>Welcome to RAVN, ${member.name}! 🎉</h2>
@@ -267,7 +292,7 @@ app.post('/api/public/events/:id/rsvp', async (req, res) => {
         const existingRSVP = event.attendees.find(a => a.email.toLowerCase() === req.body.email.toLowerCase());
         if(existingRSVP) return res.status(400).json({ error: "You have already registered for this event!" });
 
-        if (event.attendees.length >= event.capacity) {
+        if (event.attendees.length >= event.capacity && event.capacity > 0) {
             event.waitlist.push(req.body);
             await event.save();
             return res.json({ waitlist: true });
@@ -363,7 +388,7 @@ app.post('/api/member/login', async (req, res) => {
 app.put('/api/member/:id/password', async (req, res) => {
     try {
         const hash = await bcrypt.hash(req.body.password, 10);
-        await Member.findOneAndUpdate({ memberId: req.params.id }, { passwordHash: hash });
+        await Member.findOneAndUpdate({ memberId: new RegExp('^' + req.params.id + '$', 'i') }, { passwordHash: hash });
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to set password" }); }
 });
@@ -371,7 +396,7 @@ app.put('/api/member/:id/password', async (req, res) => {
 app.put('/api/member/:id/profile', async (req, res) => {
     try {
         const { phone, address, profilePic } = req.body;
-        await Member.findOneAndUpdate({ memberId: req.params.id }, { phone, address, profilePic });
+        await Member.findOneAndUpdate({ memberId: new RegExp('^' + req.params.id + '$', 'i') }, { phone, address, profilePic });
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to update profile" }); }
 });
@@ -387,14 +412,96 @@ app.get('/api/member/:id/events', async (req, res) => {
     } catch(e) { res.status(500).json({ error: "Failed to fetch events" }); }
 });
 
+// --- RENEWAL SYSTEM ROUTES ---
+app.post('/api/member/:id/renew', async (req, res) => {
+    try {
+        const member = await Member.findOne({ memberId: new RegExp('^' + req.params.id + '$', 'i') });
+        if (!member) return res.status(404).json({ error: "Member not found" });
+
+        const settings = await Settings.findOne();
+        const amount = (settings.membershipFee || 500) * 100;
+        
+        const order = await razorpay.orders.create({ amount: amount, currency: "INR", receipt: `RNW-${member.memberId}` });
+        res.json({ success: true, order, key: process.env.RAZORPAY_KEY_ID });
+    } catch(e) { res.status(500).json({ error: "Failed to initiate renewal." }); }
+});
+
+app.post('/api/member/:id/renew/verify', async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
+
+        if (expectedSignature === razorpay_signature) {
+            const member = await Member.findOne({ memberId: new RegExp('^' + req.params.id + '$', 'i') });
+            
+            // Calculate new expiry: If already expired, start from today. If active, add 1 year to current expiry.
+            let newExpiry = member.subscriptionExpiry ? new Date(member.subscriptionExpiry) : new Date();
+            if (newExpiry < new Date()) newExpiry = new Date(); 
+            newExpiry.setFullYear(newExpiry.getFullYear() + 1);
+
+            member.subscriptionExpiry = newExpiry;
+            member.paymentStatus = 'Paid';
+            await member.save();
+
+            const htmlEmail = `<div style="font-family: sans-serif; padding: 20px;"><h2>Renewal Successful! 🎉</h2><p>Hi ${member.name}, your annual club membership has been extended to ${newExpiry.toLocaleDateString()}. Thank you for staying with us!</p></div>`;
+            await sendViaEmailJS(member.email, 'RAVN Membership Renewed!', htmlEmail);
+            res.json({ success: true, newExpiry });
+        } else {
+            res.status(400).json({ error: "Invalid payment signature" });
+        }
+    } catch(e) { res.status(500).json({ error: "Verification failed." }); }
+});
+// ------------------------------
+
+// ROBUST CANCELLATION & REFUND TICKET LOGIC
 app.delete('/api/member/:id/events/:eventId/rsvp', async (req, res) => {
     try {
         const event = await Event.findById(req.params.eventId);
         if(!event) return res.status(404).json({ error: "Event not found" });
 
-        event.attendees = event.attendees.filter(a => a.memberId !== req.params.id);
+        const memberData = await Member.findOne({ memberId: new RegExp('^' + req.params.id + '$', 'i') });
+        if (!memberData) return res.status(404).json({ error: "Member not found" });
 
-        if (event.waitlist.length > 0 && event.attendees.length < event.capacity) {
+        const safeEmail = memberData.email ? memberData.email.toLowerCase() : '';
+        
+        // Find attendee matching EITHER exact MemberId or Email
+        const attendeeRecord = event.attendees.find(a => 
+            (a.memberId && a.memberId.toUpperCase() === memberData.memberId.toUpperCase()) || 
+            (a.email && safeEmail && a.email.toLowerCase() === safeEmail)
+        );
+        
+        const { upiId } = req.body || {}; 
+
+        // CREATE A REFUND TICKET IF THE EVENT WAS PAID AND THEY WERE VERIFIED
+        if (attendeeRecord && event.isPayable && attendeeRecord.status === 'Verified') {
+            let fee = event.eventFee;
+            if (event.tiers && event.tiers.length > 0 && attendeeRecord.tier) {
+                const tier = event.tiers.find(t => t.name === attendeeRecord.tier);
+                if (tier) fee = tier.price;
+            }
+            
+            await Refund.create({
+                memberId: memberData.memberId,
+                memberName: memberData.name,
+                email: memberData.email,
+                phone: memberData.phone,
+                upiId: upiId || 'Not provided',
+                eventId: event._id,
+                eventTitle: event.title,
+                amount: fee
+            });
+        }
+
+        // Remove from event attendees utilizing the robust match logic
+        event.attendees = event.attendees.filter(a => {
+            const matchId = a.memberId && a.memberId.toUpperCase() === memberData.memberId.toUpperCase();
+            const matchEmail = a.email && safeEmail && a.email.toLowerCase() === safeEmail;
+            return !(matchId || matchEmail);
+        });
+
+        // Pull from waitlist if applicable
+        if (event.waitlist.length > 0 && event.capacity > 0 && event.attendees.length < event.capacity) {
             const nextInLine = event.waitlist.shift();
             event.attendees.push({ ...nextInLine, status: 'Verified' });
             
@@ -404,13 +511,25 @@ app.delete('/api/member/:id/events/:eventId/rsvp', async (req, res) => {
 
         await event.save();
         res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: "Cancellation failed" }); }
+    } catch(e) { 
+        console.error("Cancellation Error:", e);
+        res.status(500).json({ error: "Cancellation failed" }); 
+    }
 });
 
 app.get('/api/member/:id/vault', async (req, res) => {
     try {
         const member = await Member.findOne({ memberId: new RegExp('^' + req.params.id + '$', 'i') });
-        const events = await Event.find({ attendees: { $elemMatch: { memberId: member.memberId, status: 'Verified' } }, "resources.0": { $exists: true } });
+        if(!member) return res.status(404).json({ error: "Member not found" });
+
+        const safeEmail = member.email ? member.email.toLowerCase() : 'no-email-set';
+        const events = await Event.find({ 
+            attendees: { $elemMatch: { 
+                $or: [{ memberId: member.memberId }, { email: safeEmail }], 
+                status: 'Verified' 
+            }}, 
+            "resources.0": { $exists: true } 
+        });
         res.json(events.map(e => ({ title: e.title, date: e.date, resources: e.resources })));
     } catch(e) { res.status(500).json({ error: "Failed to fetch vault" }); }
 });
@@ -438,9 +557,10 @@ app.get('/api/admin/data', verifyToken, async (req, res) => {
         const messages = await Message.find().sort({ date: -1 });
         const notifications = await Notification.find().sort({ timestamp: -1 });
         const settings = await Settings.findOne() || {};
+        const refunds = await Refund.find().sort({ createdAt: -1 }); 
 
         res.json({
-            members, events, messages, notifications, settings,
+            members, events, messages, notifications, settings, refunds,
             statistics: {
                 totalMembers: members.length,
                 pendingMembers: members.filter(m => m.paymentStatus === 'Pending').length,
@@ -493,6 +613,13 @@ app.delete('/api/admin/events/:id', verifyToken, async (req, res) => {
         await Event.findByIdAndDelete(req.params.id);
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to delete event" }); }
+});
+
+app.put('/api/admin/refunds/:id/settle', verifyToken, async (req, res) => {
+    try {
+        await Refund.findByIdAndUpdate(req.params.id, { status: 'Settled', settledAt: Date.now() });
+        res.json({ success: true });
+    } catch(e) { res.status(500).json({ error: "Failed to settle refund" }); }
 });
 
 app.put('/api/admin/events/:id/toggle', verifyToken, async (req, res) => {
@@ -652,5 +779,5 @@ app.post('/api/admin/webhook/sms', async (req, res) => {
 // ==========================================
 // 9. START SERVER
 // ==========================================
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`RAVN Backend securely running on port ${PORT} 🛡️`));

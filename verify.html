@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAVN | Clubhouse Scanner 📸</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="assets/tailwind.js"></script>
+    <script src="assets/phosphor.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,8 +41,7 @@
         #reader__dashboard_section_csr button { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%) !important; color: #ffffff !important; border: none !important; padding: 12px 24px !important; border-radius: 100px !important; font-weight: 700 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 13px !important; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important; transition: all 0.3s ease; }
         #reader__dashboard_section_csr button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important; }
     </style>
-    <link rel="manifest" href="/manifest.json">
-</head>
+    </head>
 
 <body class="min-h-screen flex flex-col antialiased selection:bg-ravn-primary selection:text-white relative">
 
@@ -189,15 +188,6 @@
         }
     </script>
 
-    <!-- RAVN Offline PWA Engine -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
-                    .catch(err => console.error('Offline Engine Failed:', err));
-            });
-        }
-    </script>
+    
 </body>
 </html>

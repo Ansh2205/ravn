@@ -109,7 +109,6 @@
             gap: 16px;
         }
     </style>
-    <link rel="manifest" href="/manifest.json">
 </head>
 
 <body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
@@ -148,7 +147,7 @@
                 <i class="ph-bold ph-list text-3xl"></i>
             </button>
 
-            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel !bg-white/95 backdrop-blur-2xl border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-2xl">
                 <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
                 <a href="events.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
                 <a href="about.html" class="text-base font-bold text-ravn-primary py-2 flex justify-between">About Us <span>✨</span></a>
@@ -340,17 +339,6 @@
         }, { threshold: 0.1 });
 
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-    </script>
-
-    <!-- RAVN Offline PWA Engine -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
-                    .catch(err => console.error('Offline Engine Failed:', err));
-            });
-        }
     </script>
 </body>
 </html>

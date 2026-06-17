@@ -8,6 +8,7 @@
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
     <!-- Friendly, Round, Modern Font: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -172,7 +173,6 @@
         .step-dot { transition: all 0.3s ease; }
         .step-line { transition: all 0.3s ease; }
     </style>
-    <link rel="manifest" href="/manifest.json">
 </head>
 
 <body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
@@ -212,7 +212,7 @@
                 <i class="ph-bold ph-list text-3xl"></i>
             </button>
 
-            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-lg">
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full glass-panel !bg-white/95 backdrop-blur-2xl border border-ravn-border rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-2xl">
                 <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
                 <a href="events.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
                 <a href="about.html" class="text-base font-semibold text-ravn-textMuted hover:text-ravn-primary py-2 flex justify-between">About Us <span>✨</span></a>
@@ -329,24 +329,22 @@
                                 </div>
 
                                 <!-- Dynamic Payment State -->
-                                <div id="paymentState" class="hidden flex-col items-center space-y-6">
+                                <div id="paymentState" class="hidden flex-col items-center space-y-6 py-6">
                                     <div class="text-center">
                                         <p class="text-xs font-bold text-ravn-textMuted mb-2">Lifetime Access Fee 🍕</p>
                                         <h3 class="text-4xl font-extrabold text-ravn-textMain">₹<span id="feeAmount">500</span></h3>
                                     </div>
-                                    <div class="p-3 bg-white rounded-3xl shadow-sm border border-gray-200 mx-auto w-fit">
-                                        <img id="upiQrCode" src="" class="w-40 h-40 object-cover rounded-[20px]">
-                                    </div>
-                                    <div class="w-full flex flex-col gap-2">
-                                        <label class="text-xs font-bold text-ravn-textMain ml-1 text-center">Enter your UPI Reference (12-Digits) 🧾</label>
-                                        <input type="text" id="utrInput" placeholder="0000 0000 0000" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-mono tracking-widest text-base shadow-sm">
+                                    <div class="p-6 bg-white rounded-[24px] shadow-sm border border-gray-100 w-full text-center">
+                                        <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100"><i class="ph-fill ph-shield-check text-2xl"></i></div>
+                                        <h4 class="font-extrabold text-ravn-textMain text-lg mb-2">Secure Checkout</h4>
+                                        <p class="text-sm font-medium text-ravn-textMuted">We use Razorpay to process payments safely via UPI, Credit Card, and NetBanking. Instant approval.</p>
                                     </div>
                                 </div>
 
                                 <div class="pt-4 flex gap-4">
                                     <button type="button" onclick="goToStep(3, 2)" class="btn-glass w-1/3 py-4 text-sm">Back</button>
                                     <button type="submit" id="submitRegBtn" class="btn-glow w-2/3 py-4 text-sm gap-2">
-                                        <span>Join the Club</span> <span class="text-lg">🫂</span>
+                                        <span id="btnText">Proceed to Pay</span> <span class="text-lg">💳</span>
                                     </button>
                                 </div>
                             </div>
@@ -548,25 +546,25 @@
                 const upiId = data.settings ? data.settings.upiId : 'ravn@bank';
 
                 if (isPromoActive) {
-                    isFirst100 = true;
-                    document.getElementById('capacityBadge').classList.remove('hidden');
-                    document.getElementById('capacityBadge').classList.add('flex');
-                    document.getElementById('promoState').classList.remove('hidden');
-                    document.getElementById('promoState').classList.add('flex');
-                    document.getElementById('paymentState').classList.add('hidden');
-                    document.getElementById('paymentState').classList.remove('flex');
-                } else {
-                    isFirst100 = false;
-                    document.getElementById('feeAmount').textContent = feeAmount;
-                    const qrUrl = `upi://pay?pa=${upiId}&pn=RAVN%20Club&cu=INR&am=${feeAmount}`;
-                    document.getElementById('upiQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}&color=000000&bgcolor=ffffff`;
+                isFirst100 = true;
+                document.getElementById('capacityBadge').classList.remove('hidden');
+                document.getElementById('capacityBadge').classList.add('flex');
+                document.getElementById('promoState').classList.remove('hidden');
+                document.getElementById('promoState').classList.add('flex');
+                document.getElementById('paymentState').classList.add('hidden');
+                document.getElementById('paymentState').classList.remove('flex');
+                document.getElementById('btnText').textContent = "Join the Club";
+            } else {
+                isFirst100 = false;
+                document.getElementById('feeAmount').textContent = feeAmount;
 
-                    document.getElementById('paymentState').classList.remove('hidden');
-                    document.getElementById('paymentState').classList.add('flex');
-                    document.getElementById('promoState').classList.add('hidden');
-                    document.getElementById('promoState').classList.remove('flex');
-                }
-            } catch (err) {
+                document.getElementById('paymentState').classList.remove('hidden');
+                document.getElementById('paymentState').classList.add('flex');
+                document.getElementById('promoState').classList.add('hidden');
+                document.getElementById('promoState').classList.remove('flex');
+                document.getElementById('btnText').textContent = "Proceed to Pay";
+            }
+        } catch (err) {
                 isFirst100 = false;
                 document.getElementById('paymentState').classList.remove('hidden');
                 document.getElementById('paymentState').classList.add('flex');
@@ -590,16 +588,10 @@
         // --- SUBMISSION ---
         document.getElementById('multiStepForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            let utr = "";
-            if (!isFirst100) {
-                utr = document.getElementById('utrInput').value.trim();
-                if(utr.length < 8) { alert("Please double-check your UPI Reference Number. 🤔"); return; }
-            }
 
             const submitBtn = document.getElementById('submitRegBtn');
             const origHtml = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>';
+            submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Processing...';
             submitBtn.disabled = true;
 
             const payload = {
@@ -609,7 +601,7 @@
                 age: document.getElementById('regAge').value,
                 gender: document.getElementById('regGender').value,
                 address: document.getElementById('regAddress').value.trim(),
-                paymentMethod: isFirst100 ? "Free Promo Entry" : `UPI (UTR: ${utr})`
+                paymentMethod: isFirst100 ? "Free Promo Entry" : "Razorpay"
             };
 
             try {
@@ -622,7 +614,44 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);
 
-                renderSuccess(payload.name, data.memberId);
+                if (data.pending) {
+                    // Open Razorpay Checkout
+                    const options = {
+                        "key": data.key,
+                        "amount": data.order.amount,
+                        "currency": "INR",
+                        "name": "RAVN Community",
+                        "description": "Lifetime Membership",
+                        "order_id": data.order.id,
+                        "handler": async function (response) {
+                            try {
+                                submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...';
+                                const verifyRes = await fetch('/api/register/verify', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ ...response, memberId: data.memberId })
+                                });
+                                const verifyData = await verifyRes.json();
+                                if (!verifyRes.ok) throw new Error(verifyData.error);
+                                renderSuccess(payload.name, verifyData.memberId);
+                            } catch (err) {
+                                alert("Verification Failed: " + err.message);
+                                submitBtn.innerHTML = origHtml;
+                                submitBtn.disabled = false;
+                            }
+                        },
+                        "theme": { "color": "#FF6B6B" }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response){
+                        alert("Payment Failed. Please try again.");
+                        submitBtn.innerHTML = origHtml;
+                        submitBtn.disabled = false;
+                    });
+                    rzp.open();
+                } else {
+                    renderSuccess(payload.name, data.memberId);
+                }
             } catch (err) {
                 alert("Oops! Something went wrong on our end. " + (err.message || "Please try again!"));
                 submitBtn.innerHTML = origHtml;
@@ -635,17 +664,6 @@
             document.getElementById('displayMemberName').textContent = name;
             document.getElementById('displayMemberId').textContent = id;
             document.getElementById('idQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(id)}&color=000000&bgcolor=ffffff`;
-        }
-    </script>
-
-    <!-- RAVN Offline PWA Engine -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
-                    .catch(err => console.error('Offline Engine Failed:', err));
-            });
         }
     </script>
 </body>

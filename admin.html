@@ -54,7 +54,6 @@
         .tab-content { display: none; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         .tab-content.active { display: block; }
     </style>
-    <link rel="manifest" href="/manifest.json">
 </head>
 
 <body class="h-screen flex flex-col antialiased selection:bg-ravn-primary selection:text-white relative">
@@ -471,12 +470,6 @@
                     <p id="rosterTitle" class="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading...</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <!-- NEW 0-COMMISSION UTR SCANNER -->
-                    <input type="file" id="bankCsvUpload" accept=".csv,.txt,.xls,.xlsx" class="hidden" onchange="processBankStatement(event)">
-                    <button onclick="document.getElementById('bankCsvUpload').click()" class="btn-glow !py-2.5 !px-5 text-[11px] gap-2 !bg-gradient-to-r !from-green-400 !to-emerald-500 shadow-green-500/30">
-                        <i class="ph-bold ph-bank text-lg"></i> Bank Auto-Verify
-                    </button>
-                    
                     <button onclick="document.getElementById('vaultUploadBox').classList.toggle('hidden')" class="btn-glass !py-2.5 !px-5 text-[11px] gap-2">
                         <i class="ph-bold ph-backpack text-lg"></i> Add to Backpack
                     </button>
@@ -502,7 +495,7 @@
                 <div class="overflow-x-auto mb-12 bg-white rounded-[24px] border border-gray-100 shadow-sm">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50/80 text-[10px] font-extrabold uppercase tracking-widest text-gray-400 border-b border-gray-100">
-                            <tr><th class="px-6 py-5">Friend</th><th class="px-6 py-5">Ticket</th><th class="px-6 py-5">Payment Status</th><th class="px-6 py-5 text-right">Actions</th></tr>
+                            <tr><th class="px-6 py-5">Friend</th><th class="px-6 py-5">Ticket</th><th class="px-6 py-5">Payment Ref</th><th class="px-6 py-5 text-right">Actions</th></tr>
                         </thead>
                         <tbody id="attendeesList" class="divide-y divide-gray-50"></tbody>
                     </table>
@@ -820,8 +813,8 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4"><h4 class="text-sm font-extrabold text-ravn-textMain">${a.name}</h4><p class="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md w-fit mt-1">${a.memberId || a.email}</p></td>
                         <td class="px-6 py-4"><span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-100">${a.tier || 'Standard'}</span></td>
-                        <td class="px-6 py-4"><span class="status-badge status-${(a.status || 'pending').toLowerCase()} mb-1 block w-fit">${a.status || 'Pending'}</span><span class="text-[9px] text-gray-400 uppercase tracking-widest font-mono font-bold">${a.utr || ''}</span></td>
-                        <td class="px-6 py-4 text-right">${(currentRole === 'Core' || currentRole === 'Finance') && a.status === 'Pending' ? `<button onclick="verifyEventAttendee('${id}', '${a._id}')" class="btn-glow !py-1.5 !px-3 text-[10px] shadow-sm">Verify Pass</button>` : `<span class="text-[10px] text-green-500 uppercase font-extrabold tracking-widest bg-green-50 px-3 py-1.5 rounded-full border border-green-100"><i class="ph-bold ph-check"></i> Good to go</span>`}</td>
+                        <td class="px-6 py-4"><span class="status-badge status-${(a.status || 'pending').toLowerCase()} mb-1 block w-fit">${a.status || 'Pending'}</span><span class="text-[9px] text-gray-400 uppercase tracking-widest font-mono font-bold truncate max-w-[120px] block" title="${a.utr || ''}">${a.utr || 'N/A'}</span></td>
+                        <td class="px-6 py-4 text-right">${(currentRole === 'Core' || currentRole === 'Finance') && a.status === 'Pending' ? `<button onclick="verifyEventAttendee('${id}', '${a._id}')" class="btn-glow !py-1.5 !px-3 text-[10px] shadow-sm">Force Verify</button>` : `<span class="text-[10px] text-green-500 uppercase font-extrabold tracking-widest bg-green-50 px-3 py-1.5 rounded-full border border-green-100"><i class="ph-bold ph-check"></i> Good to go</span>`}</td>
                     </tr>
                 `).join('') || '<tr><td colspan="4" class="text-center text-gray-400 py-10 font-bold text-sm uppercase tracking-widest">Nobody has RSVP\'d yet.</td></tr>';
 
@@ -837,51 +830,13 @@
 
         document.getElementById('exportCsvBtn').addEventListener('click', () => {
             if (!window.currentEventAttendees.length) return showToast("Nobody to download!", "error");
-            let csvContent = "data:text/csv;charset=utf-8,Name,Email,Type,Status,UTR\n";
+            let csvContent = "data:text/csv;charset=utf-8,Name,Email,Type,Status,PaymentRef\n";
             window.currentEventAttendees.forEach(a => { csvContent += `"${a.name}","${a.email}",${a.memberId ? 'Club Member' : 'Guest'},${a.status || 'Pending'},${a.utr || "N/A"}\n`; });
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `GuestList.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Downloading CSV! 📊");
         });
 
         async function verifyEventAttendee(eventId, subId) {
             try { await fetch(`/api/admin/events/${eventId}/verify/${subId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Pass verified! 🎫"); viewAttendees(eventId); fetchData(); } catch(e) { showToast("Verification failed.", "error"); }
-        }
-
-        // ZERO COMMISSION UTR EXTRACTOR
-        function processBankStatement(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const text = e.target.result;
-                // Regex to find 12-digit Indian UPI UTR numbers
-                const utrMatches = text.match(/\b\d{12}\b/g) || [];
-                const uniqueUtrs = [...new Set(utrMatches)];
-
-                if (uniqueUtrs.length === 0) {
-                    return showToast("No 12-digit UTRs found in that file.", "error");
-                }
-
-                showToast(`Scanning for ${uniqueUtrs.length} UTRs...`);
-
-                try {
-                    const res = await fetch(`/api/admin/events/${currentEventId}/bulk-verify`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` },
-                        body: JSON.stringify({ utrs: uniqueUtrs })
-                    });
-                    const data = await res.json();
-                    
-                    showToast(`Boom! 💥 Auto-verified ${data.matched} tickets.`);
-                    viewAttendees(currentEventId);
-                    fetchData();
-                } catch (err) {
-                    showToast("Failed to run bulk verification.", "error");
-                }
-            };
-            reader.readAsText(file);
-            // Reset input so you can upload the same file again if needed
-            event.target.value = '';
         }
 
         async function verifyMember(mid) {
@@ -892,17 +847,6 @@
         function toggleModal(id, show) { const m = document.getElementById(id); const content = m.querySelector('div[id$="Content"]'); if(show) { m.classList.remove('hidden'); m.classList.add('flex'); void m.offsetWidth; if(content) { content.classList.remove('scale-95'); content.classList.add('scale-100'); } } else { if(content) { content.classList.add('scale-95'); content.classList.remove('scale-100'); } setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 200); } }
 
         document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { const preloader = document.getElementById('preloader'); if(preloader) { preloader.style.opacity = '0'; setTimeout(() => { preloader.style.display = 'none'; }, 300); } }, 500); });
-    </script>
-
-    <!-- RAVN Offline PWA Engine -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
-                    .catch(err => console.error('Offline Engine Failed:', err));
-            });
-        }
     </script>
 </body>
 </html>

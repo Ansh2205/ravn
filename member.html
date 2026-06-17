@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAVN | The Clubhouse 🛋️</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="assets/tailwind.js"></script>
+    <script src="assets/phosphor.js"></script>
     <!-- Library for downloading the ticket as an image -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
@@ -65,8 +65,7 @@
 
         .dashed-border-b { background-image: linear-gradient(to right, #E5E7EB 50%, transparent 50%); background-position: bottom; background-size: 12px 2px; background-repeat: repeat-x; }
     </style>
-    <link rel="manifest" href="/manifest.json">
-</head>
+    </head>
 
 <body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
     
@@ -799,15 +798,6 @@
         });
     </script>
 
-    <!-- RAVN Offline PWA Engine -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
-                    .catch(err => console.error('Offline Engine Failed:', err));
-            });
-        }
-    </script>
+    
 </body>
 </html>

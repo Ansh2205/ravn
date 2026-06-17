@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAVN | Your Second Home ✨</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="assets/tailwind.js"></script>
+    <script src="assets/phosphor.js"></script>
     
     <!-- Friendly, Round, Modern Font: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,8 +156,7 @@
         }
         .faq-answer.open { opacity: 1; }
     </style>
-    <link rel="manifest" href="/manifest.json">
-</head>
+    </head>
 
 <body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
 
@@ -634,15 +633,6 @@
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 
-    <!-- RAVN Offline PWA Engine -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(() => console.log('RAVN Offline Engine Active 🛡️'))
-                    .catch(err => console.error('Offline Engine Failed:', err));
-            });
-        }
-    </script>
+    
 </body>
 </html>

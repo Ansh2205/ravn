@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAVN | Secure Your Spot 🎟️</title>
+    <title>RAVN | Event RSVP 🎟️</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- PRE-LOAD RAZORPAY & CAPTURE ENGINES -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Add local QR Code library to fix download bugs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,8 @@
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
                     colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
-                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'fade-in': 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards' },
-                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' }, }, fadeIn: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
+                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'fade-in': 'fadeIn 0.5s ease-out forwards', 'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' } }, fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }, slideUp: { '0%': { opacity: '0', transform: 'translateY(40px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -32,26 +32,27 @@
     <style>
         html { scroll-behavior: smooth; }
         body { background-color: #FAFAF9; color: #1C1917; overflow-x: hidden; }
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-bottom: 1px solid rgba(229, 231, 235, 0.5); }
-        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-bottom: 1px solid rgba(229, 231, 235, 0.5); }
+        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); }
+        
         .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
         .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
-        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0.02em; font-size: 14px; cursor: pointer; border: none; text-decoration: none; }
+        
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; border: none; min-height: 54px; }
         .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
         .btn-glow:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-glass { background: rgba(255, 255, 255, 0.9); color: #1C1917; font-weight: 700; border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; text-decoration: none; }
-        .btn-glass:hover { background: #ffffff; border-color: rgba(255, 107, 107, 0.4); color: #FF6B6B; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); }
-        .slide-container { position: relative; overflow: hidden; width: 100%; transition: height 0.4s ease; }
-        .slide-step { width: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease; position: absolute; top: 0; left: 0; }
-        .step-active { position: relative; transform: translateX(0); opacity: 1; pointer-events: auto; }
-        .step-left { transform: translateX(-120%); opacity: 0; pointer-events: none; }
-        .step-right { transform: translateX(120%); opacity: 0; pointer-events: none; }
-        .dashed-border-b { background-image: linear-gradient(to right, #E5E7EB 50%, transparent 50%); background-position: bottom; background-size: 12px 2px; background-repeat: repeat-x; }
-        @media print { body * { visibility: hidden; } #printableTicketArea, #printableTicketArea * { visibility: visible; } #printableTicketArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; border: none; box-shadow: none; background: white; } .print-hide { display: none !important; } }
+
+        /* Hide scrollbar for ticket tiers */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .tier-card { border: 2px solid #F3F4F6; transition: all 0.3s ease; cursor: pointer; }
+        .tier-card.selected { border-color: #FF6B6B; background-color: #FFF5F5; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.1); }
     </style>
 </head>
 
-<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen">
+<body class="selection:bg-ravn-primary selection:text-white flex flex-col min-h-screen relative">
 
     <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
         <div class="flex flex-col items-center gap-4">
@@ -60,192 +61,173 @@
         </div>
     </div>
 
-    <!-- Ambient Background -->
-    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none print:hidden">
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
-        <div class="absolute bottom-[20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
     </div>
 
-    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full transition-all flex items-center px-6 md:px-8 shadow-sm print:hidden">
+    <nav class="fixed z-50 top-4 left-0 right-0 w-[94%] max-w-7xl mx-auto h-[76px] glass-panel rounded-full flex items-center px-6 md:px-8 shadow-sm">
         <div class="w-full flex justify-between items-center h-full relative">
             <a href="index.html" class="flex items-center gap-2 group">
-                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none';">
+                <img src="RAVN.png" alt="RAVN Logo" class="h-5 w-auto filter brightness-0 opacity-90" onerror="this.style.display='none'; document.getElementById('nav-fallback').style.display='block';">
+                <span id="nav-fallback" style="display: none;" class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN</span>
             </a>
+
             <div class="hidden md:flex items-center space-x-8">
                 <a href="index.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Home 🏠</a>
-                <a href="events.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Adventures ✈️</a>
-                <a href="login.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Clubhouse Login 🛋️</a>
+                <a href="events.html" class="text-sm font-bold text-ravn-primary transition-colors">Adventures ✈️</a>
+                <a href="login.html" class="text-sm font-semibold text-ravn-textMuted hover:text-ravn-primary transition-colors">Clubhouse 🛋️</a>
             </div>
-            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary"><i class="ph-bold ph-list text-3xl"></i></button>
+
+            <button id="mobileMenuBtn" class="md:hidden text-ravn-textMain hover:text-ravn-primary transition-colors">
+                <i class="ph-bold ph-list text-3xl"></i>
+            </button>
+
+            <!-- High Opacity Mobile Menu -->
+            <div id="mobileMenu" class="absolute top-[85px] left-0 w-full !bg-white/98 backdrop-blur-3xl border border-gray-200 rounded-3xl hidden flex-col py-6 px-6 space-y-4 z-[60] shadow-2xl">
+                <a href="index.html" class="text-base font-semibold text-ravn-textMuted py-2 flex justify-between">Home <span>🏠</span></a>
+                <a href="events.html" class="text-base font-bold text-ravn-primary py-2 flex justify-between">Adventures <span>✈️</span></a>
+                <div class="h-px w-full bg-gray-200 my-2"></div>
+                <a href="login.html" class="text-base font-semibold text-ravn-textMain py-2 flex justify-between">Clubhouse Login <span>🛋️</span></a>
+                <a href="register.html" class="text-base font-extrabold text-ravn-primary py-2 flex justify-between">Join the Club <span>🫂</span></a>
+            </div>
         </div>
     </nav>
 
-    <main class="relative z-10 px-4 md:px-6 pt-[120px] pb-24 flex-grow flex items-start justify-center print:hidden">
-        
-        <!-- Max-w-6xl for the side-by-side layout -->
-        <div class="container mx-auto max-w-6xl w-full">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+    <main class="relative z-10 px-6 pt-[140px] pb-24 flex-grow flex items-center justify-center">
+        <div class="container mx-auto max-w-5xl">
+            
+            <div id="loadingState" class="text-center py-20 animate-fade-in">
+                <i class="ph-bold ph-spinner-gap animate-spin text-5xl text-ravn-primary mb-4"></i>
+                <h2 class="text-xl font-extrabold tracking-tight text-ravn-textMain">Fetching details...</h2>
+            </div>
 
-                <!-- LEFT COLUMN: EVENT DETAILS -->
-                <div id="eventDetailsBlock" class="lg:col-span-5 glass-card p-8 md:p-10 relative overflow-hidden bg-white/60 hidden lg:sticky lg:top-[120px]">
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span id="evTag" class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-extrabold uppercase tracking-widest shadow-sm">Public Event</span>
-                        <span id="evSpots" class="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-[10px] font-extrabold uppercase tracking-widest shadow-sm">Loading Spots...</span>
-                    </div>
+            <div id="errorState" class="hidden text-center py-20 bg-white/60 rounded-[32px] border border-gray-200 shadow-sm animate-fade-in">
+                <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="ph-bold ph-calendar-x text-4xl"></i></div>
+                <h2 class="text-3xl font-extrabold tracking-tight text-ravn-textMain mb-2">Event Not Found</h2>
+                <p class="text-ravn-textMuted font-medium mb-8">This adventure might have been canceled or the link is broken.</p>
+                <a href="events.html" class="btn-glow">View Upcoming Plans</a>
+            </div>
+
+            <div id="rsvpState" class="hidden grid grid-cols-1 lg:grid-cols-5 gap-8 items-start animate-slide-up">
+                
+                <!-- Event Details (Left) -->
+                <div class="lg:col-span-2 glass-card p-8 bg-white/60">
+                    <div class="w-14 h-14 bg-ravn-primary/10 text-ravn-primary rounded-2xl flex items-center justify-center mb-6 border border-ravn-primary/20"><i class="ph-fill ph-ticket text-3xl"></i></div>
                     
-                    <h2 id="evTitle" class="text-3xl md:text-4xl font-extrabold tracking-tight text-ravn-textMain mb-4 leading-tight">Loading Details...</h2>
-                    <p id="evDesc" class="text-ravn-textMuted font-medium text-sm leading-relaxed mb-8">Fetching the adventure plan from the group chat...</p>
+                    <span id="eventDateBadge" class="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-extrabold uppercase tracking-widest mb-3">Loading...</span>
+                    <h1 id="eventTitle" class="text-3xl font-extrabold text-ravn-textMain mb-4 leading-tight">Event Title</h1>
+                    <p id="eventDesc" class="text-sm font-medium text-ravn-textMuted leading-relaxed mb-6">Event description will go here.</p>
                     
-                    <div class="space-y-5 border-t border-gray-200 pt-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-[16px] bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100 shadow-sm"><i class="ph-fill ph-calendar-blank text-2xl"></i></div>
+                    <div class="space-y-4 pt-6 border-t border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ph-fill ph-map-pin text-xl"></i></div>
                             <div>
-                                <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-0.5">Date & Time</p>
-                                <p class="text-sm font-bold text-ravn-textMain" id="evDate">TBA</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Venue</p>
+                                <p id="eventVenue" class="text-sm font-extrabold text-ravn-textMain">Loading...</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-[16px] bg-red-50 text-ravn-primary flex items-center justify-center shrink-0 border border-red-100 shadow-sm"><i class="ph-fill ph-map-pin text-2xl"></i></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-50 text-green-500 flex items-center justify-center"><i class="ph-fill ph-users text-xl"></i></div>
                             <div>
-                                <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-0.5">Location</p>
-                                <p class="text-sm font-bold text-ravn-textMain" id="evVenue">TBA</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Availability</p>
+                                <p id="eventCapacity" class="text-sm font-extrabold text-ravn-textMain">Checking spots...</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: REGISTRATION FORM -->
-                <div id="registrationBlock" class="lg:col-span-7 glass-card p-8 md:p-12 relative overflow-hidden bg-white/60 hidden">
-                    
-                    <!-- Progress Dots -->
-                    <div class="flex items-center justify-center w-full max-w-xs mx-auto mb-10 relative z-10">
-                        <div id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm">1</div>
-                        <div id="line1" class="step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full"></div>
-                        <div id="dot2" class="step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400">2</div>
-                    </div>
+                <!-- Registration Form (Right) -->
+                <div class="lg:col-span-3 glass-card p-8 md:p-10 bg-white/80 relative">
+                    <h2 class="text-2xl font-extrabold text-ravn-textMain mb-2">Secure your spot 🙋‍♂️</h2>
+                    <p class="text-sm font-medium text-ravn-textMuted mb-8">Fill out the details below. Passes will be sent to your email.</p>
 
-                    <form id="publicRsvpForm" class="relative z-10">
-                        <div class="slide-container" id="slideWrapper">
-                            
-                            <!-- Step 1: Info -->
-                            <div id="step1" class="slide-step step-active">
-                                <div class="space-y-6 text-left">
-                                    <h3 class="text-xl font-extrabold text-ravn-textMain mb-2 text-center md:text-left">Let's get you on the list 📝</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="flex flex-col gap-2">
-                                            <label class="text-xs font-bold text-ravn-textMain ml-1">Name 🙋‍♂️</label>
-                                            <input type="text" id="gName" required placeholder="e.g. Alex" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="text-xs font-bold text-ravn-textMain ml-1">Phone 📱</label>
-                                            <input type="tel" id="gPhone" required placeholder="123-456-7890" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-xs font-bold text-ravn-textMain ml-1">Email 📧</label>
-                                        <input type="email" id="gEmail" required placeholder="alex@email.com" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
-                                    </div>
-                                    <div class="pt-2">
-                                        <button type="button" onclick="goToStep(1, 2)" class="btn-glow w-full py-4 text-sm gap-2">
-                                            <span>Next Step</span> <i class="ph-bold ph-arrow-right text-lg"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                    <form id="rsvpForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-ravn-textMain ml-1">Full Name</label>
+                                <input type="text" id="rName" required placeholder="John Doe" class="friendly-input w-full px-5 py-4 rounded-[20px] font-medium text-sm shadow-sm">
                             </div>
-
-                            <!-- Step 2: Payment/Confirmation -->
-                            <div id="step2" class="slide-step step-right">
-                                <div class="space-y-6 text-left">
-                                    <h3 class="text-xl font-extrabold text-ravn-textMain mb-2 text-center md:text-left">Checkout 🎟️</h3>
-                                    
-                                    <div id="freeState" class="hidden flex-col items-center justify-center py-8 bg-green-50/50 border border-green-100 rounded-[24px] text-center px-6 shadow-inner">
-                                        <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm mb-4 border border-green-100"><i class="ph-fill ph-ticket text-3xl text-green-500"></i></div>
-                                        <h4 class="text-lg font-extrabold text-ravn-textMain mb-2">Free Entry! 🎉</h4>
-                                        <p class="text-sm text-ravn-textMuted font-medium">Just confirm your details below to secure your spot.</p>
-                                    </div>
-
-                                    <div id="paidState" class="hidden flex-col items-center space-y-6 py-4">
-                                        <div class="flex flex-col gap-2 w-full" id="tierSelectionBox">
-                                            <label class="text-xs font-bold text-ravn-textMain ml-1">Select your pass type</label>
-                                            <select id="gTier" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium appearance-none shadow-sm cursor-pointer"></select>
-                                        </div>
-                                        <div class="p-6 bg-white rounded-[24px] shadow-sm border border-gray-100 w-full text-center mt-2">
-                                            <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100"><i class="ph-fill ph-shield-check text-xl"></i></div>
-                                            <h4 class="font-extrabold text-ravn-textMain text-sm mb-1">Secure Checkout</h4>
-                                            <p class="text-xs font-medium text-ravn-textMuted">Payments processed instantly via Razorpay.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="pt-4 flex gap-4">
-                                        <button type="button" onclick="goToStep(2, 1)" class="btn-glass w-1/3 py-4 text-sm">Back</button>
-                                        <button type="submit" id="submitBtn" class="btn-glow w-2/3 py-4 text-sm gap-2">
-                                            <span id="btnText">Confirm RSVP</span> <i class="ph-bold ph-check-circle text-lg"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-ravn-textMain ml-1">Email Address</label>
+                                <input type="email" id="rEmail" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" placeholder="john@email.com" class="friendly-input w-full px-5 py-4 rounded-[20px] font-medium text-sm shadow-sm">
                             </div>
-
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-ravn-textMain ml-1">Phone Number</label>
+                                <input type="tel" id="rPhone" required pattern="[6-9]\d{9}" title="Please enter a valid 10-digit Indian mobile number" placeholder="9876543210" maxlength="10" class="friendly-input w-full px-5 py-4 rounded-[20px] font-medium text-sm shadow-sm">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-ravn-textMain ml-1">Member ID <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" id="rMemberId" placeholder="RVN-XXXXXX" class="friendly-input w-full px-5 py-4 rounded-[20px] font-mono font-medium text-sm shadow-sm uppercase">
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Tiers Selection -->
+                        <div id="tiersSection" class="hidden flex flex-col gap-2 pt-2">
+                            <label class="text-xs font-bold text-ravn-textMain ml-1">Select Pass Type 🎟️</label>
+                            <div id="tiersContainer" class="flex overflow-x-auto gap-4 pb-2 no-scrollbar">
+                                <!-- Tiers generated here -->
+                            </div>
+                            <input type="hidden" id="selectedTier" value="">
+                        </div>
+
+                        <div id="paymentAlert" class="hidden p-4 rounded-[16px] bg-orange-50 border border-orange-100 flex items-center gap-3 text-orange-600">
+                            <i class="ph-bold ph-wallet text-2xl shrink-0"></i>
+                            <div>
+                                <p class="text-xs font-extrabold uppercase tracking-widest mb-0.5">Paid Event</p>
+                                <p class="text-sm font-medium text-orange-700 leading-tight">You will be redirected to Razorpay to complete your booking securely.</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn-glow w-full py-4 text-sm mt-4 gap-2">
+                            <span id="btnText">Complete Registration</span> <i class="ph-bold ph-arrow-right text-lg"></i>
+                        </button>
                     </form>
                 </div>
-
-                <div id="errorState" class="lg:col-span-12 hidden flex-col items-center justify-center text-center py-20 glass-card max-w-2xl mx-auto mt-10 bg-white/60">
-                    <div class="w-24 h-24 rounded-[24px] bg-red-50 flex items-center justify-center text-red-500 mb-6 border border-red-100 shadow-sm">
-                        <i class="ph-bold ph-warning-circle text-5xl"></i>
-                    </div>
-                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-ravn-textMain">Event Unavailable.</h2>
-                    <p class="text-ravn-textMuted text-base font-medium mb-10 max-w-md mx-auto" id="errorMsgText">
-                        This initiative is either members-only, fully booked, or the URL provided is invalid.
-                    </p>
-                    <div class="flex gap-4">
-                        <a href="index.html" class="btn-glass px-8 py-3.5 text-sm">Return Home</a>
-                        <a href="login.html" class="btn-glow px-8 py-3.5 text-sm hidden" id="errLoginBtn">Head to Clubhouse</a>
-                    </div>
-                </div>
-
             </div>
-        </div>
-    </main>
 
-    <!-- Scrollable Success Modal Overlay (Fixes Clipping) -->
-    <div id="successModal" class="fixed inset-0 z-[100] hidden overflow-y-auto bg-gray-900/60 backdrop-blur-md transition-opacity duration-300 opacity-0 print:!block print:!opacity-100 print:!bg-transparent">
-        <div class="min-h-screen px-4 py-12 flex items-center justify-center">
-            
-            <div class="w-full max-w-sm flex flex-col items-center transform scale-95 transition-transform duration-300 relative mt-8" id="successModalContent">
+            <div id="successState" class="hidden text-center animate-fade-in relative w-full max-w-md mx-auto pt-8">
+                <h2 class="text-4xl font-extrabold tracking-tight text-ravn-textMain mb-2">You're in! 🎉</h2>
+                <p class="text-ravn-textMuted font-medium mb-8">Your spot is secured. Save your digital pass below.</p>
                 
-                <button onclick="closeSuccessModal()" class="print-hide absolute -top-12 right-0 text-white hover:text-gray-200 transition-colors w-10 h-10 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 z-50">
-                    <i class="ph-bold ph-x text-xl"></i>
-                </button>
-
-                <!-- The Printable/Downloadable Ticket Area -->
-                <div id="printableTicketArea" class="w-full bg-white rounded-[32px] overflow-hidden shadow-2xl relative">
-                    <div class="bg-ravn-textMain text-white p-6 text-center relative overflow-hidden">
+                <div id="printableTicketArea" class="w-full bg-white rounded-[32px] overflow-hidden shadow-2xl relative text-left border border-gray-100 flex flex-col">
+                    
+                    <!-- Pass Header -->
+                    <div class="bg-gray-900 text-white p-6 pb-12 text-center relative overflow-hidden shrink-0">
                         <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')]"></div>
                         <div class="relative z-10 flex flex-col items-center">
-                            <span class="px-3 py-1 bg-white/20 rounded-full text-[9px] font-extrabold uppercase tracking-widest mb-3">Confirmed RSVP</span>
+                            <span class="px-3 py-1 bg-white/20 rounded-full text-[9px] font-extrabold uppercase tracking-widest mb-3 backdrop-blur-sm">Event Access Pass</span>
                             <h3 class="text-2xl font-extrabold tracking-tight line-clamp-2" id="passEventTitle">Event Title</h3>
                         </div>
                     </div>
-
-                    <div class="p-8 flex flex-col items-center text-center">
-                        <div class="w-20 h-20 rounded-[24px] p-1 bg-white shadow-sm border border-gray-100 mx-auto -mt-14 relative z-20 flex items-center justify-center text-4xl" id="passEmoji">
-                            👤
+                    
+                    <!-- Pass Body -->
+                    <div class="px-8 pb-6 flex flex-col items-center text-center bg-white relative z-20">
+                        <!-- Profile Pic Overlapping Header with Emoji Fallback -->
+                        <div class="w-20 h-20 rounded-[24px] p-1 bg-white shadow-md border border-gray-100 mx-auto -mt-10 relative z-30">
+                            <div class="w-full h-full rounded-[20px] bg-gray-50 flex items-center justify-center relative overflow-hidden">
+                                <span id="passProfileFallback" class="hidden text-3xl absolute z-0">😎</span>
+                                <img id="passProfilePic" crossorigin="anonymous" src="" class="w-full h-full object-cover relative z-10" onerror="this.style.display='none'; document.getElementById('passProfileFallback').style.display='block';">
+                            </div>
                         </div>
                         
                         <h4 class="text-xl font-extrabold text-ravn-textMain mt-3" id="passGuestName">Guest Name</h4>
-                        <p class="text-[10px] font-mono text-gray-400 font-bold bg-gray-50 px-3 py-1 rounded-full mt-1 border border-gray-100" id="passStatusLabel">PASS SECURED 🎉</p>
+                        <p class="text-[10px] font-mono text-gray-400 font-bold bg-gray-50 px-3 py-1 rounded-full mt-1.5 border border-gray-100" id="passGuestId">ID</p>
                         
                         <div class="w-full h-px bg-gray-100 my-6"></div>
 
                         <div class="w-full grid grid-cols-2 gap-4 text-left mb-6">
                             <div>
                                 <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Date & Time</p>
-                                <p class="text-xs font-bold text-ravn-textMain flex items-center gap-1"><i class="ph-fill ph-calendar-blank text-ravn-primary"></i> <span id="passEventDate">Date</span></p>
+                                <p class="text-xs font-bold text-ravn-textMain flex items-center gap-1.5"><i class="ph-fill ph-calendar-blank text-ravn-primary"></i> <span id="passEventDate">Date</span></p>
                             </div>
                             <div>
                                 <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Pass Type</p>
-                                <p class="text-xs font-bold text-ravn-textMain flex items-center gap-1"><i class="ph-fill ph-ticket text-ravn-accent"></i> <span id="passTier">Standard</span></p>
+                                <p class="text-xs font-bold text-ravn-textMain flex items-center gap-1.5"><i class="ph-fill ph-ticket text-ravn-accent"></i> <span id="passTier">Standard</span></p>
                             </div>
                             <div class="col-span-2">
                                 <p class="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Location</p>
@@ -253,357 +235,326 @@
                             </div>
                         </div>
 
-                        <!-- Replace the Image tag with a pure HTML div for the local QR code generator -->
-                        <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100 w-fit mx-auto mb-4 flex justify-center items-center" style="min-height: 140px; min-width: 140px;">
+                        <!-- Local QR code generator (Untainted) -->
+                        <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100 w-fit mx-auto mb-2 flex justify-center items-center shadow-inner" style="min-height: 140px; min-width: 140px;">
                             <div id="passQrCode" class="mix-blend-multiply"></div>
                         </div>
+                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mt-2">Ref: <span id="passRef" class="text-ravn-primary font-mono ml-1">---</span></p>
                     </div>
 
-                    <div class="bg-gray-50 dashed-border-b pt-6 pb-6 px-6 border-t border-gray-200">
-                        <p class="text-[9px] font-extrabold text-ravn-textMain uppercase tracking-widest mb-2 flex items-center gap-1.5"><i class="ph-fill ph-warning-circle text-ravn-primary"></i> Instructions</p>
+                    <!-- General Instructions Footer -->
+                    <div class="bg-gray-50 pt-5 pb-6 px-6 border-t-2 border-dashed border-gray-200 mt-auto w-full text-left rounded-b-[32px]">
+                        <p class="text-[9px] font-extrabold text-ravn-textMain uppercase tracking-widest mb-2 flex items-center gap-1.5"><i class="ph-fill ph-warning-circle text-ravn-primary text-sm"></i> Guidelines</p>
                         <ul class="text-[10px] font-medium text-gray-500 space-y-1.5 list-disc pl-4">
-                            <li>Save this pass or check your email inbox.</li>
-                            <li>Present this QR code at the event entrance.</li>
-                            <li>Entry is non-transferable. Good vibes only!</li>
+                            <li>Present this digital QR code at the perimeter check-in.</li>
+                            <li>Entry passes are strictly non-transferable.</li>
+                            <li>Bring a valid student or government ID for verification.</li>
                         </ul>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-3 mt-6 w-full print-hide animate-fade-in" style="animation-delay: 0.3s;">
-                    <a href="#" target="_blank" id="addToCalBtn" class="w-full bg-white text-gray-600 hover:text-ravn-primary border border-gray-200 py-3.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 hidden">
-                        <i class="ph-bold ph-calendar-plus text-lg"></i> Add to Calendar
-                    </a>
-                    <button onclick="downloadPassImage()" id="downloadPassBtn" class="w-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 py-3.5 rounded-full font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-download-simple text-lg"></i> Save Pass as Image
+                <div class="flex gap-4 mt-6 w-full pb-8">
+                    <button onclick="downloadPassImage()" id="downloadPassBtn" class="flex-1 bg-ravn-textMain hover:bg-black text-white py-3.5 rounded-full font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg">
+                        <i class="ph-bold ph-download-simple text-lg"></i> Save Pass
                     </button>
+                    <a href="index.html" class="flex-1 bg-white text-ravn-textMain border border-gray-200 py-3.5 rounded-full font-bold text-sm shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-house text-lg"></i> Home
+                    </a>
                 </div>
-
             </div>
-        </div>
-    </div>
 
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="fixed bottom-6 right-6 z-[999] flex flex-col gap-3 pointer-events-none print:hidden"></div>
+        </div>
+    </main>
+
+    <footer class="py-8 text-center border-t border-gray-200/60 bg-white/40 backdrop-blur-md relative z-10">
+        <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">
+            &copy; 2026 RAVN COMMUNITY. ALL SYSTEMS SECURE.
+        </p>
+    </footer>
 
     <script>
+        let isRazorpayLoaded = true;
+        if (typeof Razorpay === 'undefined') {
+            isRazorpayLoaded = false;
+            console.warn("Razorpay script failed to load. AdBlocker active?");
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id');
         let currentEvent = null;
+        let selectedTierPrice = 0;
+        let currentRefId = '';
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            const bgClass = type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-white border-gray-100 text-ravn-textMain shadow-lg';
-            const iconClass = type === 'error' ? 'ph-warning-circle text-red-500' : 'ph-check-circle text-green-500';
-            toast.className = `p-4 rounded-2xl backdrop-blur-md text-sm font-bold flex items-center gap-3 transition-all duration-500 transform translate-y-10 opacity-0 border ${bgClass}`;
-            toast.innerHTML = `<i class="ph-fill ${iconClass} text-xl"></i> <span>${message}</span>`;
-            document.getElementById('toastContainer').appendChild(toast);
-            requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }); });
-            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 500); }, 3000);
-        }
-
-        function generateCalendarLink(event) {
-            if (!event) return '#';
-            let dateStr = event.date || '';
-            let calDates = '';
-            if (dateStr.includes('-')) {
-                const d = dateStr.replace(/-/g, '');
-                const nextDate = new Date(dateStr); nextDate.setDate(nextDate.getDate() + 1);
-                const nd = nextDate.toISOString().split('T')[0].replace(/-/g, '');
-                calDates = `${d}/${nd}`;
-            }
-            const title = encodeURIComponent(event.title || 'RAVN Event');
-            const details = encodeURIComponent(event.description || 'Join us for a RAVN Adventure!');
-            const location = encodeURIComponent(event.venue || 'TBD');
-            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${calDates}&details=${details}&location=${location}`;
-        }
-
-        window.addEventListener('load', async () => {
-            const preloader = document.getElementById('preloader');
-            const urlParams = new URLSearchParams(window.location.search);
-            const eventId = urlParams.get('id');
-
-            if (!eventId) return showError("No event ID provided in the URL.");
-
-            try {
-                const res = await fetch(`/api/public/events/${eventId}`);
-                if (!res.ok) throw new Error("Event not found or server error.");
-                currentEvent = await res.json();
-
-                if (currentEvent.isMembersOnly) {
-                    return showError("This is a Members-Only adventure. Please log into the Clubhouse to RSVP.", true);
-                }
-                if (!currentEvent.rsvpOpen) {
-                    return showError("Registrations for this adventure are currently closed.");
-                }
-
-                // Populate Left Column Event Details
-                document.getElementById('evTitle').textContent = currentEvent.title;
-                document.getElementById('evDesc').textContent = currentEvent.description || "Join us for another amazing adventure with the RAVN crew.";
-                document.getElementById('evDate').textContent = currentEvent.date || 'TBA';
-                document.getElementById('evVenue').textContent = currentEvent.venue || 'TBA';
-                
-                // Calculate Spots Remaining
-                let spotsText = "Unlimited Spots";
-                if(currentEvent.capacity && currentEvent.capacity > 0) {
-                    const attendeesCount = currentEvent.attendees ? currentEvent.attendees.length : 0;
-                    const remaining = currentEvent.capacity - attendeesCount;
-                    spotsText = remaining > 0 ? `${remaining} Spots Left 🔥` : `Waitlist Only ⏳`;
-                    
-                    if(remaining <= 0) {
-                        document.getElementById('evSpots').className = "px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-extrabold uppercase tracking-widest shadow-sm";
-                    }
-                }
-                document.getElementById('evSpots').textContent = spotsText;
-
-                // Handle Payment State in Right Column
-                if (currentEvent.isPayable) {
-                    document.getElementById('freeState').classList.add('hidden');
-                    document.getElementById('freeState').classList.remove('flex');
-                    document.getElementById('paidState').classList.remove('hidden');
-                    document.getElementById('paidState').classList.add('flex');
-                    document.getElementById('btnText').textContent = "Proceed to Pay";
-
-                    const select = document.getElementById('gTier');
-                    select.innerHTML = '';
-                    if (currentEvent.tiers && currentEvent.tiers.length > 0) {
-                        currentEvent.tiers.forEach(t => { select.innerHTML += `<option value="${t.name}">${t.name} - ₹${t.price}</option>`; });
-                    } else {
-                        select.innerHTML = `<option value="Standard">Standard Pass - ₹${currentEvent.eventFee}</option>`;
-                    }
-                } else {
-                    document.getElementById('freeState').classList.remove('hidden');
-                    document.getElementById('freeState').classList.add('flex');
-                    document.getElementById('paidState').classList.add('hidden');
-                    document.getElementById('paidState').classList.remove('flex');
-                    document.getElementById('btnText').textContent = "Confirm RSVP";
-                }
-
-                // Unhide the main UI blocks
-                document.getElementById('eventDetailsBlock').classList.remove('hidden');
-                document.getElementById('registrationBlock').classList.remove('hidden');
-                adjustWrapperHeight('step1');
-
-            } catch (err) {
-                showError(err.message);
-            } finally {
-                preloader.style.opacity = '0';
-                setTimeout(() => { preloader.style.display = 'none'; }, 500);
-            }
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('ph-list');
+            icon.classList.toggle('ph-x');
         });
 
-        function showError(msg, showLoginBtn = false) {
-            document.getElementById('eventDetailsBlock').classList.add('hidden');
-            document.getElementById('registrationBlock').classList.add('hidden');
-            
-            const errState = document.getElementById('errorState');
-            errState.classList.remove('hidden'); errState.classList.add('flex');
-            document.getElementById('errorMsgText').textContent = msg;
-            if(showLoginBtn) { document.getElementById('errLoginBtn').classList.remove('hidden'); }
-        }
-
-        function adjustWrapperHeight(stepId) {
-            const activeStep = document.getElementById(stepId);
-            const wrapper = document.getElementById('slideWrapper');
-            if(activeStep && wrapper) {
-                wrapper.style.height = activeStep.offsetHeight + 'px';
+        async function fetchEvent() {
+            if(!eventId) return showError();
+            try {
+                const res = await fetch(`/api/public/events/${eventId}`);
+                if(!res.ok) throw new Error();
+                currentEvent = await res.json();
+                renderEventDetails();
+            } catch (err) {
+                if (eventId === 'demo') {
+                    currentEvent = { _id: 'demo', title: 'The Mountain Cabin', date: 'October 15, 2026', venue: 'Solang Valley', capacity: 20, attendees: [], isPayable: true, eventFee: 1500, tiers: [{name: "Solo", price: 1500}, {name: "Couple", price: 2800}], rsvpOpen: true };
+                    renderEventDetails();
+                } else {
+                    showError();
+                }
             }
         }
 
-        function goToStep(current, next) {
-            if (current === 1 && next === 2) {
-                const name = document.getElementById('gName').value.trim();
-                const phone = document.getElementById('gPhone').value.trim();
-                const email = document.getElementById('gEmail').value.trim();
-                if(!name || !phone || !email) return showToast("Please fill in all details! 👋", "error");
-            }
+        function renderEventDetails() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('rsvpState').classList.remove('hidden');
             
-            document.getElementById(`step${current}`).className = `slide-step step-${next > current ? 'left' : 'right'}`;
-            document.getElementById(`step${next}`).className = 'slide-step step-active';
+            document.getElementById('eventTitle').textContent = currentEvent.title;
+            document.getElementById('eventDesc').textContent = currentEvent.description || "Join us for another epic adventure!";
+            document.getElementById('eventDateBadge').textContent = currentEvent.date;
+            document.getElementById('eventVenue').textContent = currentEvent.venue;
             
-            const dot1 = document.getElementById('dot1'); const dot2 = document.getElementById('dot2'); const line1 = document.getElementById('line1');
-            if (next === 2) {
-                dot1.className = "step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white"; dot1.innerHTML = `<i class="ph-bold ph-check"></i>`;
-                dot2.className = "step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm"; dot2.innerHTML = "2";
-                line1.className = "step-line flex-1 h-1 bg-ravn-primary mx-2 rounded-full";
+            const spotsLeft = currentEvent.capacity - (currentEvent.attendees ? currentEvent.attendees.length : 0);
+            if (spotsLeft <= 0) {
+                document.getElementById('eventCapacity').textContent = "Waitlist Only";
+                document.getElementById('eventCapacity').classList.replace('text-ravn-textMain', 'text-orange-500');
+                document.getElementById('btnText').textContent = "Join Waitlist";
             } else {
-                dot1.className = "step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-ravn-primary text-white shadow-sm"; dot1.innerHTML = "1";
-                dot2.className = "step-dot w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center text-sm font-bold bg-white text-gray-400"; dot2.innerHTML = "2";
-                line1.className = "step-line flex-1 h-1 bg-gray-200 mx-2 rounded-full";
+                document.getElementById('eventCapacity').textContent = `${spotsLeft} spots remaining`;
             }
 
-            setTimeout(() => adjustWrapperHeight(`step${next}`), 50);
+            if(currentEvent.isPayable) {
+                document.getElementById('paymentAlert').classList.remove('hidden');
+                document.getElementById('paymentAlert').classList.add('flex');
+                document.getElementById('btnText').textContent = `Pay ₹${currentEvent.eventFee} & Book`;
+                selectedTierPrice = currentEvent.eventFee;
+
+                if(currentEvent.tiers && currentEvent.tiers.length > 0) {
+                    const tiersSection = document.getElementById('tiersSection');
+                    const tiersContainer = document.getElementById('tiersContainer');
+                    tiersSection.classList.remove('hidden');
+                    
+                    tiersContainer.innerHTML = currentEvent.tiers.map((t, idx) => `
+                        <div class="tier-card min-w-[140px] bg-white rounded-[20px] p-4 flex flex-col items-center justify-center shrink-0 ${idx === 0 ? 'selected' : ''}" onclick="selectTier('${t.name}', ${t.price}, this)">
+                            <p class="text-xs font-extrabold uppercase tracking-widest text-gray-500 mb-1 tier-name">${t.name}</p>
+                            <p class="text-xl font-extrabold text-ravn-textMain">₹${t.price}</p>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('selectedTier').value = currentEvent.tiers[0].name;
+                    selectedTierPrice = currentEvent.tiers[0].price;
+                    document.getElementById('btnText').textContent = `Pay ₹${selectedTierPrice} & Book`;
+                }
+            }
+
+            const session = sessionStorage.getItem('ravn_member_session');
+            if (session) {
+                const member = JSON.parse(session);
+                document.getElementById('rName').value = member.name || '';
+                document.getElementById('rEmail').value = member.email || '';
+                document.getElementById('rPhone').value = member.phone || '';
+                document.getElementById('rMemberId').value = member.memberId || '';
+            }
         }
 
-        document.getElementById('publicRsvpForm').addEventListener('submit', async (e) => {
+        function selectTier(name, price, element) {
+            document.querySelectorAll('.tier-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('selectedTier').value = name;
+            selectedTierPrice = price;
+            document.getElementById('btnText').textContent = `Pay ₹${price} & Book`;
+        }
+
+        function showError() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+
+        document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            const origHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Processing...';
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>';
             btn.disabled = true;
 
             const payload = {
-                name: document.getElementById('gName').value.trim(),
-                email: document.getElementById('gEmail').value.trim(),
-                phone: document.getElementById('gPhone').value.trim(),
-                tier: currentEvent.isPayable ? document.getElementById('gTier').value : 'Standard'
+                name: document.getElementById('rName').value,
+                email: document.getElementById('rEmail').value,
+                phone: document.getElementById('rPhone').value,
+                memberId: document.getElementById('rMemberId').value.toUpperCase(),
+                tier: document.getElementById('selectedTier').value
             };
 
             try {
-                const res = await fetch(`/api/public/events/${currentEvent._id}/rsvp`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "RSVP Failed");
-
-                if (data.waitlist) {
-                    showToast("Event is full! You're on the waitlist. ⏳");
-                    setTimeout(() => window.location.href = 'index.html', 3000);
+                if (currentEvent.isPayable && !isRazorpayLoaded) {
+                    alert("⚠️ Payment system blocked. Please disable Ad-Blockers or use incognito mode.");
+                    btn.innerHTML = originalContent; btn.disabled = false;
                     return;
                 }
 
-                if (data.pending) {
-                    const options = {
-                        "key": data.key, "amount": data.order.amount, "currency": "INR",
-                        "name": "RAVN Community", "description": `Pass for ${currentEvent.title}`,
-                        "order_id": data.order.id,
-                        "handler": async function (response) {
-                            try {
-                                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Verifying...';
-                                const verifyRes = await fetch(`/api/public/events/${currentEvent._id}/rsvp/verify`, {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ ...response, attendeeId: data.attendeeId })
-                                });
-                                const verifyData = await verifyRes.json();
-                                if (!verifyRes.ok) throw new Error(verifyData.error);
-                                
-                                showSuccessState(currentEvent.title, "Payment Successful! Pass sent to your email.", { event: currentEvent, guest: payload, qrUrl: verifyData.qrUrl });
-                            } catch (err) { alert("Verification Failed: " + err.message); btn.innerHTML = origHtml; btn.disabled = false; }
-                        },
-                        "theme": { "color": "#FF6B6B" }
-                    };
-                    const rzp = new Razorpay(options);
-                    rzp.on('payment.failed', function () { alert("Payment Failed. Try again."); btn.innerHTML = origHtml; btn.disabled = false; });
-                    rzp.open();
+                const res = await fetch(`/api/public/events/${eventId}/rsvp`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                
+                if (!res.ok && eventId === 'demo') {
+                    if(currentEvent.isPayable) return mockRazorpay(payload);
+                    return showSuccess("REF-DEMO-123");
+                }
+
+                const data = await res.json();
+                if(data.error) throw new Error(data.error);
+
+                if (data.waitlist) {
+                    alert("Event is full! You have been added to the waitlist. We'll email you if a spot opens.");
+                    window.location.href = 'events.html';
+                } else if (data.pending && data.order) {
+                    launchRazorpay(data.order, data.attendeeId, data.key, payload);
                 } else {
-                    showSuccessState(currentEvent.title, "RSVP Confirmed! See you there.", { event: currentEvent, guest: payload, qrUrl: data.qrUrl });
+                    showSuccess(data.refId);
                 }
             } catch (err) {
-                showToast(err.message, "error");
-                btn.innerHTML = origHtml; btn.disabled = false;
+                alert(err.message || "Failed to submit RSVP.");
+                btn.innerHTML = originalContent; btn.disabled = false;
             }
         });
 
-        function showSuccessState(title, desc, passData) {
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = '<span>Confirm RSVP</span> <i class="ph-bold ph-check-circle text-lg"></i>'; btn.disabled = false;
+        function launchRazorpay(order, attendeeId, keyId, userDetails) {
+            const options = {
+                key: keyId, amount: order.amount, currency: "INR", name: "RAVN Clubhouse",
+                description: currentEvent.title, image: "https://ravn.community/RAVN.png", order_id: order.id,
+                handler: async function (response) {
+                    try {
+                        const verifyRes = await fetch(`/api/public/events/${eventId}/rsvp/verify`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                attendeeId: attendeeId
+                            })
+                        });
+                        const vData = await verifyRes.json();
+                        if(vData.success) { showSuccess(vData.refId); } 
+                        else { alert("Payment verification failed. Please contact admin."); }
+                    } catch(e) { alert("Server error verifying payment."); }
+                },
+                prefill: { name: userDetails.name, email: userDetails.email, contact: userDetails.phone },
+                theme: { color: "#FF6B6B" }
+            };
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                alert("Payment Failed: " + response.error.description);
+                const btn = document.getElementById('submitBtn');
+                btn.innerHTML = 'Try Payment Again'; btn.disabled = false;
+            });
+            rzp.open();
+        }
 
-            if (passData) {
-                document.getElementById('passEventTitle').textContent = passData.event.title;
-                document.getElementById('passGuestName').textContent = passData.guest.name;
-                document.getElementById('passEventDate').textContent = passData.event.date || 'TBA';
-                document.getElementById('passVenue').textContent = passData.event.venue || 'TBA';
-                document.getElementById('passTier').textContent = passData.guest.tier || 'Standard';
-                
-                const emojis = ['👤', '🌟', '🚀', '😎', '✌️', '🎈'];
-                document.getElementById('passEmoji').textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        function mockRazorpay(payload) {
+            const rzp = new window.Razorpay({
+                key: "rzp_test_mock", amount: selectedTierPrice * 100, currency: "INR", name: "RAVN (Demo)", description: currentEvent.title,
+                handler: function() { showSuccess("REF-MOCK-123"); },
+                prefill: { name: payload.name, email: payload.email, contact: payload.phone }, theme: { color: "#FF6B6B" }
+            });
+            rzp.open();
+        }
 
-                // Generate robust local QR code (fixes html2canvas CORS image fetching bugs)
-                document.getElementById('passQrCode').innerHTML = '';
-                new QRCode(document.getElementById("passQrCode"), { text: passData.qrPayload, width: 140, height: 140, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+        function showSuccess(refId) {
+            document.getElementById('rsvpState').classList.add('hidden');
+            currentRefId = refId;
+            
+            const rName = document.getElementById('rName').value;
+            const rId = document.getElementById('rMemberId').value || document.getElementById('rEmail').value;
 
-                const statusLabel = document.getElementById('passStatusLabel');
-                if(passData.event.isPayable) {
-                    statusLabel.textContent = 'VERIFICATION PENDING ⏳';
-                    statusLabel.className = 'text-[10px] font-mono text-orange-500 tracking-widest font-bold mt-1 bg-orange-50 px-3 py-1 rounded-full border border-orange-100';
-                } else {
-                    statusLabel.textContent = 'PASS SECURED 🎉';
-                    statusLabel.className = 'text-[10px] font-mono text-green-500 tracking-widest font-bold mt-1 bg-green-50 px-3 py-1 rounded-full border border-green-100';
-                }
-
-                const calBtn = document.getElementById('addToCalBtn');
-                calBtn.href = generateCalendarLink(passData.event);
-                calBtn.classList.remove('hidden');
-                calBtn.classList.add('flex');
+            // Handle Profile Picture (Auto-generate initials if no session exists)
+            const session = sessionStorage.getItem('ravn_member_session');
+            let avatarSrc = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(rName)}&backgroundColor=FF6B6B`;
+            if (session) {
+                const member = JSON.parse(session);
+                if(member.profilePic) avatarSrc = member.profilePic;
             }
+            
+            const profImg = document.getElementById('passProfilePic');
+            const fallback = document.getElementById('passProfileFallback');
+            
+            // Reset state in case this runs multiple times
+            profImg.style.display = 'block';
+            fallback.style.display = 'none';
+            
+            // Cache buster guarantees CORS headers aren't stripped by browser cache
+            profImg.src = avatarSrc + (avatarSrc.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
 
-            const modal = document.getElementById('successModal');
-            const content = document.getElementById('successModalContent');
-            modal.classList.remove('hidden'); modal.classList.add('block');
-            void modal.offsetWidth;
-            modal.classList.remove('opacity-0');
-            content.classList.remove('scale-95'); content.classList.add('scale-100');
+            // Populate Ticket
+            document.getElementById('passEventTitle').textContent = currentEvent.title;
+            document.getElementById('passGuestName').textContent = rName;
+            document.getElementById('passGuestId').textContent = rId;
+            document.getElementById('passEventDate').textContent = currentEvent.date || 'TBA';
+            document.getElementById('passVenue').textContent = currentEvent.venue || 'TBA';
+            document.getElementById('passTier').textContent = document.getElementById('selectedTier').value || 'Standard';
+            document.getElementById('passRef').textContent = refId;
+            
+            // Generate QR Locally
+            const identifier = document.getElementById('rMemberId').value.trim() || document.getElementById('rEmail').value.trim();
+            const qrPayload = `${identifier}-${eventId}-${refId}`;
+            
+            document.getElementById('passQrCode').innerHTML = '';
+            new QRCode(document.getElementById("passQrCode"), { 
+                text: qrPayload, width: 140, height: 140, 
+                colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H 
+            });
+
+            const successDiv = document.getElementById('successState');
+            successDiv.classList.remove('hidden');
+            successDiv.classList.add('block');
         }
 
         async function downloadPassImage() {
-            const btn = document.getElementById('downloadPassBtn');
+            const btn = document.getElementById('downloadPassBtn'); 
             const origHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Generating...';
-            
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Saving...';
+            btn.disabled = true;
+
             const element = document.getElementById('printableTicketArea');
             
-            try {
-                const res = await fetch(`/api/public/events/${currentEvent._id}/rsvp`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "RSVP Failed");
-
-                if (data.waitlist) {
-                    showToast("Event is full! You're on the waitlist. ⏳");
-                    setTimeout(() => window.location.href = 'index.html', 3000);
-                    return;
+            // Delay to ensure QR code canvas finishes painting
+            setTimeout(async () => {
+                try { 
+                    const canvas = await html2canvas(element, { 
+                        scale: 2, 
+                        useCORS: true, 
+                        allowTaint: false,
+                        backgroundColor: '#ffffff' 
+                    }); 
+                    const link = document.createElement('a'); 
+                    link.download = `RAVN-Pass-${currentRefId}.png`; 
+                    link.href = canvas.toDataURL('image/png'); 
+                    link.click(); 
+                } catch (err) { 
+                    console.error(err);
+                    alert("Failed to save image. Please take a screenshot!"); 
+                } finally { 
+                    btn.innerHTML = origHtml; 
+                    btn.disabled = false;
                 }
-
-                if (data.pending) {
-                    const options = {
-                        "key": data.key, "amount": data.order.amount, "currency": "INR",
-                        "name": "RAVN Community", "description": `Pass for ${currentEvent.title}`,
-                        "order_id": data.order.id,
-                        "handler": async function (response) {
-                            try {
-                                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Verifying...';
-                                const verifyRes = await fetch(`/api/public/events/${currentEvent._id}/rsvp/verify`, {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ ...response, attendeeId: data.attendeeId })
-                                });
-                                const verifyData = await verifyRes.json();
-                                if (!verifyRes.ok) throw new Error(verifyData.error);
-                                
-                                const refId = `REF-${Math.floor(Math.random()*1000)}`;
-                                const qrPayload = `${payload.email}-${currentEvent._id}-${refId}`;
-
-                                showSuccessState(currentEvent.title, "Payment Successful! Pass sent to your email.", { event: currentEvent, guest: payload, qrPayload: qrPayload });
-                            } catch (err) { alert("Verification Failed: " + err.message); btn.innerHTML = origHtml; btn.disabled = false; }
-                        },
-                        "theme": { "color": "#FF6B6B" }
-                    };
-                    const rzp = new Razorpay(options);
-                    rzp.on('payment.failed', function () { alert("Payment Failed. Try again."); btn.innerHTML = origHtml; btn.disabled = false; });
-                    rzp.open();
-                } else {
-                    const refId = `REF-${Math.floor(Math.random()*1000)}`;
-                    const qrPayload = `${payload.email}-${currentEvent._id}-${refId}`;
-                    showSuccessState(currentEvent.title, "RSVP Confirmed! See you there.", { event: currentEvent, guest: payload, qrPayload: qrPayload });
-                }
-            } catch (err) {
-                console.error("Download error:", err);
-                showToast("Failed to save image. Try printing to PDF instead.", "error");
-            } finally {
-                btn.innerHTML = origHtml;
-            }
+            }, 500);
         }
 
-        function closeSuccessModal() {
-            const modal = document.getElementById('successModal');
-            const content = document.getElementById('successModalContent');
-            
-            modal.classList.add('opacity-0');
-            content.classList.remove('scale-100'); content.classList.add('scale-95');
-            
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
             setTimeout(() => {
-                modal.classList.add('hidden'); modal.classList.remove('block');
-                document.getElementById('publicRsvpForm').reset();
-                goToStep(2, 1);
+                preloader.style.opacity = '0';
+                setTimeout(() => { preloader.style.display = 'none'; }, 300);
             }, 300);
-        }
+            
+            fetchEvent();
+        });
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAVN | The Backstage 🎭</title>
+    <title>RAVN | Admin Command ⚡</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -17,9 +17,9 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
-                    colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
-                    animation: { 'float': 'float 8s ease-in-out infinite', 'fade-in': 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards', },
-                    keyframes: { fadeIn: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
+                    colors: { ravn: { bg: '#F3F4F6', surface: '#FFFFFF', border: '#E5E7EB', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
+                    animation: { 'fade-in': 'fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards', 'slide-up': 'slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards' },
+                    keyframes: { fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } }, slideUp: { from: { opacity: '0', transform: 'translateY(20px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -27,766 +27,721 @@
 
     <style>
         html { scroll-behavior: smooth; }
-        body { background-color: #FAFAF9; color: #1C1917; overflow: hidden; }
-        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); }
-        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
-        .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
+        body { background-color: #F9FAFB; color: #1C1917; }
+        .glass-card { background: #FFFFFF; border: 1px solid #F3F4F6; border-radius: 24px; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05); }
+        .friendly-input { background-color: #F9FAFB; border: 1px solid #E5E7EB; color: #1C1917; transition: all 0.3s ease; }
         .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
-        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 12px 24px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; }
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 16px; padding: 12px 24px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; }
         .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
-        .btn-glass { background: rgba(255, 255, 255, 0.9); color: #1C1917; font-weight: 700; border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 100px; padding: 12px 24px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; }
-        .btn-glass:hover { background: #ffffff; border-color: rgba(255, 107, 107, 0.4); color: #FF6B6B; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); }
-        .sidebar-item { transition: all 0.3s ease; border-radius: 20px; color: #57534E; font-weight: 700; }
-        .sidebar-item.active { background-color: rgba(255, 107, 107, 0.1); color: #FF6B6B; font-weight: 800; }
-        .sidebar-item:not(.active):hover { background-color: #F9FAFB; color: #1C1917; transform: translateX(4px); }
-        .status-badge { padding: 4px 12px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; border: 1px solid transparent; }
-        .status-paid { background-color: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
-        .status-pending { background-color: #FFF7ED; color: #C2410C; border-color: #FFEDD5; }
-        .status-free { background-color: #F0F9FF; color: #0369A1; border-color: #E0F2FE; }
+        .nav-item.active { background-color: #FFF5F5; color: #FF6B6B; font-weight: 800; border-right: 3px solid #FF6B6B; }
+        .nav-item.active i { color: #FF6B6B; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease forwards; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
-        .tab-content { display: none; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .tab-content.active { display: block; }
-        
-        /* Custom playful toggle switch */
-        .playful-toggle input:checked ~ div { background-color: #FF6B6B !important; }
-        .playful-toggle input:checked ~ div::after { transform: translateX(100%); border-color: white; }
+        ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
+
+        /* Fancy date picker overrides for webkit */
+        ::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(0.5) sepia(1) saturate(5) hue-rotate(315deg);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        ::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     </style>
 </head>
 
-<body class="h-screen flex flex-col antialiased selection:bg-ravn-primary selection:text-white relative">
-    
-    <!-- Ambient Background (Playful) -->
-    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/15 blur-[120px] animate-float-delayed"></div>
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
-    </div>
+<body class="flex h-screen overflow-hidden selection:bg-ravn-primary selection:text-white">
 
-    <!-- Preloader -->
-    <div id="preloader" class="fixed inset-0 flex items-center justify-center bg-ravn-bg z-[9999] transition-opacity duration-500">
-        <div class="flex flex-col items-center gap-4">
-            <div class="w-16 h-16 bg-white rounded-[24px] flex items-center justify-center shadow-sm border border-gray-100 animate-pulse">
-                <span class="text-3xl">🎭</span>
+    <!-- Global Custom Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card w-full max-w-sm bg-white p-6 text-center shadow-2xl transform scale-95 transition-transform" id="confirmBox">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100"><i class="ph-bold ph-warning-circle text-3xl"></i></div>
+            <h3 class="text-xl font-extrabold mb-2 text-ravn-textMain" id="confirmTitle">Are you sure?</h3>
+            <p class="text-sm text-gray-500 mb-6 font-medium" id="confirmMsg">This action cannot be undone.</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirm()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold transition-colors">Cancel</button>
+                <button id="confirmActionBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Confirm</button>
             </div>
-            <span class="text-[10px] font-extrabold tracking-widest uppercase text-ravn-textMuted animate-pulse">Unlocking Backstage...</span>
         </div>
     </div>
 
-    <!-- Login Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-xl transition-opacity duration-300">
-        <div class="glass-card p-10 md:p-12 w-full max-w-md text-center mx-6 relative overflow-hidden bg-white/90 shadow-2xl">
-            <div class="w-20 h-20 rounded-[24px] bg-red-50 text-ravn-primary flex items-center justify-center mx-auto mb-6 shadow-sm border border-red-100">
-                <span class="text-4xl">🎭</span>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 z-20 shadow-sm relative">
+        <div class="h-[76px] flex items-center px-8 border-b border-gray-100 shrink-0">
+            <span class="font-extrabold text-2xl tracking-wider text-ravn-textMain uppercase">RAVN <span class="text-ravn-primary">Admin</span></span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-squares-four text-xl"></i> Dashboard</button>
+            <button onclick="switchTab('events')" id="nav-events" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-calendar-star text-xl"></i> Adventures</button>
+            <button onclick="switchTab('members')" id="nav-members" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-users-three text-xl"></i> Members</button>
+            <button onclick="switchTab('refunds')" id="nav-refunds" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-receipt text-xl"></i> Refunds</button>
+            <button onclick="switchTab('broadcasts')" id="nav-broadcasts" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-megaphone text-xl"></i> Broadcasts</button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-gear-six text-xl"></i> System Rules</button>
+        </div>
+        <div class="p-4 border-t border-gray-100 shrink-0">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-500 rounded-xl text-sm font-bold hover:bg-red-100 transition-colors"><i class="ph-bold ph-sign-out text-lg"></i> Sign Out</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-gray-50/50 relative">
+        
+        <header class="h-[76px] bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shrink-0 z-10 sticky top-0 shadow-sm">
+            <h1 class="text-xl font-extrabold text-ravn-textMain tracking-tight" id="headerTitle">Command Center</h1>
+            <div class="flex items-center gap-4">
+                <button onclick="fetchData()" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-ravn-primary hover:border-ravn-primary/30 transition-colors shadow-sm" title="Refresh Data"><i class="ph-bold ph-arrows-clockwise text-lg"></i></button>
+                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100 shadow-sm"><i class="ph-fill ph-user-circle text-xl"></i></div>
             </div>
-            <h2 class="font-extrabold text-3xl mb-2 tracking-tight text-ravn-textMain">The Backstage</h2>
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-8">Crew Members Only 🤫</p>
-            <form id="loginForm" class="space-y-4">
-                <input type="email" id="adminEmail" required placeholder="admin@ravn.io" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-medium text-sm shadow-sm">
-                <input type="password" id="adminPassword" required placeholder="Secret Key" class="friendly-input w-full px-5 py-4 rounded-[20px] text-center font-medium text-sm shadow-sm">
-                <button type="submit" id="loginSubmitBtn" class="btn-glow w-full py-4 text-sm mt-2 shadow-md">Sneak In 🚪</button>
-            </form>
-        </div>
-    </div>
+        </header>
 
-    <nav class="h-[76px] glass-panel border-b border-gray-200/50 flex items-center justify-between px-6 md:px-8 shrink-0 z-50 shadow-sm relative bg-white/60">
-        <div class="flex items-center gap-3">
-            <span class="text-2xl">🛋️</span>
-            <span class="font-extrabold text-xl tracking-wider text-ravn-textMain uppercase">RAVN Backstage</span>
-            <span class="px-3 py-1 bg-green-50 text-green-500 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-green-100 shadow-sm">Live</span>
-        </div>
-        <div class="flex items-center gap-4 md:gap-6">
-            <a href="verify.html" target="_blank" class="text-xs font-bold text-blue-500 uppercase flex items-center gap-1.5 hover:text-blue-600 transition-colors bg-blue-50 px-4 py-2 rounded-full border border-blue-100 hidden sm:flex"><i class="ph-bold ph-camera"></i> Scanner</a>
-            <button onclick="fetchData()" class="text-xs font-bold text-ravn-textMuted uppercase flex items-center gap-1.5 hover:text-gray-900 transition-colors"><i class="ph-bold ph-arrows-clockwise text-lg" id="syncIcon"></i> <span class="hidden sm:inline">Refresh</span></button>
-            <button onclick="location.reload()" class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors border border-red-100"><i class="ph-bold ph-sign-out text-lg"></i></button>
-        </div>
-    </nav>
-
-    <div class="flex-1 flex overflow-hidden hidden" id="adminPortal">
-        <!-- Sidebar -->
-        <aside class="w-64 glass-panel border-r border-gray-200/50 p-6 flex flex-col gap-2 shrink-0 overflow-y-auto bg-white/40">
-            <div class="mb-6 px-4">
-                <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Control Panel</p>
-            </div>
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item active w-full flex items-center gap-4 px-4 py-3.5 text-sm"><span class="text-xl">📊</span> Big Picture</button>
-            <button onclick="switchTab('members')" id="nav-members" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm"><span class="text-xl">👥</span> The Roster</button>
-            <button onclick="switchTab('events')" id="nav-events" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm"><span class="text-xl">🗺️</span> Adventures</button>
-            <button onclick="switchTab('refunds')" id="nav-refunds" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm"><span class="text-xl">💸</span> Refunds</button>
-            <button onclick="switchTab('broadcasts')" id="nav-broadcasts" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm"><span class="text-xl">📡</span> Megaphone</button>
-            <button onclick="switchTab('settings')" id="nav-settings" class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 text-sm"><span class="text-xl">🎛️</span> House Rules</button>
-        </aside>
-
-        <main class="flex-1 overflow-y-auto p-6 md:p-10 bg-transparent">
+        <div class="flex-1 overflow-y-auto p-8 relative">
             
             <!-- Dashboard Tab -->
-            <div id="tab-dashboard-content" class="tab-content active max-w-6xl mx-auto">
-                <h1 class="text-3xl font-extrabold mb-8 text-ravn-textMain flex items-center gap-3">How's it looking? 👀</h1>
+            <div id="tab-dashboard" class="tab-content active max-w-6xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-card p-8 bg-white border border-gray-100 hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-2xl mb-4 border border-blue-100">🫂</div>
-                        <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Total Homies</p>
-                        <h2 class="text-4xl font-black text-ravn-textMain" id="statMembers">0</h2>
+                    <div class="glass-card p-6 border-t-4 border-t-blue-500">
+                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-users text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Total</span></div>
+                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statMembers">0</h3>
+                        <p class="text-xs font-bold text-gray-500 mt-1">Active Members</p>
                     </div>
-                    <div class="glass-card p-8 bg-white border border-gray-100 hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-2xl mb-4 border border-orange-100">⏳</div>
-                        <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">In the Waiting Room</p>
-                        <h2 class="text-4xl font-black text-ravn-textMain" id="statPending">0</h2>
+                    <div class="glass-card p-6 border-t-4 border-t-green-500">
+                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-money text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Yearly</span></div>
+                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statRev">₹0</h3>
+                        <p class="text-xs font-bold text-gray-500 mt-1">Est. Revenue</p>
                     </div>
-                    <div class="glass-card p-8 bg-white border border-gray-100 hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-2xl mb-4 border border-green-100">💰</div>
-                        <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">The Piggybank (₹)</p>
-                        <h2 class="text-4xl font-black text-ravn-textMain" id="statRevenue">0</h2>
+                    <div class="glass-card p-6 border-t-4 border-t-orange-500">
+                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-clock text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Action</span></div>
+                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statPending">0</h3>
+                        <p class="text-xs font-bold text-gray-500 mt-1">Pending Approvals</p>
                     </div>
-                    <div class="glass-card p-8 bg-white border border-gray-100 hover:-translate-y-1">
-                        <div class="w-12 h-12 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center text-2xl mb-4 border border-pink-100">🎟️</div>
-                        <p class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">Tickets Scanned</p>
-                        <h2 class="text-4xl font-black text-ravn-textMain" id="statRSVPs">0</h2>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Members Tab -->
-            <div id="tab-members-content" class="tab-content max-w-6xl mx-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-extrabold text-ravn-textMain flex items-center gap-3">The Roster 📋</h1>
-                </div>
-                <div class="glass-card overflow-hidden bg-white/80 shadow-sm border border-gray-200">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-50 text-[10px] font-extrabold uppercase text-gray-500 tracking-widest border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-4">Club ID</th>
-                                    <th class="px-6 py-4">Homie Info</th>
-                                    <th class="px-6 py-4">Wallet Status</th>
-                                    <th class="px-6 py-4 text-right">Quick Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="memberList" class="divide-y divide-gray-100"></tbody>
-                        </table>
+                    <div class="glass-card p-6 border-t-4 border-t-purple-500">
+                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-ticket text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Tickets</span></div>
+                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statRsvps">0</h3>
+                        <p class="text-xs font-bold text-gray-500 mt-1">Total RSVPs</p>
                     </div>
                 </div>
             </div>
 
             <!-- Events Tab -->
-            <div id="tab-events-content" class="tab-content max-w-6xl mx-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-extrabold text-ravn-textMain flex items-center gap-3">Adventures ✈️</h1>
-                    <button onclick="openEventModal()" class="btn-glow px-6 py-3 text-xs gap-2 shadow-md"><span>Plan Something</span> <span class="text-lg">🗺️</span></button>
+            <div id="tab-events" class="tab-content max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <div><h2 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Manage Adventures</h2></div>
+                    <button onclick="openEventModal()" class="btn-glow flex items-center gap-2"><i class="ph-bold ph-plus"></i> Plan Adventure</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="eventList"></div>
+                <div id="eventsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- Members Tab -->
+            <div id="tab-members" class="tab-content max-w-6xl mx-auto">
+                <div class="glass-card overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-white"><h2 class="text-xl font-extrabold text-ravn-textMain tracking-tight">Member Roster</h2></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead><tr class="bg-gray-50 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest"><th class="p-4 rounded-tl-2xl">Member</th><th class="p-4">Contact</th><th class="p-4">Status</th><th class="p-4">Expiry</th><th class="p-4 text-right rounded-tr-2xl">Actions</th></tr></thead>
+                            <tbody id="membersTable" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <!-- Refunds Tab -->
-            <div id="tab-refunds-content" class="tab-content max-w-6xl mx-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 class="text-3xl font-extrabold text-ravn-textMain flex items-center gap-3 mb-1">Refunds & Payouts 💸</h1>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Process cancellations manually via UPI.</p>
+            <div id="tab-refunds" class="tab-content max-w-6xl mx-auto">
+                <div class="glass-card overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-white"><h2 class="text-xl font-extrabold text-ravn-textMain tracking-tight">Pending Refunds</h2></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead><tr class="bg-gray-50 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest"><th class="p-4 rounded-tl-2xl">Guest</th><th class="p-4">Event</th><th class="p-4">UPI Details</th><th class="p-4">Amount</th><th class="p-4 text-right rounded-tr-2xl">Action</th></tr></thead>
+                            <tbody id="refundsTable" class="divide-y divide-gray-100"></tbody>
+                        </table>
                     </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="refundsList">
-                    <!-- Dynamic Refunds injected here -->
                 </div>
             </div>
 
             <!-- Broadcasts Tab -->
-            <div id="tab-broadcasts-content" class="tab-content max-w-4xl mx-auto">
-                <h1 class="text-3xl font-extrabold text-ravn-textMain mb-8 flex items-center gap-3">The Megaphone 📣</h1>
-                <div class="glass-card p-8 bg-white/80 mb-8 border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-extrabold text-ravn-textMain mb-4">Shout to the group chat</h3>
+            <div id="tab-broadcasts" class="tab-content max-w-4xl mx-auto">
+                <div class="glass-card p-8 mb-8 bg-white relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
+                    <h2 class="text-xl font-extrabold text-ravn-textMain mb-6">Send Network Broadcast 📢</h2>
                     <form id="broadcastForm" class="space-y-4">
-                        <input type="text" id="bTitle" required placeholder="Subject (e.g. Free Pizza in the lobby!)" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
-                        <textarea id="bMessage" required rows="3" placeholder="What's the word?..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm resize-none shadow-sm"></textarea>
+                        <input type="text" id="bTitle" required placeholder="Announcement Title" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
+                        <textarea id="bMessage" required rows="4" placeholder="Type your message..." class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-medium shadow-sm resize-none"></textarea>
                         <div class="flex items-center gap-3 py-2">
-                            <input type="checkbox" id="bEmailBlast" class="w-5 h-5 text-ravn-primary border-gray-300 rounded focus:ring-ravn-primary">
-                            <label class="text-sm font-bold text-gray-700">Blast this to everyone's email inbox too 📧</label>
+                            <input type="checkbox" id="bBlast" class="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer">
+                            <label for="bBlast" class="text-sm font-bold text-gray-600 cursor-pointer">Also send as an Email Blast to all members</label>
                         </div>
-                        <button type="submit" class="btn-glow w-full py-4 text-sm shadow-md">Send to the crew 🚀</button>
+                        <button type="submit" class="btn-glow !bg-blue-500 shadow-md">Publish to Network</button>
                     </form>
                 </div>
-                <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-4">Past Shouts</h3>
-                <div id="notificationList" class="space-y-4"></div>
             </div>
 
-            <!-- Playful Settings Tab -->
-            <div id="tab-settings-content" class="tab-content max-w-4xl mx-auto">
-                <h1 class="text-3xl font-extrabold text-ravn-textMain mb-8 flex items-center gap-3">House Rules & Knobs 🎛️</h1>
-                
-                <form id="settingsForm" class="space-y-6">
-                    
-                    <!-- Category: The Basics -->
-                    <div class="glass-card p-8 bg-white/80 border border-gray-200">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-xl border border-green-100 shadow-sm">💸</div>
-                            <h3 class="text-xl font-extrabold text-ravn-textMain">Money & Basics</h3>
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="tab-content max-w-3xl mx-auto">
+                <div class="glass-card p-8 bg-white relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-gray-800"></div>
+                    <h2 class="text-xl font-extrabold text-ravn-textMain mb-6">System Rules ⚙️</h2>
+                    <form id="settingsForm" class="space-y-6">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-[16px] border border-gray-100">
+                            <div><p class="font-extrabold text-sm text-ravn-textMain">Open Registrations</p><p class="text-xs font-medium text-gray-500">Allow new members to sign up.</p></div>
+                            <input type="checkbox" id="setRegOpen" class="w-6 h-6 rounded border-gray-300 text-ravn-primary focus:ring-ravn-primary cursor-pointer">
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="flex flex-col gap-2">
-                                <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest ml-1">Annual Club Fee (₹)</label>
-                                <input type="number" id="setFee" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest ml-1">Where should they email us?</label>
-                                <input type="email" id="setSupportEmail" placeholder="hello@ravn.club" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
-                            </div>
+                        <div class="flex items-center justify-between p-4 bg-orange-50 rounded-[16px] border border-orange-100">
+                            <div><p class="font-extrabold text-sm text-orange-700">Free Entry Promo</p><p class="text-xs font-medium text-orange-600/70">Make the first 100 signups free.</p></div>
+                            <input type="checkbox" id="setPromoActive" class="w-6 h-6 rounded border-orange-300 text-orange-500 focus:ring-orange-500 cursor-pointer">
                         </div>
-                    </div>
-                    
-                    <!-- Category: Bouncer Settings -->
-                    <div class="glass-card p-8 bg-white/80 border border-gray-200">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-xl border border-blue-100 shadow-sm">🚪</div>
-                            <h3 class="text-xl font-extrabold text-ravn-textMain">The Bouncer</h3>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Annual Membership Fee (₹)</label>
+                            <input type="number" id="setFee" required class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            
-                            <div class="bg-gray-50 p-5 rounded-[24px] border border-gray-100 flex flex-col justify-between h-full shadow-inner">
-                                <div class="mb-4">
-                                    <h4 class="font-extrabold text-sm text-ravn-textMain mb-1">Open the Doors 🟢</h4>
-                                    <p class="text-[11px] text-gray-500 font-medium">Allow new people from the public to join the club.</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer playful-toggle">
-                                    <input type="checkbox" id="setRegOpen" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                                </label>
-                            </div>
-                            
-                            <div class="bg-gray-50 p-5 rounded-[24px] border border-gray-100 flex flex-col justify-between h-full shadow-inner">
-                                <div class="mb-4">
-                                    <h4 class="font-extrabold text-sm text-ravn-textMain mb-1">Free Entry Promo 🎁</h4>
-                                    <p class="text-[11px] text-gray-500 font-medium">Turn off the payment gateway. Everyone gets in free!</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer playful-toggle">
-                                    <input type="checkbox" id="setPromo" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                                </label>
-                            </div>
-
-                            <div class="bg-gray-50 p-5 rounded-[24px] border border-gray-100 flex flex-col justify-between h-full shadow-inner">
-                                <div class="mb-4">
-                                    <h4 class="font-extrabold text-sm text-ravn-textMain mb-1">Trust Everyone 🤝</h4>
-                                    <p class="text-[11px] text-gray-500 font-medium">Auto-approve all free signups without admin review.</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer playful-toggle">
-                                    <input type="checkbox" id="setAutoApprove" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                                </label>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Category: Panic Buttons -->
-                    <div class="glass-card p-8 bg-white/80 border border-gray-200">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-xl border border-red-100 shadow-sm">🚨</div>
-                            <h3 class="text-xl font-extrabold text-ravn-textMain">Panic Buttons</h3>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-red-50/50 p-5 rounded-[24px] border border-red-100 flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-extrabold text-sm text-red-600 mb-0.5">Maintenance Mode</h4>
-                                    <p class="text-[10px] text-red-400 font-medium">Lock down the member portal.</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer playful-toggle">
-                                    <input type="checkbox" id="setMaintenance" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-red-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
-                                </label>
-                            </div>
-                            
-                            <div class="bg-purple-50/50 p-5 rounded-[24px] border border-purple-100 flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-extrabold text-sm text-purple-600 mb-0.5">Strict ID Mode</h4>
-                                    <p class="text-[10px] text-purple-400 font-medium">Ask for student IDs at events.</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer playful-toggle">
-                                    <input type="checkbox" id="setStrictID" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-purple-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-glow w-full py-4 text-sm mt-4 text-lg shadow-lg">Save the Rules 💾</button>
-                </form>
+                        <button type="submit" class="btn-glow w-full shadow-md">Save Core Settings</button>
+                    </form>
+                </div>
             </div>
 
-        </main>
-    </div>
+        </div>
+    </main>
 
+    
     <!-- Edit Member Modal -->
-    <div id="editMemberModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity">
-        <div class="glass-card p-8 md:p-10 max-w-md w-full bg-white shadow-2xl relative">
-            <button type="button" onclick="closeModal('editMemberModal')" class="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"><i class="ph-bold ph-x text-sm"></i></button>
-            <h2 class="text-2xl font-extrabold mb-6 text-ravn-textMain flex items-center gap-2"><span class="text-3xl">✍️</span> Tweak Details</h2>
-            <form id="editMemberForm" class="space-y-4 text-left">
-                <input type="hidden" id="editMemberId">
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-ravn-textMain ml-1">Their Name</label>
-                    <input type="text" id="editName" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-ravn-textMain ml-1">Email Address</label>
-                    <input type="email" id="editEmail" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-ravn-textMain ml-1">Piggybank Status</label>
-                    <select id="editPaymentStatus" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm cursor-pointer shadow-sm">
-                        <option value="Pending">Pending (Broke 😭)</option>
-                        <option value="Paid">Paid (Baller 💸)</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-ravn-textMain ml-1">Annual Expiry Date</label>
-                    <input type="date" id="editExpiry" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
-                </div>
-                <button type="submit" class="btn-glow w-full py-4 mt-2 shadow-md">Update Profile 🚀</button>
+    <div id="memberModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card w-full max-w-md bg-white shadow-2xl relative">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center"><h3 class="text-xl font-extrabold text-ravn-textMain">Edit Member</h3><button onclick="closeModal('memberModal')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-xl"></i></button></div>
+            <form id="editMemberForm" class="p-6 space-y-4">
+                <input type="hidden" id="editMemId">
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Payment Status</label><select id="editMemPayStatus" class="friendly-input w-full px-4 py-3 rounded-xl text-sm font-bold"><option value="Pending">Pending</option><option value="Paid">Paid</option></select></div>
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Annual Expiry Date</label><input type="date" id="editMemExpiry" class="friendly-input w-full px-4 py-3 rounded-xl text-sm font-bold text-blue-600"></div>
+                <button type="submit" class="btn-glow w-full mt-4">Save Changes</button>
             </form>
         </div>
     </div>
 
-    <!-- Draft Event Modal -->
-    <div id="eventModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 transition-opacity">
-        <div class="glass-card p-8 md:p-10 max-w-2xl w-full bg-white shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button type="button" onclick="closeModal('eventModal')" class="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"><i class="ph-bold ph-x text-sm"></i></button>
-            <h2 class="text-2xl font-extrabold mb-6 text-ravn-textMain flex items-center gap-2"><span class="text-3xl">🗓️</span> <span id="eventModalTitle">Draft a New Plan</span></h2>
-            <form id="eventForm" class="space-y-4 text-left">
-                <input type="hidden" id="evId">
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-ravn-textMain ml-1">What are we doing?</label>
-                    <input type="text" id="evTitle" required placeholder="e.g. Midnight Bowling 🎳" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-ravn-textMain ml-1">When?</label>
-                        <input type="text" id="evDate" required placeholder="This Friday, 9 PM" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-ravn-textMain ml-1">Where?</label>
-                        <input type="text" id="evVenue" required placeholder="Downtown Alley" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm shadow-sm">
+    <!-- Attendees Modal (Restored!) -->
+    <div id="attendeesModal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card w-full max-w-4xl bg-white max-h-[90vh] flex flex-col relative shadow-2xl">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
+                <div><h3 class="text-xl font-extrabold text-ravn-textMain tracking-tight">Guest List 🎟️</h3><p class="text-xs font-bold text-gray-400" id="attModalTitle">Event Title</p></div>
+                <button onclick="closeModal('attendeesModal')" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                <div>
+                    <h4 class="text-sm font-extrabold uppercase tracking-widest text-gray-400 mb-4">Confirmed & Pending RSVPs</h4>
+                    <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-[10px] font-extrabold text-gray-500 uppercase tracking-widest border-b border-gray-200"><tr><th class="p-4">Guest</th><th class="p-4">Tier / Admits</th><th class="p-4 text-center">Status</th><th class="p-4 text-right">Action</th></tr></thead>
+                            <tbody id="attendeesTable" class="divide-y divide-gray-100"></tbody>
+                        </table>
                     </div>
                 </div>
+
+                <div>
+                    <h4 class="text-sm font-extrabold uppercase tracking-widest text-orange-400 mb-4">Waitlist Queue</h4>
+                    <div class="border border-orange-100 rounded-2xl overflow-hidden bg-orange-50/30">
+                        <table class="w-full text-left">
+                            <thead class="bg-orange-50 text-[10px] font-extrabold text-orange-600 uppercase tracking-widest border-b border-orange-100"><tr><th class="p-4">Guest Info</th><th class="p-4">Added On</th></tr></thead>
+                            <tbody id="waitlistTable" class="divide-y divide-orange-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gorgeous Event Builder Modal -->
+    <div id="eventModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="glass-card w-full max-w-2xl bg-white max-h-[90vh] flex flex-col relative shadow-2xl overflow-hidden">
+            <!-- Premium Header -->
+            <div class="bg-gradient-to-r from-ravn-primary/10 to-ravn-accent/10 p-6 flex justify-between items-center shrink-0 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-ravn-primary border border-white"><i class="ph-fill ph-map-trifold text-xl"></i></div>
+                    <div><h3 class="text-xl font-extrabold text-ravn-textMain" id="eventModalTitle">Plan Adventure</h3><p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Create a new experience</p></div>
+                </div>
+                <button onclick="closeModal('eventModal')" class="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md flex items-center justify-center text-gray-500 hover:bg-white hover:text-red-500 transition-colors shadow-sm"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            
+            <form id="createEventForm" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+                <input type="hidden" id="eId">
+                
                 <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-ravn-textMain ml-1">The Details 🍿</label>
-                    <textarea id="evDesc" rows="3" placeholder="Tell the crew what to expect..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm resize-none shadow-sm"></textarea>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-text-t"></i> Adventure Title</label>
+                    <input type="text" id="eTitle" required placeholder="e.g. Weekend Mountain Retreat" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm text-ravn-textMain">
                 </div>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-gray-50 rounded-[24px] border border-gray-100 shadow-inner mt-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Max People</label>
-                        <input type="number" id="evCap" placeholder="0 = ∞" class="friendly-input w-full px-4 py-3 rounded-[16px] text-sm">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-text-align-left"></i> Description / Vibe</label>
+                    <textarea id="eDesc" rows="3" placeholder="What are we doing? Tell the crew..." class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-medium shadow-sm resize-none"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Native Auto Date/Time Selector -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-calendar-blank"></i> Date & Time</label>
+                        <input type="datetime-local" id="eDate" required class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm text-ravn-textMain cursor-pointer">
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Ticket (₹)</label>
-                        <input type="number" id="evFee" placeholder="0 = Free" class="friendly-input w-full px-4 py-3 rounded-[16px] text-sm">
-                    </div>
-                    <div class="flex flex-col justify-center items-center pt-5">
-                        <label class="flex flex-col items-center gap-2 cursor-pointer playful-toggle">
-                            <span class="text-[10px] font-extrabold text-purple-600 uppercase tracking-widest">Members Only 🤫</span>
-                            <div class="relative inline-flex items-center">
-                                <input type="checkbox" id="evMembersOnly" class="sr-only peer">
-                                <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="flex flex-col justify-center items-center pt-5">
-                        <label class="flex flex-col items-center gap-2 cursor-pointer playful-toggle">
-                            <span class="text-[10px] font-extrabold text-orange-600 uppercase tracking-widest">Secret Link 🕵️‍♂️</span>
-                            <div class="relative inline-flex items-center">
-                                <input type="checkbox" id="evHidden" class="sr-only peer">
-                                <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-                            </div>
-                        </label>
+                    
+                    <!-- Native Venue Selector with Datalist -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-map-pin"></i> Venue / Location</label>
+                        <input list="venueOptions" id="eVenue" required placeholder="Type or select a venue..." class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
+                        <datalist id="venueOptions">
+                            <option value="Clubhouse Main Lounge">
+                            <option value="Downtown Cinema">
+                            <option value="The Mountain Cabin">
+                            <option value="Discord Voice Channel">
+                        </datalist>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-glow w-full py-4 mt-6 shadow-md">Publish to the Group Chat 🚀</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-users"></i> Total Capacity</label>
+                        <input type="number" id="eCap" required placeholder="How many spots?" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
+                    </div>
+                    
+                    <!-- Secret Visibility Dropdown -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-eye"></i> Visibility</label>
+                        <select id="eVisibility" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm cursor-pointer">
+                            <option value="Public">🌍 Public (Show on Feed)</option>
+                            <option value="Unlisted">🤫 Secret (Hidden Link Only)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Soft settings blocks -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 p-4 bg-purple-50/50 rounded-[16px] border border-purple-100 hover:bg-purple-50 transition-colors">
+                        <input type="checkbox" id="eMembersOnly" class="w-5 h-5 rounded border-gray-300 text-purple-500 focus:ring-purple-500 cursor-pointer">
+                        <label for="eMembersOnly" class="text-sm font-bold text-purple-700 cursor-pointer flex-1">Members Only 🔒</label>
+                    </div>
+                    <div class="flex items-center gap-3 p-4 bg-blue-50/50 rounded-[16px] border border-blue-100 hover:bg-blue-50 transition-colors">
+                        <input type="checkbox" id="ePayable" onchange="toggleTiers(this.checked)" class="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer">
+                        <label for="ePayable" class="text-sm font-bold text-blue-700 cursor-pointer flex-1">Paid Event 💳</label>
+                    </div>
+                </div>
+
+                <!-- Ticket Tiers Builder -->
+                <div id="tiersBuilder" class="hidden bg-blue-50/30 p-5 rounded-[20px] border border-blue-100 space-y-4">
+                    <div class="flex justify-between items-center border-b border-blue-100/50 pb-3">
+                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 flex items-center gap-1.5"><i class="ph-bold ph-ticket"></i> Ticket Variants Builder</p>
+                        <button type="button" onclick="addTier()" class="text-[10px] font-extrabold text-blue-600 bg-white px-3 py-1.5 rounded-full border border-blue-200 shadow-sm hover:shadow transition-shadow uppercase tracking-widest">+ Add Variant</button>
+                    </div>
+                    <div id="tiersList" class="space-y-3"></div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="btn-glow w-full py-4 text-base shadow-lg" id="eventSubmitBtn">Publish to the Network 🚀</button>
+                </div>
             </form>
         </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[999] flex flex-col gap-3 pointer-events-none"></div>
 
     <script>
-        // GLOBALS
-        let adminKey = '';
-        let allMembers = [];
-        let allEvents = [];
-        let allSettings = {};
+        const adminKey = sessionStorage.getItem('ravn_admin_token');
+        if (!adminKey) window.location.href = 'adminlogin.html';
 
-        // INITIAL LOAD / PRELOADER
-        window.addEventListener('load', () => {
-            const preloader = document.getElementById('preloader');
-            preloader.style.opacity = '0';
-            setTimeout(() => preloader.style.display = 'none', 500);
-        });
-
-        // TAB SWITCHING
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(`tab-${id}-content`).classList.add('active');
-            document.getElementById(`nav-${id}`).classList.add('active');
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-gray-900 border-gray-800 text-white shadow-xl';
+            const iconClass = type === 'error' ? 'ph-warning-circle text-red-500' : 'ph-check-circle text-green-400';
+            toast.className = `p-4 rounded-2xl backdrop-blur-md text-sm font-bold flex items-center gap-3 transition-all duration-500 transform translate-y-10 opacity-0 border ${bgClass}`;
+            toast.innerHTML = `<i class="ph-fill ${iconClass} text-xl"></i> <span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }); });
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 500); }, 3000);
         }
 
-        // LOGIN
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('loginSubmitBtn'); const origTxt = btn.textContent;
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Securing...'; btn.disabled = true;
-
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
+        // Custom Confirm Logic
+        let confirmCallback = null;
+        function adminConfirm(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMsg').textContent = message;
+            confirmCallback = callback;
             
-            try {
-                const res = await fetch('/api/admin/login', { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) 
-                });
-                const data = await res.json();
-                if(!res.ok) throw new Error();
-                
-                adminKey = data.token;
-                document.getElementById('loginOverlay').classList.add('opacity-0');
-                setTimeout(() => {
-                    document.getElementById('loginOverlay').classList.add('hidden');
-                    document.getElementById('adminPortal').classList.remove('hidden');
-                    fetchData();
-                }, 300);
-            } catch(e) { 
-                alert("Whoops! Incorrect backstage pass. 😅"); 
-                btn.textContent = origTxt; btn.disabled = false;
-            }
+            const modal = document.getElementById('confirmModal');
+            const box = document.getElementById('confirmBox');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            box.classList.remove('scale-95'); box.classList.add('scale-100');
+        }
+
+        function closeConfirm() {
+            const modal = document.getElementById('confirmModal');
+            const box = document.getElementById('confirmBox');
+            modal.classList.add('opacity-0');
+            box.classList.remove('scale-100'); box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirmActionBtn').addEventListener('click', () => {
+            if (confirmCallback) confirmCallback();
+            closeConfirm();
         });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+            const titles = { 'dashboard': 'Command Center', 'events': 'Adventures', 'members': 'Member Roster', 'refunds': 'Pending Refunds', 'broadcasts': 'Network Comms', 'settings': 'System Rules' };
+            document.getElementById('headerTitle').textContent = titles[tabId];
+        }
+
+        function closeModal(modalId) {
+            const m = document.getElementById(modalId);
+            m.classList.add('opacity-0');
+            setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        }
+
+        function logout() { sessionStorage.removeItem('ravn_admin_token'); window.location.href = 'adminlogin.html'; }
 
         // DATA FETCHING
         async function fetchData() {
-            if(!adminKey) return;
-            const syncIcon = document.getElementById('syncIcon');
-            syncIcon.classList.add('animate-spin');
-
             try {
                 const res = await fetch('/api/admin/data', { headers: { 'Authorization': `Bearer ${adminKey}` } });
+                if (!res.ok) { if(res.status === 401 || res.status === 403) logout(); throw new Error(); }
                 const data = await res.json();
                 
-                allMembers = data.members;
-                allEvents = data.events;
-                allSettings = data.settings;
-
-                // Update Dash
                 document.getElementById('statMembers').textContent = data.statistics.totalMembers;
+                document.getElementById('statRev').textContent = '₹' + data.statistics.revenue.toLocaleString();
                 document.getElementById('statPending').textContent = data.statistics.pendingMembers;
-                document.getElementById('statRevenue').textContent = data.statistics.revenue.toLocaleString();
-                document.getElementById('statRSVPs').textContent = data.statistics.totalRSVPs;
+                document.getElementById('statRsvps').textContent = data.statistics.totalRSVPs;
 
                 renderMembers(data.members);
                 renderEvents(data.events);
-                renderNotifications(data.notifications);
-                renderRefunds(data.refunds || []); // New render call
-                
-                // Populate Settings Form dynamically
+                renderRefunds(data.refunds || []);
+
+                document.getElementById('setRegOpen').checked = data.settings.registrationOpen;
+                document.getElementById('setPromoActive').checked = data.settings.freePromoActive;
                 document.getElementById('setFee').value = data.settings.membershipFee || 500;
-                document.getElementById('setSupportEmail').value = data.settings.supportEmail || '';
-                document.getElementById('setRegOpen').checked = data.settings.registrationOpen !== false;
-                document.getElementById('setPromo').checked = data.settings.freePromoActive === true;
-                document.getElementById('setAutoApprove').checked = data.settings.autoApprove === true;
-                document.getElementById('setMaintenance').checked = data.settings.maintenanceMode === true;
-                document.getElementById('setStrictID').checked = data.settings.strictVerification === true;
 
-            } catch (err) {
-                console.error("Fetch failed", err);
-            } finally {
-                setTimeout(() => syncIcon.classList.remove('animate-spin'), 500);
-            }
-        }
-
-        // RENDER MEMBERS
-        function renderMembers(members) {
-            const list = document.getElementById('memberList');
-            if(members.length === 0) { list.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400 font-bold text-sm">No homies found. It's quiet in here... 🦗</td></tr>`; return; }
-            
-            list.innerHTML = members.map(m => `
-                <tr class="hover:bg-gray-50 transition-colors group">
-                    <td class="px-6 py-4 whitespace-nowrap"><span class="text-xs font-mono font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-[10px] shadow-sm">${m.memberId}</span></td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-[14px] bg-red-50 text-ravn-primary flex items-center justify-center font-extrabold text-sm border border-red-100 shadow-sm">${m.name.charAt(0)}</div>
-                            <div><div class="text-sm font-extrabold text-ravn-textMain">${m.name}</div><div class="text-[10px] font-bold text-gray-400">${m.email}</div></div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="status-badge status-${(m.paymentStatus || 'pending').toLowerCase()}">${m.paymentStatus}</span>
-                        <div class="text-[9px] font-bold text-gray-400 mt-1.5">Exp: ${m.subscriptionExpiry ? new Date(m.subscriptionExpiry).toLocaleDateString() : 'N/A'}</div>
-                    </td>
-                    <td class="px-6 py-4 text-right whitespace-nowrap space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="openEditMember('${m.memberId}')" class="w-8 h-8 inline-flex items-center justify-center bg-blue-50 text-blue-600 rounded-[10px] hover:bg-blue-500 hover:text-white transition-colors border border-blue-100" title="Edit Profile"><i class="ph-bold ph-pencil-simple text-sm"></i></button>
-                        <button onclick="deleteMember('${m.memberId}')" class="w-8 h-8 inline-flex items-center justify-center bg-red-50 text-red-600 rounded-[10px] hover:bg-red-500 hover:text-white transition-colors border border-red-100" title="Remove Member"><i class="ph-bold ph-trash text-sm"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function openEditMember(mid) {
-            const m = allMembers.find(x => x.memberId === mid);
-            if(!m) return;
-            document.getElementById('editMemberId').value = m.memberId;
-            document.getElementById('editName').value = m.name;
-            document.getElementById('editEmail').value = m.email;
-            document.getElementById('editPaymentStatus').value = m.paymentStatus;
-            document.getElementById('editExpiry').value = m.subscriptionExpiry ? new Date(m.subscriptionExpiry).toISOString().split('T')[0] : '';
-            
-            const modal = document.getElementById('editMemberModal');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-        }
-
-        document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...'; btn.disabled = true;
-            const mid = document.getElementById('editMemberId').value;
-            const expiryVal = document.getElementById('editExpiry').value;
-            const payload = {
-                name: document.getElementById('editName').value,
-                email: document.getElementById('editEmail').value,
-                paymentStatus: document.getElementById('editPaymentStatus').value,
-                subscriptionExpiry: expiryVal ? new Date(expiryVal) : null
-            };
-            
-            try {
-                await fetch(`/api/admin/members/${mid}`, { 
-                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) 
-                });
-                closeModal('editMemberModal');
-                fetchData();
-            } catch(e) { alert("Failed to update homie. 😅"); }
-            finally { btn.innerHTML = 'Update Profile 🚀'; btn.disabled = false; }
-        });
-
-        async function deleteMember(mid) {
-            if(!confirm("Are you 100% sure you want to kick them out? They will lose all access to the club! 🚪")) return;
-            try {
-                await fetch(`/api/admin/members/${mid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } });
-                fetchData();
-            } catch(e) { alert("Failed to remove member."); }
+            } catch (e) { showToast("Failed to fetch dashboard data.", "error"); }
         }
 
         // RENDER EVENTS
         function renderEvents(events) {
-            const list = document.getElementById('eventList');
-            if(events.length === 0) { list.innerHTML = `<div class="col-span-full py-10 text-center text-gray-400 font-bold text-sm">No adventures planned right now. Boring! 😴</div>`; return; }
+            const container = document.getElementById('eventsGrid');
+            if(!container) return;
+            if(events.length === 0) { container.innerHTML = '<div class="col-span-full glass-card p-12 text-center text-gray-400 font-bold">No events active.</div>'; return; }
             
-            list.innerHTML = events.map(e => `
-                <div class="glass-card p-6 bg-white/80 border border-gray-200 flex flex-col relative overflow-hidden group hover:-translate-y-1">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="px-3 py-1.5 bg-white border border-gray-100 text-gray-600 rounded-[10px] text-[10px] font-extrabold uppercase tracking-widest shadow-sm">${e.date}</span>
-                        ${!e.rsvpOpen ? `<span class="px-3 py-1.5 bg-red-50 text-red-500 rounded-[10px] text-[10px] font-extrabold uppercase tracking-widest border border-red-100">Full / Closed 🛑</span>` : ''}
+            container.innerHTML = events.map(e => {
+                const secretBadge = e.visibility === 'Unlisted' ? '<span class="absolute top-4 right-4 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest shadow-sm flex items-center gap-1 z-10"><i class="ph-bold ph-lock-key"></i> Secret</span>' : '';
+                
+                return `
+                <div class="glass-card p-6 flex flex-col hover:-translate-y-1 transition-transform relative group">
+                    ${secretBadge}
+                    <div class="w-14 h-14 rounded-[16px] bg-red-50 text-ravn-primary flex items-center justify-center mb-4 border border-red-100 shadow-sm shrink-0">
+                        <i class="ph-fill ph-ticket text-2xl"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-ravn-textMain mb-1 line-clamp-1">${e.title}</h3>
-                    <p class="text-[11px] font-bold text-blue-500 uppercase tracking-widest mb-4 truncate flex items-center gap-1"><i class="ph-bold ph-map-pin"></i> ${e.venue}</p>
-                    <div class="flex justify-between items-center text-xs font-bold text-gray-600 mb-6 bg-gray-50 p-4 rounded-[20px] border border-gray-100 shadow-inner">
-                        <div class="flex flex-col items-center gap-1"><span class="text-[9px] uppercase tracking-widest text-gray-400">Max Spots</span><span class="text-ravn-textMain text-sm bg-white px-2 py-0.5 rounded-md border border-gray-100">${e.capacity || '∞'}</span></div>
-                        <div class="flex flex-col items-center gap-1"><span class="text-[9px] uppercase tracking-widest text-gray-400">Going</span><span class="text-ravn-primary text-sm bg-red-50 px-2 py-0.5 rounded-md border border-red-100">${e.attendees.length}</span></div>
-                        <div class="flex flex-col items-center gap-1"><span class="text-[9px] uppercase tracking-widest text-gray-400">Cost</span><span class="text-green-600 text-sm bg-green-50 px-2 py-0.5 rounded-md border border-green-100">₹${e.isPayable ? e.eventFee : '0'}</span></div>
-                    </div>
-                    <div class="mt-auto grid grid-cols-3 gap-2 border-t border-gray-100 pt-4">
-                        <button onclick="toggleEventRsvp('${e._id}')" class="py-2.5 bg-gray-50 hover:bg-gray-200 text-gray-600 rounded-[12px] text-[10px] font-extrabold uppercase tracking-widest transition-colors flex items-center justify-center border border-gray-100"><i class="ph-bold ${e.rsvpOpen ? 'ph-lock' : 'ph-lock-open'}"></i></button>
-                        <button onclick="openEventModal('${e._id}')" class="py-2.5 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-600 rounded-[12px] text-[10px] font-extrabold uppercase tracking-widest transition-colors flex items-center justify-center border border-blue-100"><i class="ph-bold ph-pencil-simple"></i></button>
-                        <button onclick="deleteEvent('${e._id}')" class="py-2.5 bg-red-50 hover:bg-red-500 hover:text-white text-red-600 rounded-[12px] text-[10px] font-extrabold uppercase tracking-widest transition-colors flex items-center justify-center border border-red-100"><i class="ph-bold ph-trash"></i></button>
+                    <h3 class="text-xl font-extrabold mb-1 text-ravn-textMain line-clamp-1" title="${e.title.replace(/"/g, '&quot;')}">${e.title}</h3>
+                    <p class="text-xs text-gray-500 font-bold mb-4"><i class="ph-bold ph-calendar-blank text-ravn-primary"></i> ${e.date}</p>
+                    
+                    <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <div class="text-center cursor-pointer hover:text-ravn-primary transition-colors group/btn" onclick="openAttendeesModal('${e._id}', '${e.title.replace(/'/g, "\\'")}')" title="View Guest List">
+                            <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 group-hover/btn:text-ravn-primary transition-colors">RSVPs</p>
+                            <p class="text-lg font-extrabold text-ravn-textMain flex items-center justify-center gap-1">${e.attendees ? e.attendees.length : 0} <i class="ph-bold ph-eye text-sm text-gray-400 group-hover/btn:text-ravn-primary transition-colors"></i></p>
+                        </div>
+                        <button onclick="openEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="text-center text-[10px] font-extrabold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors flex flex-col items-center gap-0.5">
+                            <i class="ph-bold ph-pencil-simple text-lg"></i>
+                            <span>Edit</span>
+                        </button>
+                        <button onclick="copyEventLink('${e._id}')" class="text-center text-[10px] font-extrabold text-blue-500 hover:text-blue-600 uppercase tracking-widest transition-colors flex flex-col items-center gap-0.5">
+                            <i class="ph-bold ph-link text-lg"></i>
+                            <span>Copy Link</span>
+                        </button>
+                        <button onclick="deleteEvent('${e._id}')" class="text-center text-[10px] font-extrabold text-red-400 hover:text-red-600 uppercase tracking-widest transition-colors flex flex-col items-center gap-0.5">
+                            <i class="ph-bold ph-trash text-lg"></i>
+                            <span>Drop</span>
+                        </button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        function openEventModal(eid = null) {
-            const modal = document.getElementById('eventModal');
-            const form = document.getElementById('eventForm');
-            form.reset();
-            document.getElementById('evId').value = '';
-            document.getElementById('eventModalTitle').textContent = "Draft a New Plan";
-
-            if (eid) {
-                const e = allEvents.find(x => x._id === eid);
-                if(e) {
-                    document.getElementById('eventModalTitle').textContent = "Tweak the Plan";
-                    document.getElementById('evId').value = e._id;
-                    document.getElementById('evTitle').value = e.title;
-                    document.getElementById('evDate').value = e.date;
-                    document.getElementById('evVenue').value = e.venue;
-                    document.getElementById('evDesc').value = e.description;
-                    document.getElementById('evCap').value = e.capacity || '';
-                    document.getElementById('evFee').value = e.eventFee || '';
-                    document.getElementById('evMembersOnly').checked = e.isMembersOnly;
-                    document.getElementById('evHidden').checked = e.visibility === 'Unlisted';
-                }
-            }
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-        }
-
-        document.getElementById('eventForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Packing the bags...'; btn.disabled = true;
-            const eid = document.getElementById('evId').value;
-            const feeVal = parseInt(document.getElementById('evFee').value) || 0;
-            
-            const payload = {
-                title: document.getElementById('evTitle').value,
-                date: document.getElementById('evDate').value,
-                venue: document.getElementById('evVenue').value,
-                description: document.getElementById('evDesc').value,
-                capacity: parseInt(document.getElementById('evCap').value) || 0,
-                eventFee: feeVal,
-                isPayable: feeVal > 0,
-                isMembersOnly: document.getElementById('evMembersOnly').checked,
-                visibility: document.getElementById('evHidden').checked ? 'Unlisted' : 'Public'
-            };
-
-            const url = eid ? `/api/admin/events/${eid}` : `/api/admin/events`;
-            const method = eid ? 'PUT' : 'POST';
-
+        function copyEventLink(eventId) {
+            const link = window.location.origin + '/eventregister.html?id=' + eventId;
+            const textArea = document.createElement("textarea");
+            textArea.value = link;
+            document.body.appendChild(textArea);
+            textArea.select();
             try {
-                await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) });
-                closeModal('eventModal');
-                fetchData();
-            } catch(e) { alert("Failed to save plan. 😅"); }
-            finally { btn.innerHTML = 'Publish to the Group Chat 🚀'; btn.disabled = false; }
-        });
-
-        async function deleteEvent(eid) {
-            if(!confirm("Cancel this entire trip? All RSVPs will be lost forever! 😱")) return;
-            try { await fetch(`/api/admin/events/${eid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); } 
-            catch(e) { alert("Failed to cancel event."); }
-        }
-
-        async function toggleEventRsvp(eid) {
-            try { await fetch(`/api/admin/events/${eid}/toggle`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); } 
-            catch(e) { alert("Failed to toggle RSVP door."); }
-        }
-
-        // RENDER REFUNDS
-        function renderRefunds(refunds) {
-            const list = document.getElementById('refundsList');
-            const pendingRefunds = refunds.filter(r => r.status === 'Pending');
-            
-            if(pendingRefunds.length === 0) { 
-                list.innerHTML = `<div class="col-span-full py-16 text-center bg-white/60 rounded-[32px] border border-gray-200 shadow-sm"><span class="text-4xl mb-4 block">😎</span><h3 class="text-xl font-extrabold text-ravn-textMain mb-2">No pending refunds!</h3><p class="text-gray-400 font-bold text-sm">Everyone is keeping their plans.</p></div>`; 
-                return; 
+                document.execCommand('copy');
+                showToast("Secret Link copied to clipboard! 🔗");
+            } catch (err) {
+                showToast("Failed to copy link.", "error");
             }
-            
-            list.innerHTML = pendingRefunds.map(r => `
-                <div class="glass-card p-8 bg-white/90 border border-orange-200 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 px-4 py-1.5 bg-orange-100 text-orange-600 rounded-bl-[20px] text-[10px] font-extrabold uppercase tracking-widest shadow-sm">Action Needed</div>
-                    
-                    <div class="flex items-center gap-4 mb-6 mt-2">
-                        <div class="w-12 h-12 rounded-[16px] bg-red-50 text-red-500 flex items-center justify-center font-extrabold text-lg border border-red-100 shadow-sm">${r.memberName.charAt(0)}</div>
-                        <div>
-                            <h3 class="text-lg font-extrabold text-ravn-textMain">${r.memberName}</h3>
-                            <p class="text-xs font-bold text-gray-500">${r.eventTitle}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-4 mb-8 bg-gray-50 p-5 rounded-[20px] border border-gray-100 shadow-inner">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Amount to Refund</span>
-                            <span class="text-lg font-black text-green-600">₹${r.amount}</span>
-                        </div>
-                        <div class="h-px w-full bg-gray-200"></div>
-                        <div class="flex justify-between items-center group/copy">
-                            <div>
-                                <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">UPI ID</span>
-                                <span class="text-sm font-bold text-ravn-textMain font-mono">${r.upiId || 'Not provided'}</span>
-                            </div>
-                            ${r.upiId ? `<button onclick="copyToClipboard('${r.upiId}')" class="text-ravn-primary hover:bg-red-50 p-2 rounded-lg transition-colors" title="Copy UPI ID"><i class="ph-bold ph-copy text-lg"></i></button>` : ''}
-                        </div>
-                        <div class="flex justify-between items-center group/copy">
-                            <div>
-                                <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-1">Phone Number</span>
-                                <span class="text-sm font-bold text-ravn-textMain">${r.phone || 'N/A'}</span>
-                            </div>
-                            <button onclick="copyToClipboard('${r.phone}')" class="text-ravn-primary hover:bg-red-50 p-2 rounded-lg transition-colors" title="Copy Phone Number"><i class="ph-bold ph-copy text-lg"></i></button>
-                        </div>
-                    </div>
-                    
-                    <button onclick="markRefundSettled('${r._id}')" class="w-full btn-glow py-3.5 text-sm gap-2"><i class="ph-bold ph-check-circle text-lg"></i> Mark as Settled manually</button>
-                </div>
-            `).join('');
+            document.body.removeChild(textArea);
         }
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Copied to clipboard! 📋");
+        function deleteEvent(eid) {
+            adminConfirm("Drop Event", "Are you sure? This will delete the event and all its RSVPs.", async () => {
+                try { await fetch(`/api/admin/events/${eid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); showToast("Event deleted."); } 
+                catch(e) { showToast("Failed to delete.", "error"); }
             });
         }
 
-        async function markRefundSettled(refundId) {
-            if(!confirm("Did you actually transfer the money? This will mark the refund as fully settled! 💸")) return;
-            const btn = event.currentTarget; const origText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Processing...';
-            try { 
-                await fetch(`/api/admin/refunds/${refundId}/settle`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); 
-                fetchData(); 
-            } catch(e) { alert("Failed to mark as settled."); btn.innerHTML = origText; }
+        // ATTENDEES LIST MODAL
+        let currentEventIdForAttendees = null;
+
+        async function openAttendeesModal(eid, title) {
+            currentEventIdForAttendees = eid;
+            document.getElementById('attModalTitle').textContent = title;
+            document.getElementById('attendeesTable').innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold"><i class="ph-bold ph-spinner animate-spin text-2xl mx-auto"></i></td></tr>';
+            document.getElementById('waitlistTable').innerHTML = '<tr><td colspan="2" class="p-8 text-center text-gray-400 font-bold"><i class="ph-bold ph-spinner animate-spin text-2xl mx-auto"></i></td></tr>';
+            
+            const modal = document.getElementById('attendeesModal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            
+            await fetchAttendeesList();
         }
 
-        // RENDER BROADCASTS
-        function renderNotifications(notifs) {
-            const list = document.getElementById('notificationList');
-            if(notifs.length === 0) { list.innerHTML = `<div class="p-6 text-center text-gray-400 font-bold text-sm bg-white/80 rounded-[24px] border border-gray-100 shadow-sm">No shouts in the group chat yet. 🦗</div>`; return; }
+        async function fetchAttendeesList() {
+            if(!currentEventIdForAttendees) return;
+            try {
+                const res = await fetch(`/api/admin/events/${currentEventIdForAttendees}/attendees`, { headers: { 'Authorization': `Bearer ${adminKey}` } });
+                const data = await res.json();
+                
+                const attTbody = document.getElementById('attendeesTable');
+                if (data.attendees && data.attendees.length > 0) {
+                    attTbody.innerHTML = data.attendees.map(a => `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-4">
+                                <p class="font-extrabold text-ravn-textMain text-sm">${a.name}</p>
+                                <p class="text-[10px] font-bold text-gray-400">${a.email} | ${a.phone}</p>
+                            </td>
+                            <td class="p-4">
+                                <p class="text-xs font-bold text-gray-600">${a.tier || 'Standard'}</p>
+                                <p class="text-[9px] font-extrabold text-blue-500 uppercase tracking-widest mt-0.5">Admits: ${a.admits || 1}</p>
+                            </td>
+                            <td class="p-4 text-center">
+                                <span class="px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${a.status === 'Verified' || a.status === 'Scanned' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">${a.status}</span>
+                                ${a.utr ? `<p class="text-[9px] font-mono text-gray-400 mt-1 truncate max-w-[100px] mx-auto" title="UTR: ${a.utr}">${a.utr}</p>` : ''}
+                            </td>
+                            <td class="p-4 text-right">
+                                ${a.status === 'Pending' ? `<button onclick="verifyAttendee('${currentEventIdForAttendees}', '${a._id}')" class="text-[10px] font-extrabold uppercase tracking-widest text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg transition-colors shadow-sm">Verify</button>` : `<span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest"><i class="ph-bold ph-check"></i> Done</span>`}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    attTbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold text-sm">No RSVPs yet.</td></tr>';
+                }
+
+                const wlTbody = document.getElementById('waitlistTable');
+                if (data.waitlist && data.waitlist.length > 0) {
+                    wlTbody.innerHTML = data.waitlist.map(w => `
+                        <tr class="hover:bg-orange-50/50 transition-colors">
+                            <td class="p-4">
+                                <p class="font-extrabold text-ravn-textMain text-sm">${w.name}</p>
+                                <p class="text-[10px] font-bold text-gray-400">${w.email} | ${w.phone}</p>
+                            </td>
+                            <td class="p-4 text-xs font-bold text-gray-600">${new Date(w.addedAt).toLocaleDateString()}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    wlTbody.innerHTML = '<tr><td colspan="2" class="p-8 text-center text-gray-400 font-bold text-sm">Waitlist is empty.</td></tr>';
+                }
+
+            } catch (e) { showToast("Failed to load guests.", "error"); }
+        }
+
+        function verifyAttendee(eventId, subId) {
+            adminConfirm("Approve Payment", "Manually verify this payment? The guest will receive their pass via email.", async () => {
+                try {
+                    await fetch(`/api/admin/events/${eventId}/verify/${subId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } });
+                    showToast("Guest verified successfully!");
+                    fetchAttendeesList();
+                    fetchData(); 
+                } catch(e) { showToast("Action failed.", "error"); }
+            });
+        }
+
+        // TICKET TIERS BUILDER
+        function toggleTiers(isPaid) {
+            const builder = document.getElementById('tiersBuilder');
+            if(isPaid) { builder.classList.remove('hidden'); if(document.getElementById('tiersList').children.length===0) addTier(); }
+            else builder.classList.add('hidden');
+        }
+
+        function addTier() {
+            const id = Date.now();
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm';
+            div.id = `tier-${id}`;
+            div.innerHTML = `
+                <input type="text" placeholder="Pass Name (e.g. Couple)" class="tier-name flex-1 px-3 py-2 text-sm font-bold border-none focus:ring-0 bg-transparent outline-none text-ravn-textMain placeholder-gray-300">
+                <input type="number" placeholder="₹ Price" class="tier-price w-24 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-ravn-primary placeholder-gray-300">
+                <input type="number" placeholder="Admits" title="Number of people this pass admits" value="1" min="1" class="tier-admits w-20 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-blue-500">
+                <button type="button" onclick="document.getElementById('tier-${id}').remove()" class="p-2 text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash"></i></button>
+            `;
+            document.getElementById('tiersList').appendChild(div);
+        }
+
+        function openEventModal(eventData = null) {
+            const m = document.getElementById('eventModal'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.classList.remove('opacity-0'), 10);
+            const form = document.getElementById('createEventForm'); form.reset(); document.getElementById('tiersList').innerHTML = '';
+            document.getElementById('eId').value = '';
             
-            list.innerHTML = notifs.map(n => `
-                <div class="p-6 bg-white/80 rounded-[24px] border border-gray-100 shadow-sm flex justify-between items-start group hover:-translate-y-1 transition-transform">
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100"><i class="ph-fill ph-megaphone text-xl"></i></div>
-                        <div>
-                            <h4 class="font-extrabold text-base text-ravn-textMain">${n.title}</h4>
-                            <p class="text-sm text-gray-500 mt-1 leading-relaxed">${n.message}</p>
-                        </div>
-                    </div>
-                    <button onclick="deleteNotification('${n._id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors border border-red-100 shrink-0"><i class="ph-bold ph-trash text-sm"></i></button>
-                </div>
+            if(eventData) {
+                document.getElementById('eventModalTitle').textContent = "Edit Adventure";
+                document.getElementById('eId').value = eventData._id;
+                document.getElementById('eTitle').value = eventData.title; document.getElementById('eDesc').value = eventData.description || '';
+                
+                // Parse Date back to datetime-local format if possible
+                if(eventData.date) {
+                    try {
+                        const d = new Date(eventData.date);
+                        if(!isNaN(d.getTime())) {
+                            const tzOffset = d.getTimezoneOffset() * 60000;
+                            const localISOTime = (new Date(d - tzOffset)).toISOString().slice(0, 16);
+                            document.getElementById('eDate').value = localISOTime;
+                        }
+                    } catch(e) {}
+                }
+
+                document.getElementById('eVenue').value = eventData.venue;
+                document.getElementById('eCap').value = eventData.capacity;
+                document.getElementById('eVisibility').value = eventData.visibility || 'Public';
+                document.getElementById('eMembersOnly').checked = eventData.isMembersOnly;
+                document.getElementById('ePayable').checked = eventData.isPayable;
+                
+                toggleTiers(eventData.isPayable);
+                if(eventData.isPayable && eventData.tiers) {
+                    eventData.tiers.forEach(t => {
+                        const id = Date.now() + Math.random();
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm';
+                        div.id = `tier-${id}`;
+                        div.innerHTML = `<input type="text" value="${t.name}" class="tier-name flex-1 px-3 py-2 text-sm font-bold border-none focus:ring-0 bg-transparent outline-none text-ravn-textMain placeholder-gray-300"><input type="number" value="${t.price}" class="tier-price w-24 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-ravn-primary placeholder-gray-300"><input type="number" value="${t.admits || 1}" min="1" class="tier-admits w-20 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-blue-500"><button type="button" onclick="document.getElementById('tier-${id}').remove()" class="p-2 text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash"></i></button>`;
+                        document.getElementById('tiersList').appendChild(div);
+                    });
+                }
+            } else { document.getElementById('eventModalTitle').textContent = "Plan Adventure"; toggleTiers(false); }
+        }
+
+        document.getElementById('createEventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('eventSubmitBtn'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...'; btn.disabled = true;
+            
+            const isPayable = document.getElementById('ePayable').checked;
+            let tiers = [];
+            if(isPayable) {
+                const tierNodes = document.getElementById('tiersList').children;
+                for(let node of tierNodes) {
+                    const name = node.querySelector('.tier-name').value.trim();
+                    const price = Number(node.querySelector('.tier-price').value);
+                    const admits = Number(node.querySelector('.tier-admits').value) || 1;
+                    if(name && price >= 0) tiers.push({ name, price, admits });
+                }
+                if(tiers.length === 0) { showToast("Add at least one ticket variant!", "error"); btn.innerHTML = 'Publish to the Network 🚀'; btn.disabled = false; return; }
+            }
+
+            // Beautifully format the native datetime-local value
+            let dateVal = document.getElementById('eDate').value;
+            if(dateVal && dateVal.includes('T')) {
+                const d = new Date(dateVal);
+                dateVal = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+            }
+
+            const payload = {
+                title: document.getElementById('eTitle').value, description: document.getElementById('eDesc').value,
+                date: dateVal, venue: document.getElementById('eVenue').value, capacity: Number(document.getElementById('eCap').value),
+                visibility: document.getElementById('eVisibility').value,
+                isMembersOnly: document.getElementById('eMembersOnly').checked, isPayable, tiers
+            };
+            
+            const eid = document.getElementById('eId').value;
+            const url = eid ? `/api/admin/events/${eid}` : '/api/admin/events';
+            const method = eid ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) });
+                if(!res.ok) throw new Error(); closeModal('eventModal'); fetchData(); showToast("Adventure published! 🗺️");
+            } catch(e) { showToast("Failed to save event.", "error"); } finally { btn.innerHTML = 'Publish to the Network 🚀'; btn.disabled = false; }
+        });
+
+        // MEMBERS LOGIC
+        function renderMembers(members) {
+            const tbody = document.getElementById('membersTable');
+            tbody.innerHTML = members.map(m => {
+                const expiryText = m.subscriptionExpiry ? new Date(m.subscriptionExpiry).toLocaleDateString() : 'Lifetime';
+                const statusBadge = m.paymentStatus === 'Paid' ? `<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest">Active</span>` : `<span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest">Pending</span>`;
+                return `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4"><div class="flex items-center gap-3"><img src="${m.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(m.name)}&backgroundColor=FF6B6B`}" class="w-10 h-10 rounded-xl object-cover bg-gray-100 border border-gray-200 shadow-sm"><div><p class="font-extrabold text-sm text-ravn-textMain">${m.name}</p><p class="text-[10px] font-mono text-gray-400 font-bold">${m.memberId}</p></div></div></td>
+                    <td class="p-4"><p class="text-xs font-bold text-gray-600">${m.email}</p><p class="text-[10px] text-gray-400 font-bold mt-0.5">${m.phone}</p></td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4"><p class="text-xs font-bold text-blue-500">${expiryText}</p></td>
+                    <td class="p-4 text-right"><button onclick="openEditMember('${m.memberId}', '${m.paymentStatus}', '${m.subscriptionExpiry || ''}')" class="text-gray-400 hover:text-blue-500 transition-colors p-2"><i class="ph-bold ph-pencil-simple text-lg"></i></button><button onclick="deleteMember('${m.memberId}')" class="text-gray-400 hover:text-red-500 transition-colors p-2"><i class="ph-bold ph-trash text-lg"></i></button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openEditMember(mid, status, expiry) {
+            document.getElementById('editMemId').value = mid; document.getElementById('editMemPayStatus').value = status;
+            if(expiry) document.getElementById('editMemExpiry').value = new Date(expiry).toISOString().split('T')[0];
+            const m = document.getElementById('memberModal'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+
+        document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mid = document.getElementById('editMemId').value;
+            const payload = { paymentStatus: document.getElementById('editMemPayStatus').value, subscriptionExpiry: document.getElementById('editMemExpiry').value || null };
+            try { await fetch(`/api/admin/members/${mid}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); closeModal('memberModal'); fetchData(); showToast("Profile updated."); } 
+            catch(e) { showToast("Failed to update.", "error"); }
+        });
+
+        function deleteMember(mid) {
+            adminConfirm("Delete Member", "Are you sure? This removes them from the database completely.", async () => {
+                try { await fetch(`/api/admin/members/${mid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); showToast("Member removed."); } 
+                catch(e) { showToast("Failed to delete.", "error"); }
+            });
+        }
+
+        // REFUNDS LOGIC
+        function renderRefunds(refunds) {
+            const tbody = document.getElementById('refundsTable');
+            if (refunds.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400 font-bold text-sm">No pending refunds! 🎉</td></tr>'; return; }
+            tbody.innerHTML = refunds.map(r => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4"><p class="font-extrabold text-sm text-ravn-textMain">${r.memberName}</p><p class="text-[10px] font-mono text-gray-400">${r.memberId}</p></td>
+                    <td class="p-4"><p class="text-xs font-bold text-gray-600 line-clamp-1">${r.eventTitle}</p><p class="text-[9px] text-gray-400 mt-0.5">Cancelled: ${new Date(r.createdAt).toLocaleDateString()}</p></td>
+                    <td class="p-4"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-mono font-bold border border-blue-100 shadow-sm">${r.upiId}</span></td>
+                    <td class="p-4"><p class="text-sm font-extrabold text-red-500">₹${r.amount}</p></td>
+                    <td class="p-4 text-right">${r.status === 'Pending' ? `<button onclick="settleRefund('${r._id}')" class="btn-glow !bg-green-500 !px-4 !py-2 !text-[11px] shadow-sm">Mark Settled</button>` : `<span class="text-[10px] font-extrabold text-green-500 uppercase tracking-widest"><i class="ph-bold ph-check"></i> Done</span>`}</td>
+                </tr>
             `).join('');
         }
 
-        document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Broadcasting...'; btn.disabled = true;
-            const payload = {
-                title: document.getElementById('bTitle').value,
-                message: document.getElementById('bMessage').value,
-                triggerBlast: document.getElementById('bEmailBlast').checked
-            };
-            try {
-                await fetch('/api/admin/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) });
-                document.getElementById('broadcastForm').reset();
-                fetchData();
-            } catch(e) { alert("Broadcast failed. 😅"); }
-            finally { btn.innerHTML = "Send to the crew 🚀"; btn.disabled = false; }
-        });
-
-        async function deleteNotification(nid) {
-            if(!confirm("Delete this shout from the feed? 🗑️")) return;
-            try { await fetch(`/api/admin/notifications/${nid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); } 
-            catch(e) { alert("Delete failed."); }
+        function settleRefund(rid) {
+            adminConfirm("Settle Refund", "Confirm you have manually transferred the money via UPI before clicking this.", async () => {
+                try { await fetch(`/api/admin/refunds/${rid}/settle`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); showToast("Refund marked as settled."); } 
+                catch(e) { showToast("Failed to settle.", "error"); }
+            });
         }
 
-        // SAVE SETTINGS
+        // SETTINGS & BROADCASTS
         document.getElementById('settingsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Updating House Rules...'; btn.disabled = true;
-            const payload = {
-                membershipFee: parseInt(document.getElementById('setFee').value) || 0,
-                supportEmail: document.getElementById('setSupportEmail').value,
-                registrationOpen: document.getElementById('setRegOpen').checked,
-                freePromoActive: document.getElementById('setPromo').checked,
-                autoApprove: document.getElementById('setAutoApprove').checked,
-                maintenanceMode: document.getElementById('setMaintenance').checked,
-                strictVerification: document.getElementById('setStrictID').checked
-            };
-            try {
-                await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) });
-                fetchData(); alert("House rules successfully updated! 💾");
-            } catch(e) { alert("Failed to save rules. 😅"); }
-            finally { btn.innerHTML = "Save the Rules 💾"; btn.disabled = false; }
+            const payload = { registrationOpen: document.getElementById('setRegOpen').checked, freePromoActive: document.getElementById('setPromoActive').checked, membershipFee: Number(document.getElementById('setFee').value) };
+            try { await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); showToast("Rules updated successfully!"); } 
+            catch(e) { showToast("Failed to update.", "error"); }
         });
 
-        // UTIL
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+        document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = { title: document.getElementById('bTitle').value, message: document.getElementById('bMessage').value, triggerBlast: document.getElementById('bBlast').checked };
+            try { await fetch('/api/admin/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); document.getElementById('broadcastForm').reset(); showToast("Broadcast transmitted! 🚀"); } 
+            catch(e) { showToast("Failed to broadcast.", "error"); }
+        });
+
+        window.addEventListener('load', fetchData);
     </script>
 </body>
 </html>

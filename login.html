@@ -32,10 +32,10 @@
         .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
         .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
-        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0.02em; font-size: 14px; cursor: pointer; border: none; }
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 16px 36px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0.02em; font-size: 14px; cursor: pointer; border: none; min-height: 54px; }
         .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
         .btn-glow:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
-        .slide-container { position: relative; overflow: hidden; width: 100%; transition: height 0.4s ease; }
+        .slide-container { position: relative; width: 100%; height: auto; }
         .slide-step { width: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease; position: absolute; top: 0; left: 0; }
         .step-active { position: relative; transform: translateX(0); opacity: 1; pointer-events: auto; }
         .step-left { transform: translateX(-120%); opacity: 0; pointer-events: none; }
@@ -98,7 +98,7 @@
                 <div class="slide-container" id="slideWrapper">
                     
                     <!-- STEP 1: Enter Member ID -->
-                    <div id="step1" class="slide-step step-active">
+                    <div id="step1" class="slide-step step-active pb-10">
                         <form id="idForm" class="space-y-6 text-left" onsubmit="handleIdSubmit(event)">
                             <div class="flex flex-col gap-2">
                                 <label class="text-xs font-bold text-ravn-textMain ml-1">What's your Member ID? 🪪</label>
@@ -113,7 +113,7 @@
                     </div>
 
                     <!-- STEP 2: Password (Login OR Set) -->
-                    <div id="step2" class="slide-step step-right">
+                    <div id="step2" class="slide-step step-right pb-10">
                         
                         <!-- Dynamic Profile Pill -->
                         <div class="mx-auto w-fit bg-white border border-gray-200 shadow-sm rounded-full p-1.5 pr-4 flex items-center gap-3 mb-8 cursor-pointer hover:bg-gray-50 transition-colors group" onclick="goBackToId()" title="Switch Account">
@@ -165,7 +165,6 @@
         window.addEventListener('load', () => {
             const preloader = document.getElementById('preloader');
             setTimeout(() => { preloader.style.opacity = '0'; setTimeout(() => { preloader.style.display = 'none'; }, 300); }, 300);
-            adjustWrapperHeight('step1');
         });
 
         const step1 = document.getElementById('step1');
@@ -177,22 +176,15 @@
         let verifiedMemberId = '';
         let memberDataCache = null;
 
-        function adjustWrapperHeight(stepId) {
-            const activeStep = document.getElementById(stepId);
-            slideWrapper.style.height = activeStep.offsetHeight + 'px';
-        }
-
         function showError(msg) {
             errorMessage.textContent = msg;
             errorContainer.classList.remove('hidden');
             errorContainer.classList.add('flex', 'animate-shake');
             setTimeout(() => errorContainer.classList.remove('animate-shake'), 500);
-            adjustWrapperHeight(step1.classList.contains('step-active') ? 'step1' : 'step2');
         }
 
         function hideError() {
             errorContainer.classList.add('hidden'); errorContainer.classList.remove('flex');
-            adjustWrapperHeight(step1.classList.contains('step-active') ? 'step1' : 'step2');
         }
 
         async function handleIdSubmit(e) {
@@ -203,7 +195,7 @@
             const btn = document.getElementById('nextBtn');
             const originalContent = btn.innerHTML;
             
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>'; btn.disabled = true;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>'; btn.disabled = true;
 
             try {
                 const res = await fetch(`/api/member/${idInput}`);
@@ -239,7 +231,6 @@
                 step1.classList.replace('step-active', 'step-left');
                 step2.classList.replace('step-right', 'step-active');
                 
-                setTimeout(() => adjustWrapperHeight('step2'), 50);
                 setTimeout(() => {
                     if(data.hasPassword) document.getElementById('loginPasswordInput').focus();
                     else document.getElementById('setupPasswordInput').focus();
@@ -257,7 +248,7 @@
             const btn = document.getElementById('loginBtn');
             const originalContent = btn.innerHTML;
             
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>'; btn.disabled = true;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>'; btn.disabled = true;
 
             try {
                 const res = await fetch('/api/member/login', {
@@ -285,7 +276,7 @@
             const btn = document.getElementById('setupBtn');
             const originalContent = btn.innerHTML;
             
-            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>'; btn.disabled = true;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>'; btn.disabled = true;
 
             try {
                 // 1. Set the password
@@ -327,7 +318,6 @@
             step2.classList.replace('step-active', 'step-right');
             step1.classList.replace('step-left', 'step-active');
             
-            setTimeout(() => adjustWrapperHeight('step1'), 50);
             setTimeout(() => document.getElementById('memberIdInput').focus(), 500);
         }
     </script>

@@ -105,6 +105,7 @@
             font-size: 14px;
             cursor: pointer;
             border: none;
+            min-height: 54px;
         }
         .btn-glow:hover {
             box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5);
@@ -130,6 +131,7 @@
             align-items: center;
             justify-content: center;
             font-size: 14px;
+            min-height: 54px;
         }
         .btn-glass:hover {
             background: #ffffff;
@@ -141,9 +143,8 @@
         /* Smooth Sliding Forms */
         .slide-container {
             position: relative;
-            overflow: hidden;
             width: 100%;
-            transition: height 0.4s ease;
+            height: auto;
         }
         .slide-step {
             width: 100%;
@@ -258,7 +259,7 @@
                     <div class="slide-container" id="slideWrapper">
                         
                         <!-- STEP 1: The Basics -->
-                        <div id="step1" class="slide-step step-active">
+                        <div id="step1" class="slide-step step-active pb-10">
                             <div class="space-y-6 text-left">
                                 <div class="flex flex-col gap-2">
                                     <label class="text-xs font-bold text-ravn-textMain ml-1">What's your name? 🙋‍♂️</label>
@@ -289,16 +290,16 @@
                         </div>
 
                         <!-- STEP 2: Contact & Campus -->
-                        <div id="step2" class="slide-step step-right">
+                        <div id="step2" class="slide-step step-right pb-10">
                             <div class="space-y-6 text-left">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="flex flex-col gap-2">
                                         <label class="text-xs font-bold text-ravn-textMain ml-1">Email 📧</label>
-                                        <input type="email" id="regEmail" placeholder="alex@email.com" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                        <input type="email" id="regEmail" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" placeholder="alex@email.com" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
                                     </div>
                                     <div class="flex flex-col gap-2">
                                         <label class="text-xs font-bold text-ravn-textMain ml-1">Phone Number 📱</label>
-                                        <input type="tel" id="regPhone" placeholder="123-456-7890" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
+                                        <input type="tel" id="regPhone" pattern="[6-9]\d{9}" title="Please enter a valid 10-digit Indian mobile number" placeholder="9876543210" maxlength="10" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-medium shadow-sm">
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2">
@@ -316,7 +317,7 @@
                         </div>
 
                         <!-- STEP 3: The Piggybank (Checkout) -->
-                        <div id="step3" class="slide-step step-right">
+                        <div id="step3" class="slide-step step-right pb-10">
                             <div class="space-y-6 text-left">
                                 
                                 <!-- Dynamic Promo State -->
@@ -427,8 +428,7 @@
                     <div>
                         <h4 class="text-sm font-extrabold text-ravn-textMain uppercase tracking-widest mb-4">Connect</h4>
                         <ul class="space-y-3 text-base font-medium text-ravn-textMuted">
-                            <li><a href="#" class="hover:text-ravn-primary transition-colors">Instagram 📸</a></li>
-                            <li><a href="#" class="hover:text-ravn-primary transition-colors">TikTok 🎵</a></li>
+                            <li><a href="https://instagram.com/ravnclubofficial" class="hover:text-ravn-primary transition-colors">Instagram 📸</a></li>
                             <li><a href="contact.html" class="hover:text-ravn-primary transition-colors">Say Hello 👋</a></li>
                         </ul>
                     </div>
@@ -454,8 +454,6 @@
                 setTimeout(() => { preloader.style.display = 'none'; }, 300);
             }, 300);
             
-            // Initial height set
-            adjustWrapperHeight('step1');
             checkCapacity();
         });
 
@@ -471,12 +469,6 @@
         });
 
         // --- SLIDING FORM LOGIC ---
-        function adjustWrapperHeight(stepId) {
-            const activeStep = document.getElementById(stepId);
-            const wrapper = document.getElementById('slideWrapper');
-            wrapper.style.height = activeStep.offsetHeight + 'px';
-        }
-
         function updateProgress(step) {
             for(let i=1; i<=3; i++) {
                 const dot = document.getElementById(`dot${i}`);
@@ -510,7 +502,22 @@
                 const email = document.getElementById('regEmail').value.trim();
                 const phone = document.getElementById('regPhone').value.trim();
                 const address = document.getElementById('regAddress').value.trim();
+                
                 if(!email || !phone || !address) { alert("We need your contact info to add you to the group chat! 📱"); return; }
+                
+                // Strict Email Validation
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if(!emailRegex.test(email)) {
+                    alert("Please enter a valid email address (e.g., name@gmail.com) 📧");
+                    return;
+                }
+
+                // Strict Indian Mobile Number Validation
+                const phoneRegex = /^[6-9]\d{9}$/;
+                if(!phoneRegex.test(phone.replace(/\D/g, ''))) {
+                    alert("Please enter a valid 10-digit mobile number 📱");
+                    return;
+                }
             }
 
             const currentEl = document.getElementById(`step${current}`);
@@ -525,7 +532,6 @@
                 nextEl.className = 'slide-step step-active';
             }
 
-            setTimeout(() => adjustWrapperHeight(`step${next}`), 50);
             updateProgress(next);
         }
 
@@ -591,7 +597,7 @@
 
             const submitBtn = document.getElementById('submitRegBtn');
             const origHtml = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Processing...';
+            submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Processing...';
             submitBtn.disabled = true;
 
             const payload = {

@@ -181,19 +181,19 @@
                 What's the plan? 🤔
             </div>
             
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-ravn-textMain leading-[1.1] mb-8">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-ravn-textMain leading-[1.1] mb-8 drop-shadow-sm">
                 Upcoming <span class="text-transparent bg-clip-text bg-gradient-to-r from-ravn-primary to-ravn-accent">Adventures.</span>
             </h1>
             
             <p class="text-lg md:text-xl font-medium text-ravn-textMuted leading-relaxed mb-12 max-w-2xl mx-auto">
-                From spontaneous road trips to cozy indie movie nights, here's what the group chat is planning next. Find something you like, RSVP, and let's go! 🚐
+                From high-energy raves to open-air sundowners, here's what the group chat is planning next. Find something you like, RSVP, and let's go! 🚐
             </p>
         </div>
     </header>
 
     <main class="relative z-10 px-6 pb-24 flex-grow">
         <div class="container mx-auto max-w-6xl">
-            <div id="dynamicEventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="dynamicEventsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <!-- Preloader for events -->
                 <div class="col-span-full text-center py-20 flex flex-col items-center justify-center">
                     <i class="ph-bold ph-spinner-gap animate-spin text-4xl text-ravn-primary mb-4"></i>
@@ -261,96 +261,100 @@
         async function fetchPublicEvents() {
             const container = document.getElementById('dynamicEventsContainer');
             
-            // Hardcoded beautifully styled fallback events just in case the API isn't running yet!
+            // Replaced the old mockups with the new planned events (Desi Prom & Freshers Fiesta)
             const fallbackEventsHtml = `
-                <!-- Mock Event 1 -->
+                <!-- Event 1: The Switch -->
                 <div class="reveal glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white">
                     <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0">
-                        <img src="https://images.unsplash.com/photo-1523580494112-071dcae2432f?auto=format&fit=crop&q=80&w=800" alt="Camping Trip" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000&auto=format&fit=crop" alt="The Switch" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     </div>
                     <div class="flex flex-col flex-grow">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full w-fit">Road Trip 🚐</span>
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-purple-100 text-purple-600 px-3 py-1.5 rounded-full w-fit">Marquee Event 🪩</span>
                         </div>
-                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">The Mountain Cabin</h3>
-                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">Packing up the cars and heading for the hills. Bonfires, acoustic guitars, and disconnecting from Wi-Fi.</p>
-                        <a href="eventregister.html?id=demo" class="btn-glow w-full text-sm py-3">Grab a Seat 🫂</a>
+                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">The Switch (Desi Prom)</h3>
+                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow"><strong>Part I: Desi Prom. Part II: Midnight Rave.</strong> One night, two identities. Bring your sharpest formal wear and prepare for the ultimate transition when the lights cut out at 10:30 PM.</p>
+                        <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-100 mb-6">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
+                                <i class="ph-fill ph-calendar-blank text-ravn-primary text-base"></i> Friday, 8:00 PM
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
+                                <i class="ph-fill ph-map-pin text-blue-500 text-base"></i> Secret Location
+                            </div>
+                        </div>
+                        <a href="eventregister.html?id=the-switch" class="btn-glow w-full text-sm py-3">Secure Access 🎟️</a>
                     </div>
                 </div>
-                <!-- Mock Event 2 -->
+
+                <!-- Event 2: Golden Hour -->
                 <div class="reveal delay-100 glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white">
                     <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0">
-                        <img src="https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&q=80&w=800" alt="Comedy Night" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop" alt="Golden Hour" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     </div>
                     <div class="flex flex-col flex-grow">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-pink-100 text-ravn-primary px-3 py-1.5 rounded-full w-fit">Local Hangout 🎤</span>
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-orange-100 text-orange-600 px-3 py-1.5 rounded-full w-fit">Freshers Fiesta 🌅</span>
                         </div>
-                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">Comedy Under the Stars</h3>
-                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">We've booked out the local open-mic patio. Grab some food from the trucks outside and get ready to laugh.</p>
-                        <a href="eventregister.html?id=demo" class="btn-glow w-full text-sm py-3">RSVP & Grab Pizza 🍕</a>
-                    </div>
-                </div>
-                <!-- Mock Event 3 -->
-                <div class="reveal delay-200 glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white">
-                    <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0">
-                        <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=800" alt="Movie Night" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    </div>
-                    <div class="flex flex-col flex-grow">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-[11px] font-extrabold uppercase tracking-widest bg-blue-100 text-blue-600 px-3 py-1.5 rounded-full w-fit">Chill Night In 🍿</span>
+                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">The Golden Hour</h3>
+                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">Swap the dark basement for rooftop breezes. An exclusive open-air sundowner designed to kick off the new season. Sunset aesthetics and open-air dancing.</p>
+                        <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-100 mb-6">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
+                                <i class="ph-fill ph-calendar-blank text-ravn-primary text-base"></i> Saturday, 4:00 PM
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
+                                <i class="ph-fill ph-map-pin text-blue-500 text-base"></i> The Rooftop Lounge
+                            </div>
                         </div>
-                        <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">Indie Cinema Marathon</h3>
-                        <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow">Renting out the private screening room downtown. Popcorn and sodas are on the house!</p>
-                        <a href="eventregister.html?id=demo" class="btn-glow w-full text-sm py-3">Save a spot on the couch 🛋️</a>
+                        <a href="eventregister.html?id=golden-hour" class="btn-glow w-full text-sm py-3">Get Early Bird 🐦</a>
                     </div>
                 </div>
             `;
 
             try {
+                // Un-commented the API call so it fetches live data from your Admin Panel
                 const res = await fetch('/api/public/events');
-                if(!res.ok) throw new Error();
+                if (!res.ok) throw new Error("Failed to fetch events");
+                
                 const events = await res.json();
                 
-                if(events.length === 0) {
-                    // Show beautiful fallback if API works but no events are scheduled
-                    container.innerHTML = fallbackEventsHtml;
-                    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-                    return;
+                // If there are no events in the database, fall back to the mockups
+                if (!events || events.length === 0) {
+                    throw new Error("No events found in DB");
                 }
 
-                // If we have real events from the DB, style them beautifully
+                // Map the real database events to the UI
                 container.innerHTML = events.map((e, index) => {
                     const delayClass = index % 3 === 0 ? '' : (index % 3 === 1 ? 'delay-100' : 'delay-200');
                     
                     let actionBtn = '';
                     if (e.isMembersOnly) {
                         actionBtn = `<a href="login.html" class="btn-glass w-full py-3 text-sm flex items-center justify-center gap-2">Clubhouse Login Required 🔒</a>`;
-                    } else if (!e.rsvpOpen) {
+                    } else if (e.rsvpOpen === false) {
                         actionBtn = `<button disabled class="w-full py-3 bg-gray-100 text-gray-400 rounded-full font-bold text-sm cursor-not-allowed">Fully Booked 😅</button>`;
                     } else {
-                        actionBtn = `<a href="eventregister.html?id=${e._id}" class="btn-glow w-full text-sm py-3 flex items-center justify-center gap-2">Count me in! 🙋‍♂️</a>`;
+                        actionBtn = `<a href="eventregister.html?id=${e._id || e.id}" class="btn-glow w-full text-sm py-3 flex items-center justify-center gap-2">Secure Access 🎟️</a>`;
                     }
 
-                    // Assign a friendly random placeholder image based on the event title length to make it look nice
-                    const imgTopics = ['party', 'friends', 'concert', 'camping', 'coffee'];
-                    const randomImage = `https://images.unsplash.com/photo-${e.title.length % 2 === 0 ? '1529333166437-7750a6dd5a70' : '1517604931442-7e0c8ed2963c'}?auto=format&fit=crop&q=80&w=800`;
+                    // Dynamically fetch the image uploaded via the admin panel.
+                    // Prioritize database fields, then fall back to a high-quality placeholder.
+                    const eventImage = e.image || e.imageUrl || e.coverImage || `https://images.unsplash.com/photo-${e.title && e.title.length % 2 === 0 ? '1514525253161-7a46d19cd819' : '1544717305-2782549b5136'}?q=80&w=1000&auto=format&fit=crop`;
 
                     return `
                     <div class="reveal ${delayClass} glass-card p-6 md:p-8 flex flex-col h-full group hover:bg-white transition-colors">
                         <div class="w-full h-48 rounded-[24px] overflow-hidden relative shadow-sm mb-6 shrink-0 bg-gray-100">
-                            <img src="${randomImage}" alt="Event image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <!-- Injected the dynamic image here with an onerror fallback just in case the upload link is broken -->
+                            <img src="${eventImage}" alt="${e.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1000&auto=format&fit=crop'">
                         </div>
                         
                         <div class="flex flex-col flex-grow">
                             <div class="flex justify-between items-start mb-4">
                                 <span class="text-[11px] font-extrabold uppercase tracking-widest ${e.isMembersOnly ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'} px-3 py-1.5 rounded-full w-fit">
-                                    ${e.isMembersOnly ? 'Members Only 🤫' : 'Open Invites 👋'}
+                                    ${e.isMembersOnly ? 'Members Only 🔒' : 'Open Invites 👋'}
                                 </span>
                             </div>
                             
                             <h3 class="text-2xl font-extrabold mb-3 text-ravn-textMain">${e.title}</h3>
-                            <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow line-clamp-3">${e.description || 'Join us for another amazing adventure with the RAVN crew.'}</p>
+                            <p class="text-ravn-textMuted font-medium text-sm mb-6 leading-relaxed flex-grow line-clamp-3">${e.description || 'Join us for another amazing adventure.'}</p>
                             
                             <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-100 mb-6">
                                 <div class="flex items-center gap-1.5 text-xs font-bold text-ravn-textMain">
@@ -367,11 +371,10 @@
                     `;
                 }).join('');
 
-                // Trigger Reveal Animations
                 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
             } catch(e) {
-                // If the backend fails, fall back to the beautiful static mockups!
+                // Render our beautiful static mockups!
                 container.innerHTML = fallbackEventsHtml;
                 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
             }

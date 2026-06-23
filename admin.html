@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAVN | Admin Command ⚡</title>
     
+    <script>
+        // IMMEDIATE SECURITY CHECK: Prevents the page from flashing before redirecting
+        const adminKey = sessionStorage.getItem('ravn_admin_token');
+        if (!adminKey) {
+            window.location.replace('adminlogin.html');
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
@@ -17,9 +25,9 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], },
-                    colors: { ravn: { bg: '#F3F4F6', surface: '#FFFFFF', border: '#E5E7EB', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
-                    animation: { 'fade-in': 'fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards', 'slide-up': 'slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards' },
-                    keyframes: { fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } }, slideUp: { from: { opacity: '0', transform: 'translateY(20px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
+                    colors: { ravn: { bg: '#FAFAF9', surface: '#FFFFFF', border: '#F3F4F6', primary: '#FF6B6B', primaryHover: '#FA5252', accent: '#FCA311', textMain: '#1C1917', textMuted: '#57534E', } },
+                    animation: { 'float': 'float 8s ease-in-out infinite', 'float-delayed': 'float 8s ease-in-out 4s infinite', 'fade-in': 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards', 'slide-up': 'slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards' },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' } }, fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } }, slideUp: { from: { opacity: '0', transform: 'translateY(20px)' }, to: { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -27,173 +35,206 @@
 
     <style>
         html { scroll-behavior: smooth; }
-        body { background-color: #F9FAFB; color: #1C1917; }
-        .glass-card { background: #FFFFFF; border: 1px solid #F3F4F6; border-radius: 24px; box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05); }
-        .friendly-input { background-color: #F9FAFB; border: 1px solid #E5E7EB; color: #1C1917; transition: all 0.3s ease; }
+        body { background-color: #FAFAF9; color: #1C1917; overflow: hidden; }
+        
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-right: 1px solid rgba(255, 255, 255, 0.8); }
+        .glass-card { background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 32px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
+        
+        .friendly-input { background-color: #F9FAFB; border: 2px solid transparent; color: #1C1917; transition: all 0.3s ease; }
         .friendly-input:focus { background-color: #FFFFFF; border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1); outline: none; }
-        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 16px; padding: 12px 24px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; }
+        
+        .btn-glow { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: #ffffff; font-weight: 700; border-radius: 100px; padding: 12px 28px; transition: all 0.3s ease; box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; border: none; }
         .btn-glow:hover { box-shadow: 0 12px 30px -5px rgba(255, 107, 107, 0.5); transform: translateY(-2px); }
-        .nav-item.active { background-color: #FFF5F5; color: #FF6B6B; font-weight: 800; border-right: 3px solid #FF6B6B; }
-        .nav-item.active i { color: #FF6B6B; }
+        
+        .btn-glass { background: rgba(255, 255, 255, 0.9); color: #1C1917; font-weight: 700; border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 100px; padding: 12px 28px; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; }
+        .btn-glass:hover { background: #ffffff; border-color: rgba(255, 107, 107, 0.4); color: #FF6B6B; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); }
+
+        .nav-item.active { background-color: rgba(255, 107, 107, 0.1); color: #FF6B6B; font-weight: 800; border: 1px solid rgba(255, 107, 107, 0.2); }
+        .nav-item.active .icon-bg { background-color: #FF6B6B; color: white; }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease forwards; }
+        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
-
-        /* Fancy date picker overrides for webkit */
-        ::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            filter: invert(0.5) sepia(1) saturate(5) hue-rotate(315deg);
-            opacity: 0.8;
-            transition: opacity 0.3s;
-        }
-        ::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     </style>
 </head>
 
-<body class="flex h-screen overflow-hidden selection:bg-ravn-primary selection:text-white">
+<body class="flex h-screen selection:bg-ravn-primary selection:text-white relative">
 
-    <!-- Global Custom Confirm Modal -->
-    <div id="confirmModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="glass-card w-full max-w-sm bg-white p-6 text-center shadow-2xl transform scale-95 transition-transform" id="confirmBox">
-            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100"><i class="ph-bold ph-warning-circle text-3xl"></i></div>
-            <h3 class="text-xl font-extrabold mb-2 text-ravn-textMain" id="confirmTitle">Are you sure?</h3>
-            <p class="text-sm text-gray-500 mb-6 font-medium" id="confirmMsg">This action cannot be undone.</p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirm()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold transition-colors">Cancel</button>
-                <button id="confirmActionBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Confirm</button>
+    <!-- Ambient Warm Background Glows -->
+    <div class="fixed inset-0 w-full h-full z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[10%] right-[10%] w-[500px] h-[500px] rounded-full bg-ravn-primary/10 blur-[100px] animate-float"></div>
+        <div class="absolute bottom-[10%] left-[10%] w-[600px] h-[600px] rounded-full bg-ravn-accent/10 blur-[120px] animate-float-delayed"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz4KPC9zdmc+')] opacity-50"></div>
+    </div>
+
+    <div id="confirmModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-gray-900/60 backdrop-blur-md p-4 transition-opacity opacity-0">
+        <div class="glass-card w-full max-w-sm bg-white/90 p-8 text-center shadow-2xl transform scale-95 transition-transform" id="confirmBox">
+            <div class="w-20 h-20 bg-red-50 text-red-500 rounded-[24px] flex items-center justify-center mx-auto mb-6 border border-red-100 shadow-sm"><i class="ph-fill ph-warning-circle text-4xl"></i></div>
+            <h3 class="text-2xl font-extrabold mb-2 text-ravn-textMain" id="confirmTitle">Are you sure?</h3>
+            <p class="text-sm text-gray-500 mb-8 font-medium" id="confirmMsg">This action cannot be undone.</p>
+            <div class="flex gap-4">
+                <button onclick="closeConfirm()" class="flex-1 btn-glass">Cancel</button>
+                <button id="confirmActionBtn" class="flex-1 btn-glow !bg-red-500 hover:!bg-red-600 shadow-md">Confirm</button>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 z-20 shadow-sm relative">
-        <div class="h-[76px] flex items-center px-8 border-b border-gray-100 shrink-0">
-            <span class="font-extrabold text-2xl tracking-wider text-ravn-textMain uppercase">RAVN <span class="text-ravn-primary">Admin</span></span>
+    <aside class="w-[280px] glass-panel flex flex-col shrink-0 z-20 relative">
+        <div class="h-[88px] flex items-center px-8 border-b border-gray-200/50 shrink-0">
+            <img src="RAVN.png" alt="RAVN" class="h-6 w-auto mr-3 filter brightness-0 opacity-90" onerror="this.style.display='none';">
         </div>
-        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-squares-four text-xl"></i> Dashboard</button>
-            <button onclick="switchTab('events')" id="nav-events" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-calendar-star text-xl"></i> Adventures</button>
-            <button onclick="switchTab('members')" id="nav-members" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-users-three text-xl"></i> Members</button>
-            <button onclick="switchTab('refunds')" id="nav-refunds" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-receipt text-xl"></i> Refunds</button>
-            <button onclick="switchTab('broadcasts')" id="nav-broadcasts" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-megaphone text-xl"></i> Broadcasts</button>
-            <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors text-left"><i class="ph-fill ph-gear-six text-xl"></i> System Rules</button>
+        <div class="flex-1 overflow-y-auto py-8 px-5 space-y-3">
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">Command Center</p>
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-4 px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-squares-four text-lg"></i></div> Dashboard
+            </button>
+            <button onclick="switchTab('events')" id="nav-events" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-map-trifold text-lg"></i></div> Adventures
+            </button>
+            <button onclick="switchTab('members')" id="nav-members" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-users-three text-lg"></i></div> Members
+            </button>
+            
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mt-6 mb-2">Operations</p>
+            <button onclick="switchTab('inbox')" id="nav-inbox" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="flex items-center gap-4"><div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-envelope-open text-lg"></i></div> Inbox</div>
+                <span id="badgeInbox" class="hidden bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">0</span>
+            </button>
+            <button onclick="switchTab('refunds')" id="nav-refunds" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="flex items-center gap-4"><div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-receipt text-lg"></i></div> Refunds</div>
+                <span id="badgeRefunds" class="hidden bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">0</span>
+            </button>
+            
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mt-6 mb-2">System</p>
+            <button onclick="switchTab('broadcasts')" id="nav-broadcasts" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-megaphone text-lg"></i></div> Broadcasts
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-white/50 transition-colors text-left border border-transparent">
+                <div class="icon-bg w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 border border-gray-100"><i class="ph-fill ph-gear-six text-lg"></i></div> Settings
+            </button>
         </div>
-        <div class="p-4 border-t border-gray-100 shrink-0">
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-500 rounded-xl text-sm font-bold hover:bg-red-100 transition-colors"><i class="ph-bold ph-sign-out text-lg"></i> Sign Out</button>
+        <div class="p-6 border-t border-gray-200/50 shrink-0">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-red-50 text-red-500 rounded-[20px] text-sm font-bold hover:bg-red-100 border border-red-100 transition-colors shadow-sm"><i class="ph-bold ph-sign-out text-lg"></i> Sign Out</button>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0 bg-gray-50/50 relative">
+    <main class="flex-1 flex flex-col min-w-0 relative z-10">
         
-        <header class="h-[76px] bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shrink-0 z-10 sticky top-0 shadow-sm">
-            <h1 class="text-xl font-extrabold text-ravn-textMain tracking-tight" id="headerTitle">Command Center</h1>
+        <header class="h-[88px] bg-white/40 backdrop-blur-2xl border-b border-gray-200/50 flex items-center justify-between px-10 shrink-0 z-30 sticky top-0 shadow-sm">
+            <div>
+                <h1 class="text-3xl font-extrabold text-ravn-textMain tracking-tight" id="headerTitle">Dashboard</h1>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Admin Command Node</p>
+            </div>
             <div class="flex items-center gap-4">
-                <button onclick="fetchData()" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-ravn-primary hover:border-ravn-primary/30 transition-colors shadow-sm" title="Refresh Data"><i class="ph-bold ph-arrows-clockwise text-lg"></i></button>
-                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100 shadow-sm"><i class="ph-fill ph-user-circle text-xl"></i></div>
+                <button onclick="fetchData()" class="btn-glass !p-3 !rounded-xl" title="Refresh Data"><i class="ph-bold ph-arrows-clockwise text-xl"></i></button>
+                <div class="w-12 h-12 rounded-[16px] bg-ravn-primary/10 text-ravn-primary flex items-center justify-center border border-ravn-primary/20 shadow-sm"><i class="ph-fill ph-shield-check text-2xl"></i></div>
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 relative">
-            
-            <!-- Dashboard Tab -->
-            <div id="tab-dashboard" class="tab-content active max-w-6xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-card p-6 border-t-4 border-t-blue-500">
-                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-users text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Total</span></div>
-                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statMembers">0</h3>
+            <div id="tab-dashboard" class="tab-content active max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <div class="glass-card p-6 bg-white/60">
+                        <div class="flex items-center justify-between mb-4"><div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-[20px] flex items-center justify-center border border-blue-100 shadow-sm"><i class="ph-fill ph-users text-3xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Total</span></div>
+                        <h3 class="text-4xl font-extrabold text-ravn-textMain" id="statMembers">0</h3>
                         <p class="text-xs font-bold text-gray-500 mt-1">Active Members</p>
                     </div>
-                    <div class="glass-card p-6 border-t-4 border-t-green-500">
-                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-money text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Yearly</span></div>
-                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statRev">₹0</h3>
+                    <div class="glass-card p-6 bg-white/60">
+                        <div class="flex items-center justify-between mb-4"><div class="w-14 h-14 bg-green-50 text-green-500 rounded-[20px] flex items-center justify-center border border-green-100 shadow-sm"><i class="ph-fill ph-money text-3xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Yearly</span></div>
+                        <h3 class="text-4xl font-extrabold text-ravn-textMain" id="statRev">₹0</h3>
                         <p class="text-xs font-bold text-gray-500 mt-1">Est. Revenue</p>
                     </div>
-                    <div class="glass-card p-6 border-t-4 border-t-orange-500">
-                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-clock text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Action</span></div>
-                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statPending">0</h3>
+                    <div class="glass-card p-6 bg-white/60">
+                        <div class="flex items-center justify-between mb-4"><div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-[20px] flex items-center justify-center border border-orange-100 shadow-sm"><i class="ph-fill ph-clock text-3xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Action</span></div>
+                        <h3 class="text-4xl font-extrabold text-ravn-textMain" id="statPending">0</h3>
                         <p class="text-xs font-bold text-gray-500 mt-1">Pending Approvals</p>
                     </div>
-                    <div class="glass-card p-6 border-t-4 border-t-purple-500">
-                        <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center"><i class="ph-fill ph-ticket text-2xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Tickets</span></div>
-                        <h3 class="text-3xl font-extrabold text-ravn-textMain" id="statRsvps">0</h3>
+                    <div class="glass-card p-6 bg-white/60">
+                        <div class="flex items-center justify-between mb-4"><div class="w-14 h-14 bg-purple-50 text-purple-500 rounded-[20px] flex items-center justify-center border border-purple-100 shadow-sm"><i class="ph-fill ph-ticket text-3xl"></i></div><span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Tickets</span></div>
+                        <h3 class="text-4xl font-extrabold text-ravn-textMain" id="statRsvps">0</h3>
                         <p class="text-xs font-bold text-gray-500 mt-1">Total RSVPs</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Events Tab -->
-            <div id="tab-events" class="tab-content max-w-6xl mx-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <div><h2 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Manage Adventures</h2></div>
-                    <button onclick="openEventModal()" class="btn-glow flex items-center gap-2"><i class="ph-bold ph-plus"></i> Plan Adventure</button>
+            <div id="tab-events" class="tab-content max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <div><h2 class="text-3xl font-extrabold text-ravn-textMain tracking-tight mb-2">Manage Adventures</h2><p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Create and modify club events</p></div>
+                    <button onclick="openEventModal()" class="btn-glow flex items-center gap-2 text-sm"><i class="ph-bold ph-plus text-lg"></i> Plan Adventure</button>
                 </div>
-                <div id="eventsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="eventsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
             </div>
 
-            <!-- Members Tab -->
-            <div id="tab-members" class="tab-content max-w-6xl mx-auto">
-                <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-white"><h2 class="text-xl font-extrabold text-ravn-textMain tracking-tight">Member Roster</h2></div>
+            <div id="tab-members" class="tab-content max-w-7xl mx-auto">
+                <div class="glass-card overflow-hidden bg-white/80">
+                    <div class="p-8 border-b border-gray-100 flex justify-between items-center"><h2 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Member Roster</h2></div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead><tr class="bg-gray-50 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest"><th class="p-4 rounded-tl-2xl">Member</th><th class="p-4">Contact</th><th class="p-4">Status</th><th class="p-4">Expiry</th><th class="p-4 text-right rounded-tr-2xl">Actions</th></tr></thead>
+                            <thead><tr class="bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border-y border-gray-100"><th class="p-5 pl-8">Member</th><th class="p-5">Contact</th><th class="p-5">Status</th><th class="p-5">Expiry</th><th class="p-5 text-right pr-8">Actions</th></tr></thead>
                             <tbody id="membersTable" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Refunds Tab -->
-            <div id="tab-refunds" class="tab-content max-w-6xl mx-auto">
-                <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-white"><h2 class="text-xl font-extrabold text-ravn-textMain tracking-tight">Pending Refunds</h2></div>
+            <div id="tab-inbox" class="tab-content max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <div><h2 class="text-3xl font-extrabold text-ravn-textMain tracking-tight mb-2">Inbox 📬</h2><p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Messages from the Contact Page</p></div>
+                </div>
+                <div id="messagesGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+            </div>
+
+            <div id="tab-refunds" class="tab-content max-w-7xl mx-auto">
+                <div class="glass-card overflow-hidden bg-white/80">
+                    <div class="p-8 border-b border-gray-100 flex justify-between items-center"><h2 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Pending Refunds</h2></div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead><tr class="bg-gray-50 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest"><th class="p-4 rounded-tl-2xl">Guest</th><th class="p-4">Event</th><th class="p-4">UPI Details</th><th class="p-4">Amount</th><th class="p-4 text-right rounded-tr-2xl">Action</th></tr></thead>
+                            <thead><tr class="bg-gray-50/50 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border-y border-gray-100"><th class="p-5 pl-8">Guest</th><th class="p-5">Event</th><th class="p-5">UPI Details</th><th class="p-5">Amount</th><th class="p-5 text-right pr-8">Action</th></tr></thead>
                             <tbody id="refundsTable" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Broadcasts Tab -->
             <div id="tab-broadcasts" class="tab-content max-w-4xl mx-auto">
-                <div class="glass-card p-8 mb-8 bg-white relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
-                    <h2 class="text-xl font-extrabold text-ravn-textMain mb-6">Send Network Broadcast 📢</h2>
-                    <form id="broadcastForm" class="space-y-4">
-                        <input type="text" id="bTitle" required placeholder="Announcement Title" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
-                        <textarea id="bMessage" required rows="4" placeholder="Type your message..." class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-medium shadow-sm resize-none"></textarea>
-                        <div class="flex items-center gap-3 py-2">
-                            <input type="checkbox" id="bBlast" class="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer">
-                            <label for="bBlast" class="text-sm font-bold text-gray-600 cursor-pointer">Also send as an Email Blast to all members</label>
+                <div class="glass-card p-10 mb-8 bg-white/80 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-3 h-full bg-blue-500"></div>
+                    <h2 class="text-3xl font-extrabold text-ravn-textMain mb-2">Network Broadcast 📢</h2>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-8">Send alerts to all members</p>
+                    <form id="broadcastForm" class="space-y-6">
+                        <input type="text" id="bTitle" required placeholder="Announcement Title" class="friendly-input w-full px-6 py-4 rounded-[20px] text-base font-bold shadow-sm">
+                        <textarea id="bMessage" required rows="5" placeholder="Type your message..." class="friendly-input w-full px-6 py-4 rounded-[20px] text-base font-medium shadow-sm resize-none"></textarea>
+                        <div class="flex items-center gap-4 py-2 p-4 bg-blue-50 rounded-[20px] border border-blue-100">
+                            <input type="checkbox" id="bBlast" class="w-6 h-6 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer">
+                            <label for="bBlast" class="text-sm font-bold text-blue-700 cursor-pointer flex-1">Also send as an Email Blast to all members</label>
                         </div>
-                        <button type="submit" class="btn-glow !bg-blue-500 shadow-md">Publish to Network</button>
+                        <button type="submit" class="btn-glow !bg-blue-500 shadow-md w-full py-4 text-base">Publish to Network</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Settings Tab -->
             <div id="tab-settings" class="tab-content max-w-3xl mx-auto">
-                <div class="glass-card p-8 bg-white relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-gray-800"></div>
-                    <h2 class="text-xl font-extrabold text-ravn-textMain mb-6">System Rules ⚙️</h2>
+                <div class="glass-card p-10 bg-white/80 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-3 h-full bg-gray-800"></div>
+                    <h2 class="text-3xl font-extrabold text-ravn-textMain mb-2">System Rules ⚙️</h2>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-8">Core club configuration</p>
                     <form id="settingsForm" class="space-y-6">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-[16px] border border-gray-100">
-                            <div><p class="font-extrabold text-sm text-ravn-textMain">Open Registrations</p><p class="text-xs font-medium text-gray-500">Allow new members to sign up.</p></div>
-                            <input type="checkbox" id="setRegOpen" class="w-6 h-6 rounded border-gray-300 text-ravn-primary focus:ring-ravn-primary cursor-pointer">
+                        <div class="flex items-center justify-between p-6 bg-white rounded-[24px] border border-gray-100 shadow-sm">
+                            <div><p class="font-extrabold text-lg text-ravn-textMain">Open Registrations</p><p class="text-sm font-medium text-gray-500">Allow new members to sign up.</p></div>
+                            <input type="checkbox" id="setRegOpen" class="w-8 h-8 rounded border-gray-300 text-ravn-primary focus:ring-ravn-primary cursor-pointer">
                         </div>
-                        <div class="flex items-center justify-between p-4 bg-orange-50 rounded-[16px] border border-orange-100">
-                            <div><p class="font-extrabold text-sm text-orange-700">Free Entry Promo</p><p class="text-xs font-medium text-orange-600/70">Make the first 100 signups free.</p></div>
-                            <input type="checkbox" id="setPromoActive" class="w-6 h-6 rounded border-orange-300 text-orange-500 focus:ring-orange-500 cursor-pointer">
+                        <div class="flex items-center justify-between p-6 bg-orange-50 rounded-[24px] border border-orange-100 shadow-sm">
+                            <div><p class="font-extrabold text-lg text-orange-700">Free Entry Promo</p><p class="text-sm font-medium text-orange-600/70">Make new signups free automatically.</p></div>
+                            <input type="checkbox" id="setPromoActive" class="w-8 h-8 rounded border-orange-300 text-orange-500 focus:ring-orange-500 cursor-pointer">
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Annual Membership Fee (₹)</label>
-                            <input type="number" id="setFee" required class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
+                        <div class="flex flex-col gap-2 p-6 bg-white rounded-[24px] border border-gray-100 shadow-sm">
+                            <label class="text-xs font-bold uppercase tracking-widest text-gray-400">Annual Membership Fee (₹)</label>
+                            <input type="number" id="setFee" required class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-bold shadow-sm">
                         </div>
-                        <button type="submit" class="btn-glow w-full shadow-md">Save Core Settings</button>
+                        <button type="submit" class="btn-glow w-full shadow-md py-4 text-base mt-4">Save Core Settings</button>
                     </form>
                 </div>
             </div>
@@ -201,45 +242,76 @@
         </div>
     </main>
 
-    
-    <!-- Edit Member Modal -->
-    <div id="memberModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="glass-card w-full max-w-md bg-white shadow-2xl relative">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center"><h3 class="text-xl font-extrabold text-ravn-textMain">Edit Member</h3><button onclick="closeModal('memberModal')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-xl"></i></button></div>
-            <form id="editMemberForm" class="p-6 space-y-4">
+    <div id="backpackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-md p-4 transition-opacity opacity-0">
+        <div class="glass-card w-full max-w-2xl bg-white/95 max-h-[90vh] flex flex-col relative shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500/10 to-blue-400/10 p-8 flex justify-between items-center border-b border-blue-100/50 shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-white rounded-[20px] shadow-sm flex items-center justify-center text-blue-500 border border-blue-100"><i class="ph-fill ph-backpack text-3xl"></i></div>
+                    <div><h3 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Digital Backpack</h3><p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1" id="bpEventTitle">Event Title</p></div>
+                </div>
+                <button onclick="closeModal('backpackModal')" class="btn-glass !p-3 !rounded-xl text-gray-500 hover:text-red-500"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-8 space-y-8">
+                <div>
+                    <h4 class="text-sm font-extrabold uppercase tracking-widest text-gray-400 mb-4">Stored Resources</h4>
+                    <div id="bpResourcesList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-[24px] border border-gray-100 shadow-inner">
+                    <h4 class="text-sm font-extrabold uppercase tracking-widest text-gray-600 mb-4">Upload New Link</h4>
+                    <form id="addResourceForm" class="space-y-4">
+                        <input type="hidden" id="bpEventId">
+                        <input type="text" id="bpResTitle" required placeholder="Title (e.g. Event Photos)" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
+                        <input type="url" id="bpResUrl" required placeholder="https://drive.google.com/..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
+                        <button type="submit" class="btn-glow !bg-blue-500 w-full shadow-md py-4"><i class="ph-bold ph-plus mr-2"></i> Add to Backpack</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="memberModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-md p-4 transition-opacity opacity-0">
+        <div class="glass-card w-full max-w-md bg-white/95 shadow-2xl relative overflow-hidden">
+            <div class="p-8 border-b border-gray-100 flex justify-between items-center"><h3 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Edit Member</h3><button onclick="closeModal('memberModal')" class="btn-glass !p-3 !rounded-xl text-gray-400 hover:text-red-500"><i class="ph-bold ph-x text-xl"></i></button></div>
+            <form id="editMemberForm" class="p-8 space-y-5">
                 <input type="hidden" id="editMemId">
-                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Payment Status</label><select id="editMemPayStatus" class="friendly-input w-full px-4 py-3 rounded-xl text-sm font-bold"><option value="Pending">Pending</option><option value="Paid">Paid</option></select></div>
-                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Annual Expiry Date</label><input type="date" id="editMemExpiry" class="friendly-input w-full px-4 py-3 rounded-xl text-sm font-bold text-blue-600"></div>
-                <button type="submit" class="btn-glow w-full mt-4">Save Changes</button>
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Full Name</label><input type="text" id="editMemName" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm"></div>
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email</label><input type="email" id="editMemEmail" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm"></div>
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Phone</label><input type="text" id="editMemPhone" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm"></div>
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Payment Status</label><select id="editMemPayStatus" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm"><option value="Pending">Pending</option><option value="Paid">Paid</option></select></div>
+                <div class="flex flex-col gap-2"><label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Annual Expiry Date</label><input type="date" id="editMemExpiry" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold text-blue-600 shadow-sm cursor-pointer"></div>
+                <button type="submit" class="btn-glow w-full mt-4 py-4">Save Changes</button>
             </form>
         </div>
     </div>
 
-    <!-- Attendees Modal (Restored!) -->
-    <div id="attendeesModal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="glass-card w-full max-w-4xl bg-white max-h-[90vh] flex flex-col relative shadow-2xl">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
-                <div><h3 class="text-xl font-extrabold text-ravn-textMain tracking-tight">Guest List 🎟️</h3><p class="text-xs font-bold text-gray-400" id="attModalTitle">Event Title</p></div>
-                <button onclick="closeModal('attendeesModal')" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+    <div id="attendeesModal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-gray-900/60 backdrop-blur-md p-4 transition-opacity opacity-0">
+        <div class="glass-card w-full max-w-5xl bg-white/95 max-h-[90vh] flex flex-col relative shadow-2xl overflow-hidden">
+            <div class="p-8 border-b border-gray-100 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gray-50 rounded-[20px] shadow-sm flex items-center justify-center border border-gray-200 text-gray-500"><i class="ph-fill ph-ticket text-3xl"></i></div>
+                    <div><h3 class="text-2xl font-extrabold text-ravn-textMain tracking-tight">Guest List</h3><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1" id="attModalTitle">Event Title</p></div>
+                </div>
+                <button onclick="closeModal('attendeesModal')" class="btn-glass !p-3 !rounded-xl text-gray-500 hover:text-red-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 space-y-8">
+            <div class="flex-1 overflow-y-auto p-8 space-y-10 bg-gray-50/30">
                 <div>
                     <h4 class="text-sm font-extrabold uppercase tracking-widest text-gray-400 mb-4">Confirmed & Pending RSVPs</h4>
-                    <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                    <div class="glass-card overflow-hidden bg-white shadow-sm border border-gray-100">
                         <table class="w-full text-left">
-                            <thead class="bg-gray-50 text-[10px] font-extrabold text-gray-500 uppercase tracking-widest border-b border-gray-200"><tr><th class="p-4">Guest</th><th class="p-4">Tier / Admits</th><th class="p-4 text-center">Status</th><th class="p-4 text-right">Action</th></tr></thead>
-                            <tbody id="attendeesTable" class="divide-y divide-gray-100"></tbody>
+                            <thead class="bg-gray-50/80 text-[10px] font-extrabold text-gray-500 uppercase tracking-widest border-b border-gray-100"><tr><th class="p-5 pl-6">Guest</th><th class="p-5">Tier / Admits</th><th class="p-5 text-center">Status</th><th class="p-5 text-right pr-6">Action</th></tr></thead>
+                            <tbody id="attendeesTable" class="divide-y divide-gray-50"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="text-sm font-extrabold uppercase tracking-widest text-orange-400 mb-4">Waitlist Queue</h4>
-                    <div class="border border-orange-100 rounded-2xl overflow-hidden bg-orange-50/30">
+                    <h4 class="text-sm font-extrabold uppercase tracking-widest text-orange-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-clock"></i> Waitlist Queue</h4>
+                    <div class="glass-card overflow-hidden border border-orange-100 bg-orange-50/20">
                         <table class="w-full text-left">
-                            <thead class="bg-orange-50 text-[10px] font-extrabold text-orange-600 uppercase tracking-widest border-b border-orange-100"><tr><th class="p-4">Guest Info</th><th class="p-4">Added On</th></tr></thead>
-                            <tbody id="waitlistTable" class="divide-y divide-orange-100"></tbody>
+                            <thead class="bg-orange-50 text-[10px] font-extrabold text-orange-600 uppercase tracking-widest border-b border-orange-100"><tr><th class="p-5 pl-6">Guest Info</th><th class="p-5 pr-6">Added On</th></tr></thead>
+                            <tbody id="waitlistTable" class="divide-y divide-orange-50"></tbody>
                         </table>
                     </div>
                 </div>
@@ -247,42 +319,43 @@
         </div>
     </div>
 
-    <!-- Gorgeous Event Builder Modal -->
-    <div id="eventModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="glass-card w-full max-w-2xl bg-white max-h-[90vh] flex flex-col relative shadow-2xl overflow-hidden">
-            <!-- Premium Header -->
-            <div class="bg-gradient-to-r from-ravn-primary/10 to-ravn-accent/10 p-6 flex justify-between items-center shrink-0 border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-ravn-primary border border-white"><i class="ph-fill ph-map-trifold text-xl"></i></div>
-                    <div><h3 class="text-xl font-extrabold text-ravn-textMain" id="eventModalTitle">Plan Adventure</h3><p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Create a new experience</p></div>
+    <div id="eventModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-gray-900/60 backdrop-blur-md p-4 transition-opacity opacity-0">
+        <div class="glass-card w-full max-w-3xl bg-white/95 max-h-[90vh] flex flex-col relative shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-ravn-primary/10 to-ravn-accent/10 p-8 flex justify-between items-center shrink-0 border-b border-ravn-primary/20">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-white rounded-[20px] shadow-sm flex items-center justify-center text-ravn-primary border border-white"><i class="ph-fill ph-map-trifold text-3xl"></i></div>
+                    <div><h3 class="text-2xl font-extrabold text-ravn-textMain tracking-tight" id="eventModalTitle">Plan Adventure</h3><p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Create a new experience</p></div>
                 </div>
-                <button onclick="closeModal('eventModal')" class="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md flex items-center justify-center text-gray-500 hover:bg-white hover:text-red-500 transition-colors shadow-sm"><i class="ph-bold ph-x text-lg"></i></button>
+                <button onclick="closeModal('eventModal')" class="btn-glass !p-3 !rounded-xl text-gray-500 hover:text-red-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
             
-            <form id="createEventForm" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+            <form id="createEventForm" class="flex-1 overflow-y-auto p-8 space-y-6">
                 <input type="hidden" id="eId">
                 
                 <div class="flex flex-col gap-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-text-t"></i> Adventure Title</label>
-                    <input type="text" id="eTitle" required placeholder="e.g. Weekend Mountain Retreat" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm text-ravn-textMain">
+                    <input type="text" id="eTitle" required placeholder="e.g. Weekend Mountain Retreat" class="friendly-input w-full px-5 py-4 rounded-[20px] text-base font-bold shadow-sm text-ravn-textMain">
                 </div>
                 
                 <div class="flex flex-col gap-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-text-align-left"></i> Description / Vibe</label>
-                    <textarea id="eDesc" rows="3" placeholder="What are we doing? Tell the crew..." class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-medium shadow-sm resize-none"></textarea>
+                    <textarea id="eDesc" rows="4" placeholder="What are we doing? Tell the crew..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-medium shadow-sm resize-none"></textarea>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-image"></i> Banner Image URL <span class="text-gray-300 normal-case">(Optional)</span></label>
+                    <input type="url" id="eImageUrl" placeholder="https://images.unsplash.com/..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <!-- Native Auto Date/Time Selector -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-calendar-blank"></i> Date & Time</label>
-                        <input type="datetime-local" id="eDate" required class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm text-ravn-textMain cursor-pointer">
+                        <input type="datetime-local" id="eDate" required class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm text-ravn-textMain cursor-pointer">
                     </div>
                     
-                    <!-- Native Venue Selector with Datalist -->
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-map-pin"></i> Venue / Location</label>
-                        <input list="venueOptions" id="eVenue" required placeholder="Type or select a venue..." class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
+                        <input list="venueOptions" id="eVenue" required placeholder="Type or select a venue..." class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
                         <datalist id="venueOptions">
                             <option value="Clubhouse Main Lounge">
                             <option value="Downtown Cinema">
@@ -292,74 +365,68 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-users"></i> Total Capacity</label>
-                        <input type="number" id="eCap" required placeholder="How many spots?" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm">
+                        <input type="number" id="eCap" required placeholder="How many spots?" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm">
                     </div>
                     
-                    <!-- Secret Visibility Dropdown -->
                     <div class="flex flex-col gap-2">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5"><i class="ph-fill ph-eye"></i> Visibility</label>
-                        <select id="eVisibility" class="friendly-input w-full px-5 py-4 rounded-[16px] text-sm font-bold shadow-sm cursor-pointer">
+                        <select id="eVisibility" class="friendly-input w-full px-5 py-4 rounded-[20px] text-sm font-bold shadow-sm cursor-pointer">
                             <option value="Public">🌍 Public (Show on Feed)</option>
                             <option value="Unlisted">🤫 Secret (Hidden Link Only)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Soft settings blocks -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex items-center gap-3 p-4 bg-purple-50/50 rounded-[16px] border border-purple-100 hover:bg-purple-50 transition-colors">
-                        <input type="checkbox" id="eMembersOnly" class="w-5 h-5 rounded border-gray-300 text-purple-500 focus:ring-purple-500 cursor-pointer">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="flex items-center gap-4 p-5 bg-purple-50/50 rounded-[24px] border border-purple-100 hover:bg-purple-50 transition-colors shadow-sm">
+                        <input type="checkbox" id="eMembersOnly" class="w-6 h-6 rounded border-gray-300 text-purple-500 focus:ring-purple-500 cursor-pointer">
                         <label for="eMembersOnly" class="text-sm font-bold text-purple-700 cursor-pointer flex-1">Members Only 🔒</label>
                     </div>
-                    <div class="flex items-center gap-3 p-4 bg-blue-50/50 rounded-[16px] border border-blue-100 hover:bg-blue-50 transition-colors">
-                        <input type="checkbox" id="ePayable" onchange="toggleTiers(this.checked)" class="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer">
+                    <div class="flex items-center gap-4 p-5 bg-blue-50/50 rounded-[24px] border border-blue-100 hover:bg-blue-50 transition-colors shadow-sm">
+                        <input type="checkbox" id="ePayable" onchange="toggleTiers(this.checked)" class="w-6 h-6 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer">
                         <label for="ePayable" class="text-sm font-bold text-blue-700 cursor-pointer flex-1">Paid Event 💳</label>
                     </div>
                 </div>
 
                 <!-- Ticket Tiers Builder -->
-                <div id="tiersBuilder" class="hidden bg-blue-50/30 p-5 rounded-[20px] border border-blue-100 space-y-4">
-                    <div class="flex justify-between items-center border-b border-blue-100/50 pb-3">
-                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 flex items-center gap-1.5"><i class="ph-bold ph-ticket"></i> Ticket Variants Builder</p>
-                        <button type="button" onclick="addTier()" class="text-[10px] font-extrabold text-blue-600 bg-white px-3 py-1.5 rounded-full border border-blue-200 shadow-sm hover:shadow transition-shadow uppercase tracking-widest">+ Add Variant</button>
+                <div id="tiersBuilder" class="hidden bg-blue-50/50 p-6 rounded-[24px] border border-blue-100 shadow-inner space-y-4">
+                    <div class="flex justify-between items-center border-b border-blue-200/50 pb-4">
+                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 flex items-center gap-1.5"><i class="ph-bold ph-ticket text-sm"></i> Ticket Variants</p>
+                        <button type="button" onclick="addTier()" class="btn-glass !py-2 !px-4 !text-[10px] !uppercase !tracking-widest !bg-white !text-blue-600 !border-blue-200 hover:!bg-blue-50">+ Add Variant</button>
                     </div>
                     <div id="tiersList" class="space-y-3"></div>
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" class="btn-glow w-full py-4 text-base shadow-lg" id="eventSubmitBtn">Publish to the Network 🚀</button>
+                <div class="pt-6">
+                    <button type="submit" class="btn-glow w-full py-4 text-base shadow-lg" id="eventSubmitBtn">Publish Adventure 🚀</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="fixed bottom-6 right-6 z-[999] flex flex-col gap-3 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[999] flex flex-col gap-3 pointer-events-none"></div>
 
     <script>
-        const adminKey = sessionStorage.getItem('ravn_admin_token');
-        if (!adminKey) window.location.href = 'adminlogin.html';
+        let eventsCache = [];
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            const bgClass = type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-gray-900 border-gray-800 text-white shadow-xl';
-            const iconClass = type === 'error' ? 'ph-warning-circle text-red-500' : 'ph-check-circle text-green-400';
-            toast.className = `p-4 rounded-2xl backdrop-blur-md text-sm font-bold flex items-center gap-3 transition-all duration-500 transform translate-y-10 opacity-0 border ${bgClass}`;
-            toast.innerHTML = `<i class="ph-fill ${iconClass} text-xl"></i> <span>${message}</span>`;
+            const bgClass = type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-white border-gray-100 text-ravn-textMain shadow-xl';
+            const iconClass = type === 'error' ? 'ph-warning-circle text-red-500' : 'ph-check-circle text-green-500';
+            toast.className = `p-5 rounded-2xl backdrop-blur-2xl text-sm font-bold flex items-center gap-3 transition-all duration-500 transform translate-y-10 opacity-0 border ${bgClass}`;
+            toast.innerHTML = `<i class="ph-fill ${iconClass} text-2xl"></i> <span>${message}</span>`;
             document.getElementById('toastContainer').appendChild(toast);
             requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }); });
             setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 500); }, 3000);
         }
 
-        // Custom Confirm Logic
-        let confirmCallback = null;
         function adminConfirm(title, message, callback) {
             document.getElementById('confirmTitle').textContent = title;
             document.getElementById('confirmMsg').textContent = message;
-            confirmCallback = callback;
+            window.confirmCallback = callback;
             
             const modal = document.getElementById('confirmModal');
             const box = document.getElementById('confirmBox');
@@ -375,11 +442,11 @@
             modal.classList.add('opacity-0');
             box.classList.remove('scale-100'); box.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
-            confirmCallback = null;
+            window.confirmCallback = null;
         }
 
         document.getElementById('confirmActionBtn').addEventListener('click', () => {
-            if (confirmCallback) confirmCallback();
+            if (window.confirmCallback) window.confirmCallback();
             closeConfirm();
         });
 
@@ -388,19 +455,20 @@
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById(`nav-${tabId}`).classList.add('active');
-            const titles = { 'dashboard': 'Command Center', 'events': 'Adventures', 'members': 'Member Roster', 'refunds': 'Pending Refunds', 'broadcasts': 'Network Comms', 'settings': 'System Rules' };
+            const titles = { 'dashboard': 'Dashboard', 'events': 'Adventures', 'members': 'Member Roster', 'inbox': 'Inbox', 'refunds': 'Pending Refunds', 'broadcasts': 'Network Comms', 'settings': 'System Rules' };
             document.getElementById('headerTitle').textContent = titles[tabId];
         }
 
         function closeModal(modalId) {
             const m = document.getElementById(modalId);
             m.classList.add('opacity-0');
+            const innerBox = m.querySelector('.glass-card');
+            if(innerBox) { innerBox.style.transform = 'scale(0.95)'; }
             setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
         }
 
         function logout() { sessionStorage.removeItem('ravn_admin_token'); window.location.href = 'adminlogin.html'; }
 
-        // DATA FETCHING
         async function fetchData() {
             try {
                 const res = await fetch('/api/admin/data', { headers: { 'Authorization': `Bearer ${adminKey}` } });
@@ -412,9 +480,20 @@
                 document.getElementById('statPending').textContent = data.statistics.pendingMembers;
                 document.getElementById('statRsvps').textContent = data.statistics.totalRSVPs;
 
+                eventsCache = data.events;
+
                 renderMembers(data.members);
                 renderEvents(data.events);
                 renderRefunds(data.refunds || []);
+                renderMessages(data.messages || []);
+
+                const pendingRefundsCount = (data.refunds || []).filter(r => r.status === 'Pending').length;
+                const badgeRefunds = document.getElementById('badgeRefunds');
+                if(pendingRefundsCount > 0) { badgeRefunds.textContent = pendingRefundsCount; badgeRefunds.classList.remove('hidden'); } else { badgeRefunds.classList.add('hidden'); }
+                
+                const msgCount = (data.messages || []).length;
+                const badgeInbox = document.getElementById('badgeInbox');
+                if(msgCount > 0) { badgeInbox.textContent = msgCount; badgeInbox.classList.remove('hidden'); } else { badgeInbox.classList.add('hidden'); }
 
                 document.getElementById('setRegOpen').checked = data.settings.registrationOpen;
                 document.getElementById('setPromoActive').checked = data.settings.freePromoActive;
@@ -423,41 +502,35 @@
             } catch (e) { showToast("Failed to fetch dashboard data.", "error"); }
         }
 
-        // RENDER EVENTS
         function renderEvents(events) {
             const container = document.getElementById('eventsGrid');
             if(!container) return;
-            if(events.length === 0) { container.innerHTML = '<div class="col-span-full glass-card p-12 text-center text-gray-400 font-bold">No events active.</div>'; return; }
+            if(events.length === 0) { container.innerHTML = '<div class="col-span-full glass-card p-12 text-center text-gray-400 font-bold bg-white/50 border-dashed border-2">No events active. Plan one!</div>'; return; }
             
             container.innerHTML = events.map(e => {
-                const secretBadge = e.visibility === 'Unlisted' ? '<span class="absolute top-4 right-4 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest shadow-sm flex items-center gap-1 z-10"><i class="ph-bold ph-lock-key"></i> Secret</span>' : '';
+                const secretBadge = e.visibility === 'Unlisted' ? '<span class="absolute top-4 right-4 bg-purple-100 text-purple-600 px-4 py-1.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest shadow-sm flex items-center gap-1.5 z-10 border border-purple-200"><i class="ph-bold ph-lock-key"></i> Secret</span>' : '';
+                const displayImg = e.imageUrl || 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=800';
                 
                 return `
-                <div class="glass-card p-6 flex flex-col hover:-translate-y-1 transition-transform relative group">
+                <div class="glass-card p-6 flex flex-col hover:-translate-y-1 transition-transform relative group bg-white/80">
                     ${secretBadge}
-                    <div class="w-14 h-14 rounded-[16px] bg-red-50 text-ravn-primary flex items-center justify-center mb-4 border border-red-100 shadow-sm shrink-0">
-                        <i class="ph-fill ph-ticket text-2xl"></i>
+                    <div class="w-full h-40 rounded-[24px] bg-gray-100 mb-5 overflow-hidden shrink-0 shadow-sm border border-gray-100">
+                        <img src="${displayImg}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity group-hover:scale-105 duration-700">
                     </div>
                     <h3 class="text-xl font-extrabold mb-1 text-ravn-textMain line-clamp-1" title="${e.title.replace(/"/g, '&quot;')}">${e.title}</h3>
-                    <p class="text-xs text-gray-500 font-bold mb-4"><i class="ph-bold ph-calendar-blank text-ravn-primary"></i> ${e.date}</p>
+                    <p class="text-[11px] text-ravn-primary font-extrabold uppercase tracking-widest mb-4 flex items-center gap-1.5"><i class="ph-bold ph-calendar-blank text-lg"></i> ${e.date}</p>
                     
                     <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
-                        <div class="text-center cursor-pointer hover:text-ravn-primary transition-colors group/btn" onclick="openAttendeesModal('${e._id}', '${e.title.replace(/'/g, "\\'")}')" title="View Guest List">
-                            <p class="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 group-hover/btn:text-ravn-primary transition-colors">RSVPs</p>
-                            <p class="text-lg font-extrabold text-ravn-textMain flex items-center justify-center gap-1">${e.attendees ? e.attendees.length : 0} <i class="ph-bold ph-eye text-sm text-gray-400 group-hover/btn:text-ravn-primary transition-colors"></i></p>
+                        <div class="text-center cursor-pointer hover:bg-gray-50 transition-colors group/btn py-2 px-4 rounded-2xl border border-gray-100 shadow-sm bg-white" onclick="openAttendeesModal('${e._id}', '${e.title.replace(/'/g, "\\'")}')" title="View Guest List">
+                            <p class="text-[9px] font-extrabold uppercase tracking-widest text-gray-400 group-hover/btn:text-ravn-primary transition-colors">RSVPs</p>
+                            <p class="text-lg font-extrabold text-ravn-textMain flex items-center justify-center gap-1">${e.attendees ? e.attendees.length : 0} <i class="ph-bold ph-eye text-sm text-gray-300 group-hover/btn:text-ravn-primary transition-colors"></i></p>
                         </div>
-                        <button onclick="openEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="text-center text-[10px] font-extrabold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors flex flex-col items-center gap-0.5">
-                            <i class="ph-bold ph-pencil-simple text-lg"></i>
-                            <span>Edit</span>
-                        </button>
-                        <button onclick="copyEventLink('${e._id}')" class="text-center text-[10px] font-extrabold text-blue-500 hover:text-blue-600 uppercase tracking-widest transition-colors flex flex-col items-center gap-0.5">
-                            <i class="ph-bold ph-link text-lg"></i>
-                            <span>Copy Link</span>
-                        </button>
-                        <button onclick="deleteEvent('${e._id}')" class="text-center text-[10px] font-extrabold text-red-400 hover:text-red-600 uppercase tracking-widest transition-colors flex flex-col items-center gap-0.5">
-                            <i class="ph-bold ph-trash text-lg"></i>
-                            <span>Drop</span>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="openBackpack('${e._id}')" class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Backpack"><i class="ph-bold ph-backpack text-lg"></i></button>
+                            <button onclick="openEventModal(${JSON.stringify(e).replace(/"/g, '&quot;')})" class="w-10 h-10 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-600 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Edit"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                            <button onclick="copyEventLink('${e._id}')" class="w-10 h-10 rounded-full bg-green-50 text-green-500 hover:bg-green-500 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Copy Link"><i class="ph-bold ph-link text-lg"></i></button>
+                            <button onclick="deleteEvent('${e._id}')" class="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Delete"><i class="ph-bold ph-trash text-lg"></i></button>
+                        </div>
                     </div>
                 </div>
                 `;
@@ -467,37 +540,65 @@
         function copyEventLink(eventId) {
             const link = window.location.origin + '/eventregister.html?id=' + eventId;
             const textArea = document.createElement("textarea");
-            textArea.value = link;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showToast("Secret Link copied to clipboard! 🔗");
-            } catch (err) {
-                showToast("Failed to copy link.", "error");
-            }
+            textArea.value = link; document.body.appendChild(textArea); textArea.select();
+            try { document.execCommand('copy'); showToast("Link copied! Ready to share. 🔗"); } 
+            catch (err) { showToast("Failed to copy link.", "error"); }
             document.body.removeChild(textArea);
         }
 
         function deleteEvent(eid) {
-            adminConfirm("Drop Event", "Are you sure? This will delete the event and all its RSVPs.", async () => {
-                try { await fetch(`/api/admin/events/${eid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); showToast("Event deleted."); } 
+            adminConfirm("Drop Event", "Are you sure? This will permanently delete the event and wipe all RSVPs.", async () => {
+                try { await fetch(`/api/admin/events/${eid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); showToast("Event completely wiped."); } 
                 catch(e) { showToast("Failed to delete.", "error"); }
             });
         }
 
-        // ATTENDEES LIST MODAL
-        let currentEventIdForAttendees = null;
+        function openBackpack(eventId) {
+            const event = eventsCache.find(e => e._id === eventId);
+            if(!event) return;
+            document.getElementById('bpEventId').value = eventId;
+            document.getElementById('bpEventTitle').textContent = event.title;
+            
+            const list = document.getElementById('bpResourcesList');
+            if(event.resources && event.resources.length > 0) {
+                list.innerHTML = event.resources.map(r => `
+                    <div class="flex items-center gap-3 p-4 bg-white rounded-[20px] border border-gray-100 shadow-sm hover:border-blue-200 transition-colors">
+                        <div class="w-10 h-10 rounded-[14px] bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100"><i class="ph-bold ph-link text-lg"></i></div>
+                        <div class="flex-1 min-w-0"><p class="text-xs font-bold text-ravn-textMain truncate">${r.title}</p><a href="${r.url}" target="_blank" class="text-[10px] text-gray-400 hover:text-blue-500 hover:underline truncate block">${r.url}</a></div>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = `<p class="text-xs text-gray-400 font-bold col-span-full">No items stored here yet.</p>`;
+            }
 
+            const m = document.getElementById('backpackModal'); m.classList.remove('hidden'); m.classList.add('flex');
+            const innerBox = m.querySelector('.glass-card'); if(innerBox) innerBox.style.transform = 'scale(0.95)';
+            setTimeout(() => { m.classList.remove('opacity-0'); if(innerBox) innerBox.style.transform = 'scale(1)'; }, 10);
+        }
+
+        document.getElementById('addResourceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const eid = document.getElementById('bpEventId').value;
+            const payload = { title: document.getElementById('bpResTitle').value, url: document.getElementById('bpResUrl').value };
+            try {
+                await fetch(`/api/admin/events/${eid}/resources`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) });
+                document.getElementById('addResourceForm').reset();
+                showToast("Resource securely stored in backpack!");
+                await fetchData(); 
+                openBackpack(eid); 
+            } catch(e) { showToast("Failed to add resource", "error"); }
+        });
+
+        let currentEventIdForAttendees = null;
         async function openAttendeesModal(eid, title) {
             currentEventIdForAttendees = eid;
             document.getElementById('attModalTitle').textContent = title;
-            document.getElementById('attendeesTable').innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold"><i class="ph-bold ph-spinner animate-spin text-2xl mx-auto"></i></td></tr>';
-            document.getElementById('waitlistTable').innerHTML = '<tr><td colspan="2" class="p-8 text-center text-gray-400 font-bold"><i class="ph-bold ph-spinner animate-spin text-2xl mx-auto"></i></td></tr>';
+            document.getElementById('attendeesTable').innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold"><i class="ph-bold ph-spinner animate-spin text-3xl mx-auto"></i></td></tr>';
+            document.getElementById('waitlistTable').innerHTML = '<tr><td colspan="2" class="p-8 text-center text-gray-400 font-bold"><i class="ph-bold ph-spinner animate-spin text-3xl mx-auto"></i></td></tr>';
             
-            const modal = document.getElementById('attendeesModal');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            const m = document.getElementById('attendeesModal'); m.classList.remove('hidden'); m.classList.add('flex');
+            const innerBox = m.querySelector('.glass-card'); if(innerBox) innerBox.style.transform = 'scale(0.95)';
+            setTimeout(() => { m.classList.remove('opacity-0'); if(innerBox) innerBox.style.transform = 'scale(1)'; }, 10);
             
             await fetchAttendeesList();
         }
@@ -511,58 +612,29 @@
                 const attTbody = document.getElementById('attendeesTable');
                 if (data.attendees && data.attendees.length > 0) {
                     attTbody.innerHTML = data.attendees.map(a => `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="p-4">
-                                <p class="font-extrabold text-ravn-textMain text-sm">${a.name}</p>
-                                <p class="text-[10px] font-bold text-gray-400">${a.email} | ${a.phone}</p>
-                            </td>
-                            <td class="p-4">
-                                <p class="text-xs font-bold text-gray-600">${a.tier || 'Standard'}</p>
-                                <p class="text-[9px] font-extrabold text-blue-500 uppercase tracking-widest mt-0.5">Admits: ${a.admits || 1}</p>
-                            </td>
-                            <td class="p-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${a.status === 'Verified' || a.status === 'Scanned' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">${a.status}</span>
-                                ${a.utr ? `<p class="text-[9px] font-mono text-gray-400 mt-1 truncate max-w-[100px] mx-auto" title="UTR: ${a.utr}">${a.utr}</p>` : ''}
-                            </td>
-                            <td class="p-4 text-right">
-                                ${a.status === 'Pending' ? `<button onclick="verifyAttendee('${currentEventIdForAttendees}', '${a._id}')" class="text-[10px] font-extrabold uppercase tracking-widest text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg transition-colors shadow-sm">Verify</button>` : `<span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest"><i class="ph-bold ph-check"></i> Done</span>`}
-                            </td>
+                        <tr class="hover:bg-white transition-colors">
+                            <td class="p-5 pl-6"><p class="font-extrabold text-ravn-textMain text-sm">${a.name}</p><p class="text-[10px] font-bold text-gray-400">${a.email} • ${a.phone}</p></td>
+                            <td class="p-5"><p class="text-xs font-bold text-gray-600">${a.tier || 'Standard'}</p><p class="text-[9px] font-extrabold text-blue-500 uppercase tracking-widest mt-0.5">Admits: ${a.admits || 1}</p></td>
+                            <td class="p-5 text-center"><span class="px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${a.status === 'Verified' || a.status === 'Scanned' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}">${a.status}</span>${a.utr ? `<p class="text-[9px] font-mono text-gray-400 mt-1 truncate max-w-[100px] mx-auto" title="UTR: ${a.utr}">${a.utr}</p>` : ''}</td>
+                            <td class="p-5 text-right pr-6">${a.status === 'Pending' ? `<button onclick="verifyAttendee('${currentEventIdForAttendees}', '${a._id}')" class="btn-glow !bg-green-500 !px-4 !py-2 !text-[10px]">Approve</button>` : `<span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest"><i class="ph-bold ph-check"></i> Done</span>`}</td>
                         </tr>
                     `).join('');
-                } else {
-                    attTbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 font-bold text-sm">No RSVPs yet.</td></tr>';
-                }
+                } else { attTbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400 font-bold text-sm">No RSVPs yet.</td></tr>'; }
 
                 const wlTbody = document.getElementById('waitlistTable');
                 if (data.waitlist && data.waitlist.length > 0) {
-                    wlTbody.innerHTML = data.waitlist.map(w => `
-                        <tr class="hover:bg-orange-50/50 transition-colors">
-                            <td class="p-4">
-                                <p class="font-extrabold text-ravn-textMain text-sm">${w.name}</p>
-                                <p class="text-[10px] font-bold text-gray-400">${w.email} | ${w.phone}</p>
-                            </td>
-                            <td class="p-4 text-xs font-bold text-gray-600">${new Date(w.addedAt).toLocaleDateString()}</td>
-                        </tr>
-                    `).join('');
-                } else {
-                    wlTbody.innerHTML = '<tr><td colspan="2" class="p-8 text-center text-gray-400 font-bold text-sm">Waitlist is empty.</td></tr>';
-                }
-
+                    wlTbody.innerHTML = data.waitlist.map(w => `<tr class="hover:bg-orange-50/50 transition-colors"><td class="p-5 pl-6"><p class="font-extrabold text-ravn-textMain text-sm">${w.name}</p><p class="text-[10px] font-bold text-gray-400">${w.email} • ${w.phone}</p></td><td class="p-5 pr-6 text-xs font-bold text-gray-600">${new Date(w.addedAt).toLocaleDateString()}</td></tr>`).join('');
+                } else { wlTbody.innerHTML = '<tr><td colspan="2" class="p-10 text-center text-gray-400 font-bold text-sm">Waitlist is clear.</td></tr>'; }
             } catch (e) { showToast("Failed to load guests.", "error"); }
         }
 
         function verifyAttendee(eventId, subId) {
-            adminConfirm("Approve Payment", "Manually verify this payment? The guest will receive their pass via email.", async () => {
-                try {
-                    await fetch(`/api/admin/events/${eventId}/verify/${subId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } });
-                    showToast("Guest verified successfully!");
-                    fetchAttendeesList();
-                    fetchData(); 
-                } catch(e) { showToast("Action failed.", "error"); }
+            adminConfirm("Approve Payment", "Manually verify this payment? The guest will instantly receive their pass via email.", async () => {
+                try { await fetch(`/api/admin/events/${eventId}/verify/${subId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminKey}` } }); showToast("Guest verified successfully!"); fetchAttendeesList(); fetchData(); } 
+                catch(e) { showToast("Verification failed.", "error"); }
             });
         }
 
-        // TICKET TIERS BUILDER
         function toggleTiers(isPaid) {
             const builder = document.getElementById('tiersBuilder');
             if(isPaid) { builder.classList.remove('hidden'); if(document.getElementById('tiersList').children.length===0) addTier(); }
@@ -572,28 +644,25 @@
         function addTier() {
             const id = Date.now();
             const div = document.createElement('div');
-            div.className = 'flex items-center gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm';
+            div.className = 'flex items-center gap-3 bg-white p-3 rounded-[16px] border border-blue-100 shadow-sm';
             div.id = `tier-${id}`;
-            div.innerHTML = `
-                <input type="text" placeholder="Pass Name (e.g. Couple)" class="tier-name flex-1 px-3 py-2 text-sm font-bold border-none focus:ring-0 bg-transparent outline-none text-ravn-textMain placeholder-gray-300">
-                <input type="number" placeholder="₹ Price" class="tier-price w-24 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-ravn-primary placeholder-gray-300">
-                <input type="number" placeholder="Admits" title="Number of people this pass admits" value="1" min="1" class="tier-admits w-20 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-blue-500">
-                <button type="button" onclick="document.getElementById('tier-${id}').remove()" class="p-2 text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash"></i></button>
-            `;
+            div.innerHTML = `<input type="text" placeholder="Pass Name (e.g. Couple)" class="tier-name flex-1 px-3 py-2 text-sm font-bold border-none focus:ring-0 bg-transparent outline-none text-ravn-textMain placeholder-gray-300"><input type="number" placeholder="₹ Price" class="tier-price w-24 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-ravn-primary placeholder-gray-300"><input type="number" placeholder="Admits" title="Number of people this pass admits" value="1" min="1" class="tier-admits w-20 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-blue-500"><button type="button" onclick="document.getElementById('tier-${id}').remove()" class="p-2 text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash text-lg"></i></button>`;
             document.getElementById('tiersList').appendChild(div);
         }
 
         function openEventModal(eventData = null) {
-            const m = document.getElementById('eventModal'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.classList.remove('opacity-0'), 10);
-            const form = document.getElementById('createEventForm'); form.reset(); document.getElementById('tiersList').innerHTML = '';
-            document.getElementById('eId').value = '';
+            const m = document.getElementById('eventModal'); m.classList.remove('hidden'); m.classList.add('flex');
+            const innerBox = m.querySelector('.glass-card'); if(innerBox) innerBox.style.transform = 'scale(0.95)';
+            setTimeout(() => { m.classList.remove('opacity-0'); if(innerBox) innerBox.style.transform = 'scale(1)'; }, 10);
+            
+            const form = document.getElementById('createEventForm'); form.reset(); document.getElementById('tiersList').innerHTML = ''; document.getElementById('eId').value = '';
             
             if(eventData) {
                 document.getElementById('eventModalTitle').textContent = "Edit Adventure";
                 document.getElementById('eId').value = eventData._id;
                 document.getElementById('eTitle').value = eventData.title; document.getElementById('eDesc').value = eventData.description || '';
+                document.getElementById('eImageUrl').value = eventData.imageUrl || '';
                 
-                // Parse Date back to datetime-local format if possible
                 if(eventData.date) {
                     try {
                         const d = new Date(eventData.date);
@@ -605,20 +674,18 @@
                     } catch(e) {}
                 }
 
-                document.getElementById('eVenue').value = eventData.venue;
-                document.getElementById('eCap').value = eventData.capacity;
+                document.getElementById('eVenue').value = eventData.venue; document.getElementById('eCap').value = eventData.capacity;
                 document.getElementById('eVisibility').value = eventData.visibility || 'Public';
-                document.getElementById('eMembersOnly').checked = eventData.isMembersOnly;
-                document.getElementById('ePayable').checked = eventData.isPayable;
+                document.getElementById('eMembersOnly').checked = eventData.isMembersOnly; document.getElementById('ePayable').checked = eventData.isPayable;
                 
                 toggleTiers(eventData.isPayable);
                 if(eventData.isPayable && eventData.tiers) {
                     eventData.tiers.forEach(t => {
                         const id = Date.now() + Math.random();
                         const div = document.createElement('div');
-                        div.className = 'flex items-center gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm';
+                        div.className = 'flex items-center gap-3 bg-white p-3 rounded-[16px] border border-blue-100 shadow-sm';
                         div.id = `tier-${id}`;
-                        div.innerHTML = `<input type="text" value="${t.name}" class="tier-name flex-1 px-3 py-2 text-sm font-bold border-none focus:ring-0 bg-transparent outline-none text-ravn-textMain placeholder-gray-300"><input type="number" value="${t.price}" class="tier-price w-24 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-ravn-primary placeholder-gray-300"><input type="number" value="${t.admits || 1}" min="1" class="tier-admits w-20 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-blue-500"><button type="button" onclick="document.getElementById('tier-${id}').remove()" class="p-2 text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash"></i></button>`;
+                        div.innerHTML = `<input type="text" value="${t.name}" class="tier-name flex-1 px-3 py-2 text-sm font-bold border-none focus:ring-0 bg-transparent outline-none text-ravn-textMain placeholder-gray-300"><input type="number" value="${t.price}" class="tier-price w-24 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-ravn-primary placeholder-gray-300"><input type="number" value="${t.admits || 1}" min="1" class="tier-admits w-20 px-3 py-2 text-sm font-bold border-l border-gray-100 focus:ring-0 bg-transparent outline-none text-blue-500"><button type="button" onclick="document.getElementById('tier-${id}').remove()" class="p-2 text-gray-400 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash text-lg"></i></button>`;
                         document.getElementById('tiersList').appendChild(div);
                     });
                 }
@@ -627,94 +694,113 @@
 
         document.getElementById('createEventForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('eventSubmitBtn'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...'; btn.disabled = true;
+            const btn = document.getElementById('eventSubmitBtn'); btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>'; btn.disabled = true;
             
-            const isPayable = document.getElementById('ePayable').checked;
-            let tiers = [];
+            const isPayable = document.getElementById('ePayable').checked; let tiers = [];
             if(isPayable) {
                 const tierNodes = document.getElementById('tiersList').children;
                 for(let node of tierNodes) {
-                    const name = node.querySelector('.tier-name').value.trim();
-                    const price = Number(node.querySelector('.tier-price').value);
-                    const admits = Number(node.querySelector('.tier-admits').value) || 1;
+                    const name = node.querySelector('.tier-name').value.trim(); const price = Number(node.querySelector('.tier-price').value); const admits = Number(node.querySelector('.tier-admits').value) || 1;
                     if(name && price >= 0) tiers.push({ name, price, admits });
                 }
-                if(tiers.length === 0) { showToast("Add at least one ticket variant!", "error"); btn.innerHTML = 'Publish to the Network 🚀'; btn.disabled = false; return; }
+                if(tiers.length === 0) { showToast("Add at least one ticket variant!", "error"); btn.innerHTML = 'Publish Adventure 🚀'; btn.disabled = false; return; }
             }
 
-            // Beautifully format the native datetime-local value
             let dateVal = document.getElementById('eDate').value;
             if(dateVal && dateVal.includes('T')) {
-                const d = new Date(dateVal);
-                dateVal = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+                const d = new Date(dateVal); dateVal = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
             }
 
             const payload = {
-                title: document.getElementById('eTitle').value, description: document.getElementById('eDesc').value,
+                title: document.getElementById('eTitle').value, description: document.getElementById('eDesc').value, imageUrl: document.getElementById('eImageUrl').value,
                 date: dateVal, venue: document.getElementById('eVenue').value, capacity: Number(document.getElementById('eCap').value),
-                visibility: document.getElementById('eVisibility').value,
-                isMembersOnly: document.getElementById('eMembersOnly').checked, isPayable, tiers
+                visibility: document.getElementById('eVisibility').value, isMembersOnly: document.getElementById('eMembersOnly').checked, isPayable, tiers
             };
             
             const eid = document.getElementById('eId').value;
-            const url = eid ? `/api/admin/events/${eid}` : '/api/admin/events';
-            const method = eid ? 'PUT' : 'POST';
+            const url = eid ? `/api/admin/events/${eid}` : '/api/admin/events'; const method = eid ? 'PUT' : 'POST';
 
             try {
                 const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) });
                 if(!res.ok) throw new Error(); closeModal('eventModal'); fetchData(); showToast("Adventure published! 🗺️");
-            } catch(e) { showToast("Failed to save event.", "error"); } finally { btn.innerHTML = 'Publish to the Network 🚀'; btn.disabled = false; }
+            } catch(e) { showToast("Failed to save event.", "error"); } finally { btn.innerHTML = 'Publish Adventure 🚀'; btn.disabled = false; }
         });
 
-        // MEMBERS LOGIC
         function renderMembers(members) {
             const tbody = document.getElementById('membersTable');
             tbody.innerHTML = members.map(m => {
                 const expiryText = m.subscriptionExpiry ? new Date(m.subscriptionExpiry).toLocaleDateString() : 'Lifetime';
-                const statusBadge = m.paymentStatus === 'Paid' ? `<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest">Active</span>` : `<span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest">Pending</span>`;
+                const statusBadge = m.paymentStatus === 'Paid' ? `<span class="bg-green-50 border border-green-200 text-green-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest">Active</span>` : `<span class="bg-orange-50 border border-orange-200 text-orange-600 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest">Pending</span>`;
+                const safeMember = JSON.stringify(m).replace(/"/g, '&quot;');
                 return `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="p-4"><div class="flex items-center gap-3"><img src="${m.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(m.name)}&backgroundColor=FF6B6B`}" class="w-10 h-10 rounded-xl object-cover bg-gray-100 border border-gray-200 shadow-sm"><div><p class="font-extrabold text-sm text-ravn-textMain">${m.name}</p><p class="text-[10px] font-mono text-gray-400 font-bold">${m.memberId}</p></div></div></td>
-                    <td class="p-4"><p class="text-xs font-bold text-gray-600">${m.email}</p><p class="text-[10px] text-gray-400 font-bold mt-0.5">${m.phone}</p></td>
-                    <td class="p-4">${statusBadge}</td>
-                    <td class="p-4"><p class="text-xs font-bold text-blue-500">${expiryText}</p></td>
-                    <td class="p-4 text-right"><button onclick="openEditMember('${m.memberId}', '${m.paymentStatus}', '${m.subscriptionExpiry || ''}')" class="text-gray-400 hover:text-blue-500 transition-colors p-2"><i class="ph-bold ph-pencil-simple text-lg"></i></button><button onclick="deleteMember('${m.memberId}')" class="text-gray-400 hover:text-red-500 transition-colors p-2"><i class="ph-bold ph-trash text-lg"></i></button></td>
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="p-5 pl-8"><div class="flex items-center gap-4"><img src="${m.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(m.name)}&backgroundColor=FF6B6B`}" class="w-12 h-12 rounded-[16px] object-cover bg-white border border-gray-200 shadow-sm"><div><p class="font-extrabold text-sm text-ravn-textMain">${m.name}</p><p class="text-[10px] font-mono text-gray-400 font-bold">${m.memberId}</p></div></div></td>
+                    <td class="p-5"><p class="text-xs font-bold text-gray-600">${m.email}</p><p class="text-[10px] text-gray-400 font-bold mt-0.5">${m.phone}</p></td>
+                    <td class="p-5">${statusBadge}</td>
+                    <td class="p-5"><p class="text-xs font-bold text-blue-500">${expiryText}</p></td>
+                    <td class="p-5 text-right pr-8"><div class="flex items-center justify-end gap-2"><button onclick="openEditMember(${safeMember})" class="w-10 h-10 rounded-full bg-white text-gray-400 hover:text-blue-500 hover:border-blue-200 border border-gray-100 shadow-sm transition-colors flex items-center justify-center"><i class="ph-bold ph-pencil-simple text-lg"></i></button><button onclick="deleteMember('${m.memberId}')" class="w-10 h-10 rounded-full bg-white text-gray-400 hover:text-red-500 hover:border-red-200 border border-gray-100 shadow-sm transition-colors flex items-center justify-center"><i class="ph-bold ph-trash text-lg"></i></button></div></td>
                 </tr>`;
             }).join('');
         }
 
-        function openEditMember(mid, status, expiry) {
-            document.getElementById('editMemId').value = mid; document.getElementById('editMemPayStatus').value = status;
-            if(expiry) document.getElementById('editMemExpiry').value = new Date(expiry).toISOString().split('T')[0];
-            const m = document.getElementById('memberModal'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.classList.remove('opacity-0'), 10);
+        function openEditMember(member) {
+            document.getElementById('editMemId').value = member.memberId; 
+            document.getElementById('editMemName').value = member.name || '';
+            document.getElementById('editMemEmail').value = member.email || '';
+            document.getElementById('editMemPhone').value = member.phone || '';
+            document.getElementById('editMemPayStatus').value = member.paymentStatus;
+            if(member.subscriptionExpiry) document.getElementById('editMemExpiry').value = new Date(member.subscriptionExpiry).toISOString().split('T')[0];
+            
+            const m = document.getElementById('memberModal'); m.classList.remove('hidden'); m.classList.add('flex');
+            const innerBox = m.querySelector('.glass-card'); if(innerBox) innerBox.style.transform = 'scale(0.95)';
+            setTimeout(() => { m.classList.remove('opacity-0'); if(innerBox) innerBox.style.transform = 'scale(1)'; }, 10);
         }
 
         document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const mid = document.getElementById('editMemId').value;
-            const payload = { paymentStatus: document.getElementById('editMemPayStatus').value, subscriptionExpiry: document.getElementById('editMemExpiry').value || null };
+            const payload = { 
+                name: document.getElementById('editMemName').value, email: document.getElementById('editMemEmail').value, phone: document.getElementById('editMemPhone').value,
+                paymentStatus: document.getElementById('editMemPayStatus').value, subscriptionExpiry: document.getElementById('editMemExpiry').value || null 
+            };
             try { await fetch(`/api/admin/members/${mid}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); closeModal('memberModal'); fetchData(); showToast("Profile updated."); } 
             catch(e) { showToast("Failed to update.", "error"); }
         });
 
         function deleteMember(mid) {
-            adminConfirm("Delete Member", "Are you sure? This removes them from the database completely.", async () => {
+            adminConfirm("Delete Member", "Are you sure? This removes them from the database permanently.", async () => {
                 try { await fetch(`/api/admin/members/${mid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminKey}` } }); fetchData(); showToast("Member removed."); } 
                 catch(e) { showToast("Failed to delete.", "error"); }
             });
         }
 
-        // REFUNDS LOGIC
+        function renderMessages(messages) {
+            const container = document.getElementById('messagesGrid');
+            if (messages.length === 0) { container.innerHTML = '<div class="col-span-full glass-card p-12 text-center text-gray-400 font-bold bg-white/50 border-dashed border-2">Inbox is empty. ☕</div>'; return; }
+            
+            container.innerHTML = messages.map(m => `
+                <div class="glass-card p-8 flex flex-col bg-white/80 hover:bg-white transition-colors border border-gray-100">
+                    <div class="flex justify-between items-start mb-5">
+                        <span class="px-4 py-1.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">${m.type || 'General'}</span>
+                        <span class="text-[10px] font-bold text-gray-400">${new Date(m.date).toLocaleDateString()}</span>
+                    </div>
+                    <h3 class="font-extrabold text-xl text-ravn-textMain mb-1">${m.name}</h3>
+                    <a href="mailto:${m.email}" class="text-xs font-bold text-gray-500 hover:text-blue-500 transition-colors mb-5 inline-flex items-center gap-1.5"><i class="ph-bold ph-envelope"></i> ${m.email}</a>
+                    <p class="text-sm text-ravn-textMuted font-medium leading-relaxed bg-gray-50 p-5 rounded-[20px] border border-gray-100 shadow-inner">${m.message}</p>
+                </div>
+            `).join('');
+        }
+
         function renderRefunds(refunds) {
             const tbody = document.getElementById('refundsTable');
-            if (refunds.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400 font-bold text-sm">No pending refunds! 🎉</td></tr>'; return; }
+            if (refunds.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-400 font-bold text-sm">No pending refunds! 🎉</td></tr>'; return; }
             tbody.innerHTML = refunds.map(r => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="p-4"><p class="font-extrabold text-sm text-ravn-textMain">${r.memberName}</p><p class="text-[10px] font-mono text-gray-400">${r.memberId}</p></td>
-                    <td class="p-4"><p class="text-xs font-bold text-gray-600 line-clamp-1">${r.eventTitle}</p><p class="text-[9px] text-gray-400 mt-0.5">Cancelled: ${new Date(r.createdAt).toLocaleDateString()}</p></td>
-                    <td class="p-4"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-mono font-bold border border-blue-100 shadow-sm">${r.upiId}</span></td>
-                    <td class="p-4"><p class="text-sm font-extrabold text-red-500">₹${r.amount}</p></td>
-                    <td class="p-4 text-right">${r.status === 'Pending' ? `<button onclick="settleRefund('${r._id}')" class="btn-glow !bg-green-500 !px-4 !py-2 !text-[11px] shadow-sm">Mark Settled</button>` : `<span class="text-[10px] font-extrabold text-green-500 uppercase tracking-widest"><i class="ph-bold ph-check"></i> Done</span>`}</td>
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="p-5 pl-8"><p class="font-extrabold text-sm text-ravn-textMain">${r.memberName}</p><p class="text-[10px] font-mono text-gray-400 font-bold mt-0.5">${r.memberId}</p></td>
+                    <td class="p-5"><p class="text-xs font-bold text-gray-600 line-clamp-1">${r.eventTitle}</p><p class="text-[9px] font-bold text-gray-400 mt-0.5 uppercase tracking-widest">Cancelled: ${new Date(r.createdAt).toLocaleDateString()}</p></td>
+                    <td class="p-5"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-mono font-bold border border-blue-100 shadow-sm">${r.upiId}</span></td>
+                    <td class="p-5"><p class="text-base font-extrabold text-red-500">₹${r.amount}</p></td>
+                    <td class="p-5 text-right pr-8">${r.status === 'Pending' ? `<button onclick="settleRefund('${r._id}')" class="btn-glow !bg-green-500 !px-4 !py-2 !text-[11px] shadow-sm">Mark Settled</button>` : `<span class="text-[10px] font-extrabold text-green-500 uppercase tracking-widest"><i class="ph-bold ph-check"></i> Done</span>`}</td>
                 </tr>
             `).join('');
         }
@@ -726,7 +812,6 @@
             });
         }
 
-        // SETTINGS & BROADCASTS
         document.getElementById('settingsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = { registrationOpen: document.getElementById('setRegOpen').checked, freePromoActive: document.getElementById('setPromoActive').checked, membershipFee: Number(document.getElementById('setFee').value) };
@@ -736,9 +821,10 @@
 
         document.getElementById('broadcastForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); const origText = btn.innerHTML; btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i>'; btn.disabled = true;
             const payload = { title: document.getElementById('bTitle').value, message: document.getElementById('bMessage').value, triggerBlast: document.getElementById('bBlast').checked };
             try { await fetch('/api/admin/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminKey}` }, body: JSON.stringify(payload) }); document.getElementById('broadcastForm').reset(); showToast("Broadcast transmitted! 🚀"); } 
-            catch(e) { showToast("Failed to broadcast.", "error"); }
+            catch(e) { showToast("Failed to broadcast.", "error"); } finally { btn.innerHTML = origText; btn.disabled = false; }
         });
 
         window.addEventListener('load', fetchData);

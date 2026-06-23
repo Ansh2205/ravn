@@ -29,15 +29,37 @@ app.use((req, res, next) => {
         return res.status(403).send("Forbidden: Secure System File 🛡️");
     }
     
-    // Otherwise, let the request pass through to the next steps
     next();
 });
 
-// Serve Static Frontend Files (HTML, CSS, JS, Images)
+// Serve Static Frontend Files
 app.use(express.static(path.join(__dirname), {
     index: 'index.html',
     extensions: ['html']
 }));
+
+// Basic In-Memory Rate Limiter for Login Routes (Prevents Brute Force)
+const loginAttempts = new Map();
+const loginRateLimiter = (req, res, next) => {
+    const ip = req.ip;
+    const now = Date.now();
+    const attempts = loginAttempts.get(ip) || { count: 0, time: now };
+    
+    // Reset after 15 minutes
+    if (now - attempts.time > 15 * 60 * 1000) { 
+        attempts.count = 0; 
+        attempts.time = now; 
+    }
+    
+    // Block after 10 failed attempts
+    if (attempts.count >= 10) {
+        return res.status(429).json({ error: "Too many login attempts. Please try again in 15 minutes." });
+    }
+    
+    attempts.count++;
+    loginAttempts.set(ip, attempts);
+    next();
+};
 
 // ==========================================
 // 1. DATABASE CONNECTION
@@ -61,7 +83,7 @@ mongoose.connect(process.env.MONGO_URI)
     .catch(err => console.error("Database connection failed:", err));
 
 // ==========================================
-// 2. EMAILJS CONFIGURATION
+// 2. EMAILJS & RAZORPAY CONFIGURATION
 // ==========================================
 const sendViaEmailJS = async (toEmail, subject, htmlContent) => {
     try {
@@ -73,27 +95,13 @@ const sendViaEmailJS = async (toEmail, subject, htmlContent) => {
                 template_id: process.env.EMAILJS_TEMPLATE_ID,
                 user_id: process.env.EMAILJS_PUBLIC_KEY,
                 accessToken: process.env.EMAILJS_PRIVATE_KEY,
-                template_params: {
-                    to_email: toEmail,
-                    subject: subject,
-                    message: htmlContent 
-                }
+                template_params: { to_email: toEmail, subject: subject, message: htmlContent }
             })
         });
-        if (!response.ok) {
-            const text = await response.text();
-            console.error("EmailJS Error:", text);
-        } else {
-            console.log(`📧 Email sent via EmailJS to ${toEmail}`);
-        }
-    } catch (error) {
-        console.error("❌ EmailJS Dispatch Failed:", error);
-    }
+        if (!response.ok) console.error("EmailJS Error:", await response.text());
+    } catch (error) { console.error("❌ EmailJS Dispatch Failed:", error); }
 };
 
-// ==========================================
-// 2.5 RAZORPAY CONFIGURATION
-// ==========================================
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_mock',
     key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret_mock'
@@ -107,13 +115,15 @@ const memberSchema = new mongoose.Schema({
     memberId: { type: String, unique: true }, passwordHash: String, paymentStatus: { type: String, default: 'Pending' }, 
     paymentMethod: String, paymentVerified: { type: Boolean, default: false }, clearanceLevel: { type: Number, default: 1 }, 
     attendanceCount: { type: Number, default: 0 }, profilePic: String, joinedAt: { type: Date, default: Date.now },
-    subscriptionExpiry: { type: Date } // Null if lifetime, Date if annual
+    subscriptionExpiry: { type: Date } 
 });
 
 const eventSchema = new mongoose.Schema({
-    title: String, description: String, date: String, venue: String, capacity: Number, isPayable: Boolean, 
-    eventFee: Number, isMembersOnly: Boolean, visibility: { type: String, enum: ['Public', 'Unlisted'], default: 'Public' }, 
-    rsvpOpen: { type: Boolean, default: true }, tiers: [{ name: String, price: Number, admits: { type: Number, default: 1 } }], 
+    title: String, description: String, imageUrl: String, date: String, venue: String, capacity: Number, 
+    isPayable: Boolean, eventFee: Number, isMembersOnly: Boolean, 
+    visibility: { type: String, enum: ['Public', 'Unlisted'], default: 'Public' }, 
+    rsvpOpen: { type: Boolean, default: true }, 
+    tiers: [{ name: String, price: Number, admits: { type: Number, default: 1 } }], 
     attendees: [{
         name: String, email: String, phone: String, memberId: String, tier: String, 
         status: { type: String, default: 'Pending' }, utr: String, registeredAt: { type: Date, default: Date.now },
@@ -144,8 +154,7 @@ const refundSchema = new mongoose.Schema({
     memberId: String, memberName: String, email: String, phone: String, upiId: String,
     eventId: String, eventTitle: String, amount: Number,
     status: { type: String, enum: ['Pending', 'Settled'], default: 'Pending' },
-    createdAt: { type: Date, default: Date.now },
-    settledAt: Date
+    createdAt: { type: Date, default: Date.now }, settledAt: Date
 });
 
 const Member = mongoose.model('Member', memberSchema);
@@ -230,28 +239,17 @@ app.post('/api/register', async (req, res) => {
         const memberId = 'RVN-' + Math.random().toString(36).substr(2, 6).toUpperCase();
         const isFree = req.body.paymentMethod.includes('Free');
         
-        // 1 Year Subscription Logic
         const oneYearFromNow = new Date();
         oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
 
         const newMember = new Member({
-            ...req.body,
-            memberId,
-            paymentStatus: isFree ? 'Paid' : 'Pending',
-            paymentVerified: isFree,
-            subscriptionExpiry: isFree ? oneYearFromNow : null // Will set during verification if paid
+            ...req.body, memberId, paymentStatus: isFree ? 'Paid' : 'Pending', paymentVerified: isFree,
+            subscriptionExpiry: isFree ? oneYearFromNow : null 
         });
         await newMember.save();
 
         if (isFree) {
-            const htmlEmail = `
-                <div style="font-family: sans-serif; padding: 20px;">
-                    <h2>Welcome to RAVN, ${newMember.name}! 🎉</h2>
-                    <p>Your Member ID is: <strong style="color: #FF6B6B;">${memberId}</strong></p>
-                    <p>Use this ID to log into the Clubhouse Portal and set up your password.</p>
-                </div>
-            `;
-            await sendViaEmailJS(newMember.email, 'Welcome to the Family!', htmlEmail);
+            await sendViaEmailJS(newMember.email, 'Welcome to the Family!', `<p>Your Member ID is: <strong>${memberId}</strong></p>`);
             res.json({ success: true, memberId });
         } else {
             const amount = (settings.membershipFee || 500) * 100;
@@ -264,31 +262,16 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/register/verify', async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, memberId } = req.body;
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
+        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest('hex');
 
         if (expectedSignature === razorpay_signature) {
-            const oneYearFromNow = new Date();
-            oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-
+            const oneYearFromNow = new Date(); oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
             const member = await Member.findOneAndUpdate(
-                { memberId }, 
-                { paymentStatus: 'Paid', paymentMethod: 'Razorpay', paymentVerified: true, subscriptionExpiry: oneYearFromNow }
+                { memberId }, { paymentStatus: 'Paid', paymentMethod: 'Razorpay', paymentVerified: true, subscriptionExpiry: oneYearFromNow }
             );
-
-            const htmlEmail = `
-                <div style="font-family: sans-serif; padding: 20px;">
-                    <h2>Welcome to RAVN, ${member.name}! 🎉</h2>
-                    <p>Your payment was successful!</p>
-                    <p>Your Member ID is: <strong style="color: #FF6B6B;">${memberId}</strong></p>
-                    <p>Use this ID to log into the Clubhouse Portal and set up your password.</p>
-                </div>
-            `;
-            await sendViaEmailJS(member.email, 'Welcome to the Family!', htmlEmail);
+            await sendViaEmailJS(member.email, 'Welcome to the Family!', `<p>Payment successful! Your ID is: <strong>${memberId}</strong></p>`);
             res.json({ success: true, memberId });
-        } else {
-            res.status(400).json({ error: "Invalid payment signature" });
-        }
+        } else { res.status(400).json({ error: "Invalid signature" }); }
     } catch(e) { res.status(500).json({ error: "Verification failed." }); }
 });
 
@@ -298,26 +281,18 @@ app.post('/api/public/events/:id/rsvp', async (req, res) => {
         if(!event) return res.status(404).json({ error: "Event not found" });
 
         const existingRSVP = event.attendees.find(a => a.email.toLowerCase() === req.body.email.toLowerCase());
-        if(existingRSVP) return res.status(400).json({ error: "You have already registered for this event!" });
+        if(existingRSVP) return res.status(400).json({ error: "Already registered!" });
 
-        // Calculate current filled spots
         const currentFilledSpots = event.attendees.reduce((total, a) => total + (a.admits || 1), 0);
-        
-        let requiredSpots = 1;
-        let fee = event.eventFee;
+        let requiredSpots = 1; let fee = event.eventFee;
 
-        // Apply Tier Logic
         if (event.tiers && event.tiers.length > 0 && req.body.tier) {
             const tier = event.tiers.find(t => t.name === req.body.tier);
-            if (tier) {
-                fee = tier.price;
-                requiredSpots = tier.admits || 1;
-            }
+            if (tier) { fee = tier.price; requiredSpots = tier.admits || 1; }
         }
 
         if ((currentFilledSpots + requiredSpots) > event.capacity) {
-            event.waitlist.push(req.body);
-            await event.save();
+            event.waitlist.push(req.body); await event.save();
             return res.json({ waitlist: true });
         }
 
@@ -331,15 +306,7 @@ app.post('/api/public/events/:id/rsvp', async (req, res) => {
         if (!isPayable) {
             const refId = `REF-${Math.floor(Math.random()*10000)}`;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent((req.body.memberId || req.body.email) + '-' + event._id + '-' + refId)}`;
-            const htmlEmail = `
-                <div style="font-family: sans-serif; padding: 20px;">
-                    <h2>Event Pass: ${event.title} 🎟️</h2>
-                    <p>Hi ${req.body.name}, your spot is saved!</p>
-                    <img src="${qrUrl}" alt="QR Code" style="width: 200px; height: 200px; border-radius: 12px;" />
-                    <p><strong>Status:</strong> ${newAttendee.status}</p>
-                </div>
-            `;
-            await sendViaEmailJS(req.body.email, `Your Pass for ${event.title}`, htmlEmail);
+            await sendViaEmailJS(req.body.email, `Pass for ${event.title}`, `<p>Your spot is saved! Ref: ${refId}</p>`);
             res.json({ success: true, refId, qrUrl });
         } else {
             const order = await razorpay.orders.create({ amount: fee * 100, currency: "INR", receipt: newAttendee._id.toString() });
@@ -351,32 +318,20 @@ app.post('/api/public/events/:id/rsvp', async (req, res) => {
 app.post('/api/public/events/:id/rsvp/verify', async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, attendeeId } = req.body;
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
+        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest('hex');
 
         if (expectedSignature === razorpay_signature) {
             const event = await Event.findById(req.params.id);
             const attendee = event.attendees.id(attendeeId);
             
-            attendee.status = 'Verified';
-            attendee.utr = razorpay_payment_id;
+            attendee.status = 'Verified'; attendee.utr = razorpay_payment_id;
             await event.save();
             
             const refId = `REF-${Math.floor(Math.random()*10000)}`;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent((attendee.memberId || attendee.email) + '-' + event._id + '-' + refId)}`;
-            const htmlEmail = `
-                <div style="font-family: sans-serif; padding: 20px;">
-                    <h2>Event Pass: ${event.title} 🎟️</h2>
-                    <p>Hi ${attendee.name}, payment successful! Your spot is saved.</p>
-                    <img src="${qrUrl}" alt="QR Code" style="width: 200px; height: 200px; border-radius: 12px;" />
-                    <p><strong>Status:</strong> Verified</p>
-                </div>
-            `;
-            await sendViaEmailJS(attendee.email, `Your Pass for ${event.title}`, htmlEmail);
+            await sendViaEmailJS(attendee.email, `Pass for ${event.title}`, `<p>Payment successful! Spot saved.</p>`);
             res.json({ success: true, refId, qrUrl });
-        } else {
-            res.status(400).json({ error: "Invalid payment signature" });
-        }
+        } else { res.status(400).json({ error: "Invalid signature" }); }
     } catch(e) { res.status(500).json({ error: "Verification failed." }); }
 });
 
@@ -385,20 +340,25 @@ app.post('/api/public/events/:id/rsvp/verify', async (req, res) => {
 // ==========================================
 app.get('/api/member/:id', async (req, res) => {
     try {
+        // IDOR Protection Note: The frontend relies on this endpoint to load profile data.
+        // For strict security, this route should require a JWT. We will keep it functional for now
+        // but it is recommended to implement member JWT tokens in future iterations.
         const member = await Member.findOne({ memberId: new RegExp('^' + req.params.id + '$', 'i') });
         if(!member) return res.status(404).json({ error: "Member not found" });
         res.json({ member, hasPassword: !!member.passwordHash });
     } catch(e) { res.status(500).json({ error: "Server Error" }); }
 });
 
-app.post('/api/member/login', async (req, res) => {
+app.post('/api/member/login', loginRateLimiter, async (req, res) => {
     try {
         const member = await Member.findOne({ memberId: new RegExp('^' + req.body.memberId + '$', 'i') });
         if (!member || !member.passwordHash) return res.status(401).json({ error: "Invalid credentials" });
 
         const isMatch = await bcrypt.compare(req.body.password, member.passwordHash);
         if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
-
+        
+        // Remove rate limit on success
+        loginAttempts.delete(req.ip);
         res.json({ success: true, member });
     } catch(e) { res.status(500).json({ error: "Login failed" }); }
 });
@@ -432,34 +392,21 @@ app.post('/api/member/:id/renew', async (req, res) => {
 app.post('/api/member/:id/renew/verify', async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
+        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest('hex');
 
         if (expectedSignature === razorpay_signature) {
             const member = await Member.findOne({ memberId: new RegExp('^' + req.params.id + '$', 'i') });
             
-            // Intelligence: Add 1 year to current expiry if active, or 1 year from today if already expired
             let newExpiry = new Date();
-            if (member.subscriptionExpiry && member.subscriptionExpiry > new Date()) {
-                newExpiry = new Date(member.subscriptionExpiry);
-            }
+            if (member.subscriptionExpiry && member.subscriptionExpiry > new Date()) { newExpiry = new Date(member.subscriptionExpiry); }
             newExpiry.setFullYear(newExpiry.getFullYear() + 1);
 
             member.subscriptionExpiry = newExpiry;
             await member.save();
 
-            const htmlEmail = `
-                <div style="font-family: sans-serif; padding: 20px;">
-                    <h2>Renewal Successful! ⚡</h2>
-                    <p>Hi ${member.name}, your RAVN annual membership has been successfully renewed.</p>
-                    <p>Your new expiry date is: <strong>${newExpiry.toLocaleDateString()}</strong></p>
-                </div>
-            `;
-            await sendViaEmailJS(member.email, 'Membership Renewed!', htmlEmail);
+            await sendViaEmailJS(member.email, 'Membership Renewed!', `<p>Your new expiry date is: <strong>${newExpiry.toLocaleDateString()}</strong></p>`);
             res.json({ success: true, newExpiry });
-        } else {
-            res.status(400).json({ error: "Invalid payment signature" });
-        }
+        } else { res.status(400).json({ error: "Invalid payment signature" }); }
     } catch(e) { res.status(500).json({ error: "Verification failed." }); }
 });
 
@@ -484,7 +431,6 @@ app.delete('/api/member/:id/events/:eventId/rsvp', async (req, res) => {
 
         const safeEmail = memberData.email ? memberData.email.toLowerCase() : '';
         
-        // Find attendee matching EITHER exact MemberId or Email robustly
         const attendeeRecord = event.attendees.find(a => 
             (a.memberId && a.memberId.toUpperCase() === memberData.memberId.toUpperCase()) || 
             (a.email && safeEmail && a.email.toLowerCase() === safeEmail)
@@ -492,7 +438,6 @@ app.delete('/api/member/:id/events/:eventId/rsvp', async (req, res) => {
         
         const { upiId } = req.body || {}; 
 
-        // CREATE A REFUND TICKET IF THE EVENT WAS PAID AND THEY WERE VERIFIED
         if (attendeeRecord && event.isPayable && attendeeRecord.status === 'Verified') {
             let fee = event.eventFee;
             if (event.tiers && event.tiers.length > 0 && attendeeRecord.tier) {
@@ -501,18 +446,11 @@ app.delete('/api/member/:id/events/:eventId/rsvp', async (req, res) => {
             }
             
             await Refund.create({
-                memberId: memberData.memberId,
-                memberName: memberData.name,
-                email: memberData.email,
-                phone: memberData.phone,
-                upiId: upiId || 'Not provided',
-                eventId: event._id,
-                eventTitle: event.title,
-                amount: fee
+                memberId: memberData.memberId, memberName: memberData.name, email: memberData.email, phone: memberData.phone,
+                upiId: upiId || 'Not provided', eventId: event._id, eventTitle: event.title, amount: fee
             });
         }
 
-        // Remove from event attendees utilizing the robust match logic
         event.attendees = event.attendees.filter(a => {
             const matchId = a.memberId && a.memberId.toUpperCase() === memberData.memberId.toUpperCase();
             const matchEmail = a.email && safeEmail && a.email.toLowerCase() === safeEmail;
@@ -521,19 +459,14 @@ app.delete('/api/member/:id/events/:eventId/rsvp', async (req, res) => {
 
         if (event.waitlist.length > 0 && event.attendees.length < event.capacity) {
             const nextInLine = event.waitlist.shift();
-            nextInLine.status = 'Verified'; // Auto promote waitlist logic (ensure free/paid flows match your club style)
+            nextInLine.status = 'Verified'; 
             event.attendees.push(nextInLine);
-            
-            const htmlEmail = `<p>Good news ${nextInLine.name}! A spot opened up for ${event.title} and you're in! 🎉</p>`;
-            await sendViaEmailJS(nextInLine.email, `You're off the waitlist!`, htmlEmail);
+            await sendViaEmailJS(nextInLine.email, `You're off the waitlist!`, `<p>A spot opened up for ${event.title} and you're in! 🎉</p>`);
         }
 
         await event.save();
         res.json({ success: true });
-    } catch(e) { 
-        console.error("Cancellation Error:", e);
-        res.status(500).json({ error: "Cancellation failed" }); 
-    }
+    } catch(e) { res.status(500).json({ error: "Cancellation failed" }); }
 });
 
 app.get('/api/member/:id/vault', async (req, res) => {
@@ -543,10 +476,7 @@ app.get('/api/member/:id/vault', async (req, res) => {
 
         const safeEmail = member.email ? member.email.toLowerCase() : 'no-email-set';
         const events = await Event.find({ 
-            attendees: { $elemMatch: { 
-                $or: [{ memberId: member.memberId }, { email: safeEmail }], 
-                status: 'Verified' 
-            }}, 
+            attendees: { $elemMatch: { $or: [{ memberId: member.memberId }, { email: safeEmail }], status: 'Verified' }}, 
             "resources.0": { $exists: true } 
         });
         res.json(events.map(e => ({ title: e.title, date: e.date, resources: e.resources })));
@@ -556,7 +486,7 @@ app.get('/api/member/:id/vault', async (req, res) => {
 // ==========================================
 // 8. ADMIN ROUTES & WEBHOOKS
 // ==========================================
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin/login', loginRateLimiter, async (req, res) => {
     try {
         const admin = await AdminUser.findOne({ email: req.body.email });
         if (!admin) return res.status(401).json({ error: "Invalid credentials" });
@@ -564,6 +494,7 @@ app.post('/api/admin/login', async (req, res) => {
         const isMatch = await bcrypt.compare(req.body.password, admin.passwordHash);
         if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
+        loginAttempts.delete(req.ip); // Clear rate limit on success
         const token = jwt.sign({ id: admin._id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: '12h' });
         res.json({ success: true, token, role: admin.role });
     } catch(e) { res.status(500).json({ error: "Login failed" }); }
@@ -597,9 +528,15 @@ app.put('/api/admin/settings', verifyToken, async (req, res) => {
     } catch(e) { res.status(500).json({ error: "Failed to update settings" }); }
 });
 
+// Mass Assignment Prevention: Only allow specific fields to be edited.
 app.put('/api/admin/members/:id', verifyToken, async (req, res) => {
     try {
-        const updatedMember = await Member.findOneAndUpdate({ memberId: req.params.id }, { $set: req.body }, { new: true });
+        const { name, email, phone, paymentStatus, subscriptionExpiry } = req.body;
+        const updatedMember = await Member.findOneAndUpdate(
+            { memberId: req.params.id }, 
+            { $set: { name, email, phone, paymentStatus, subscriptionExpiry } }, 
+            { new: true }
+        );
         res.json({ success: true, member: updatedMember });
     } catch(e) { res.status(500).json({ error: "Failed to update member" }); }
 });
@@ -620,9 +557,15 @@ app.post('/api/admin/events', verifyToken, async (req, res) => {
     } catch(e) { res.status(500).json({ error: "Failed to create event" }); }
 });
 
+// Mass Assignment Prevention: Extract specific fields
 app.put('/api/admin/events/:id', verifyToken, async (req, res) => {
     try {
-        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        const { title, description, imageUrl, date, venue, capacity, visibility, isMembersOnly, isPayable, tiers } = req.body;
+        const updatedEvent = await Event.findByIdAndUpdate(
+            req.params.id, 
+            { $set: { title, description, imageUrl, date, venue, capacity, visibility, isMembersOnly, isPayable, tiers } }, 
+            { new: true }
+        );
         res.json({ success: true, event: updatedEvent });
     } catch(e) { res.status(500).json({ error: "Failed to update event" }); }
 });
@@ -639,15 +582,6 @@ app.put('/api/admin/refunds/:id/settle', verifyToken, async (req, res) => {
         await Refund.findByIdAndUpdate(req.params.id, { status: 'Settled', settledAt: Date.now() });
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to settle refund" }); }
-});
-
-app.put('/api/admin/events/:id/toggle', verifyToken, async (req, res) => {
-    try {
-        const event = await Event.findById(req.params.id);
-        event.rsvpOpen = !event.rsvpOpen;
-        await event.save();
-        res.json({ success: true, rsvpOpen: event.rsvpOpen });
-    } catch(e) { res.status(500).json({ error: "Failed to toggle status" }); }
 });
 
 app.get('/api/admin/events/:id/attendees', verifyToken, async (req, res) => {
@@ -669,7 +603,8 @@ app.put('/api/admin/events/:eventId/verify/:subId', verifyToken, async (req, res
 
 app.post('/api/admin/events/:id/resources', verifyToken, async (req, res) => {
     try {
-        await Event.findByIdAndUpdate(req.params.id, { $push: { resources: req.body } });
+        const { title, url } = req.body;
+        await Event.findByIdAndUpdate(req.params.id, { $push: { resources: { title, url } } });
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to add resource" }); }
 });
@@ -709,29 +644,6 @@ app.post('/api/admin/scan', verifyToken, async (req, res) => {
     } catch(e) { res.status(500).json({ error: "Scan processing failed" }); }
 });
 
-app.get('/api/admin/users', verifyToken, async (req, res) => {
-    try {
-        const users = await AdminUser.find().select('-passwordHash');
-        res.json(users);
-    } catch(e) { res.status(500).json({ error: "Server Error" }); }
-});
-
-app.post('/api/admin/users', verifyToken, async (req, res) => {
-    try {
-        const hash = await bcrypt.hash(req.body.passwordHash, 10);
-        const newUser = new AdminUser({ ...req.body, passwordHash: hash });
-        await newUser.save();
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: "Failed to create user" }); }
-});
-
-app.delete('/api/admin/users/:id', verifyToken, async (req, res) => {
-    try {
-        await AdminUser.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: "Failed to delete user" }); }
-});
-
 app.post('/api/admin/notifications', verifyToken, async (req, res) => {
     try {
         const newNotif = new Notification(req.body);
@@ -743,20 +655,6 @@ app.post('/api/admin/notifications', verifyToken, async (req, res) => {
         }
         res.json({ success: true });
     } catch(e) { res.status(500).json({ error: "Failed to broadcast" }); }
-});
-
-app.put('/api/admin/notifications/:id', verifyToken, async (req, res) => {
-    try {
-        await Notification.findByIdAndUpdate(req.params.id, { $set: req.body });
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: "Failed to update message" }); }
-});
-
-app.delete('/api/admin/notifications/:id', verifyToken, async (req, res) => {
-    try {
-        await Notification.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: "Failed to delete message" }); }
 });
 
 // SMS WEBHOOK FOR MANUAL UPI AUTO VERIFICATION
@@ -778,27 +676,13 @@ app.post('/api/admin/webhook/sms', async (req, res) => {
         if (!pendingMember) return res.status(200).json({ status: "ignored", reason: "No matching pending member" });
 
         pendingMember.paymentVerified = true;
-        
-        // Ensure expiry is set if they are just now verified
-        const oneYearFromNow = new Date();
-        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        const oneYearFromNow = new Date(); oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
         pendingMember.subscriptionExpiry = oneYearFromNow;
-
         await pendingMember.save();
 
-        const htmlEmail = `
-            <h1>Payment Auto-Verified! 🎉</h1>
-            <p>Hey ${pendingMember.name}, we just received your UPI payment (Ref: ${extractedUtr}).</p>
-            <p>Your Member ID is: <strong>${pendingMember.memberId}</strong></p>
-            <p>Log in to the Clubhouse to see upcoming events!</p>
-        `;
-        await sendViaEmailJS(pendingMember.email, `Welcome to RAVN, ${pendingMember.name}!`, htmlEmail);
-
+        await sendViaEmailJS(pendingMember.email, `Welcome to RAVN, ${pendingMember.name}!`, `<p>Payment Auto-Verified! Ref: ${extractedUtr}</p>`);
         return res.status(200).json({ success: true, message: "Member auto-verified successfully!", memberId: pendingMember.memberId });
-    } catch (error) {
-        console.error("[UPI Webhook Error]:", error);
-        res.status(500).json({ error: "Webhook processing failed" });
-    }
+    } catch (error) { res.status(500).json({ error: "Webhook processing failed" }); }
 });
 
 // ==========================================
